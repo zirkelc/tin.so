@@ -1,0 +1,21 @@
+{
+  "theme": "candy",
+  "windows": [
+    {
+      "panes": [
+        {
+          "title": "main.ts",
+          "code": "const worker = new Worker(import.meta.resolve(\"./worker.ts\"), {\n  type: \"module\",\n});\n\nworker.onmessage = (ev) => {\n  console.log(ev.data); // → 42\n  worker.terminate();\n};\n\nworker.postMessage({ n: 41 });"
+        }
+      ]
+    },
+    {
+      "panes": [
+        {
+          "title": "worker.ts",
+          "code": "self.onmessage = (ev) => {\n  self.postMessage(ev.data.n + 1);\n};"
+        }
+      ]
+    }
+  ]
+}

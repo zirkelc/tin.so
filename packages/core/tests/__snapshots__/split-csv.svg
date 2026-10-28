@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="792" height="341" viewBox="0 0 792 341">
+<defs><clipPath id="window-0"><rect x="64" y="64" width="663.99" height="139.5" rx="0"/></clipPath><filter id="popover-shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="12"/></filter></defs>
+<rect width="792" height="341" fill="#000000"/>
+<line x1="0" y1="64.5" x2="792" y2="64.5" stroke="#1a1a1a"/><line x1="0" y1="203" x2="792" y2="203" stroke="#1a1a1a"/><line x1="0" y1="103.5" x2="792" y2="103.5" stroke="#1a1a1a"/><line x1="64.5" y1="0" x2="64.5" y2="341" stroke="#1a1a1a"/><line x1="727.49" y1="0" x2="727.49" y2="341" stroke="#1a1a1a"/><path d="M52 64.5H77M64.5 52V77" stroke="#515356"/><path d="M714.99 203H739.99M727.49 190.5V215.5" stroke="#515356"/>
+<g clip-path="url(#window-0)">
+<text x="80 89.1 98.2 107.3 116.4 125.5" y="136.57" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">import</text>
+<text x="143.7 152.8 161.9 171 180.1" y="136.57" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">posts</text>
+<text x="198.3 207.4 216.5 225.6" y="136.57" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">from</text>
+<text x="243.8 252.9 262 271.1 280.2 289.3 298.4 307.5 316.6 325.7 334.8 343.9 353" y="136.57" fill="#00ca50" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">&#34;./posts.csv&#34;</text>
+<text x="362.1" y="136.57" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">;</text>
+<rect x="143.7" y="140.5" width="45.5" height="2" rx="1" fill="#ff4d8d"/>
+<g transform="translate(80 77) scale(0.58)" fill="#a1a1a1"><path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/></g>
+<text x="102" y="84" fill="#a1a1a1" dominant-baseline="central" font-family="ci-inter, Inter" font-size="13" font-weight="400">main.ts</text>
+<line x1="64" y1="103.5" x2="440.19" y2="103.5" stroke="#1a1a1a"/>
+<text x="457.19 466.29 475.39 484.49 493.59" y="136.57" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">slug,</text>
+<text x="502.69 511.79 520.89 529.99 539.09 548.19" y="136.57" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">title,</text>
+<text x="557.29 566.39 575.49 584.59 593.69 602.79 611.89 620.99 630.09" y="136.57" fill="#c472fb" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">published</text>
+<text x="457.19 466.29 475.39 484.49 493.59 502.69" y="159.07" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">hello,</text>
+<text x="511.79 520.89 529.99 539.09 548.19 566.39 575.49 584.59 593.69 602.79 611.89" y="159.07" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">Helloworld,</text>
+<text x="620.99 630.09 639.19 648.29 657.39 666.49 675.59 684.69 693.79 702.89" y="159.07" fill="#c472fb" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">2026-10-01</text>
+<text x="457.19 466.29 475.39 484.49 493.59 502.69 511.79 520.89" y="181.58" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">loaders,</text>
+<text x="529.99 539.09 548.19 557.29 566.39 575.49 584.59 593.69" y="181.58" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">Loaders,</text>
+<text x="602.79 611.89 620.99 630.09 639.19 648.29 657.39 666.49 675.59 684.69" y="181.58" fill="#c472fb" font-family="ci-geist-mono, Geist Mono" font-size="15" font-weight="400">2026-10-06</text>
+<g transform="translate(457.19 77) scale(0.58)" fill="none" stroke="#a1a1a1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></g>
+<text x="479.19" y="84" fill="#a1a1a1" dominant-baseline="central" font-family="ci-inter, Inter" font-size="13" font-weight="400">posts.csv</text>
+<line x1="441.19" y1="103.5" x2="727.99" y2="103.5" stroke="#1a1a1a"/>
+<line x1="440.69" y1="64" x2="440.69" y2="203.5" stroke="#1a1a1a"/>
+</g>
+<rect x="143.7" y="156.5" width="280.49" height="128" rx="12" fill="black" fill-opacity="0.25" filter="url(#popover-shadow)"/>
+<rect x="143.7" y="148.5" width="280.49" height="128" rx="12" fill="rgb(0, 0, 0)" stroke="#1a1a1a" stroke-width="1"/>
+<text x="161.7 169.59 177.47 185.36 193.25" y="177.12" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">const</text>
+<text x="209.02 216.91 224.79 232.68 240.57" y="177.12" fill="#47a8ff" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">posts</text>
+<text x="248.45" y="177.12" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">:</text>
+<text x="264.23 272.11 280 287.89 295.77 303.66 311.55 319.43" y="177.12" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">readonly</text>
+<text x="335.21" y="177.12" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">{</text>
+<text x="193.25 201.13 209.02 216.91 224.79 232.68 240.57 248.45" y="197.12" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">readonly</text>
+<text x="264.23 272.11 280 287.89" y="197.12" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">slug</text>
+<text x="295.77" y="197.12" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">:</text>
+<text x="311.55 319.43 327.32 335.21 343.09 350.98" y="197.12" fill="#47a8ff" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">string</text>
+<text x="358.87" y="197.12" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">;</text>
+<text x="193.25 201.13 209.02 216.91 224.79 232.68 240.57 248.45" y="217.12" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">readonly</text>
+<text x="264.23 272.11 280 287.89 295.77" y="217.12" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">title</text>
+<text x="303.66" y="217.12" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">:</text>
+<text x="319.43 327.32 335.21 343.09 350.98 358.87" y="217.12" fill="#47a8ff" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">string</text>
+<text x="366.75" y="217.12" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">;</text>
+<text x="193.25 201.13 209.02 216.91 224.79 232.68 240.57 248.45" y="237.12" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">readonly</text>
+<text x="264.23 272.11 280 287.89 295.77 303.66 311.55 319.43 327.32" y="237.12" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">published</text>
+<text x="335.21" y="237.12" fill="#ff4d8d" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">:</text>
+<text x="350.98 358.87 366.75 374.64 382.53 390.41" y="237.12" fill="#47a8ff" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">string</text>
+<text x="398.3" y="237.12" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">;</text>
+<text x="161.7 169.59 177.47" y="257.12" fill="#ededed" font-family="ci-geist-mono, Geist Mono" font-size="13" font-weight="400">}[]</text>
+</svg>

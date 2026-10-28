@@ -1,0 +1,24 @@
+{
+  "name": "tin.so",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ready": "vp run -r build && vp check && vp run -r test",
+    "dev": "vp run -r build && vp run @tin.so/web#dev",
+    "deploy": "vp run -r build && vp run @tin.so/web#deploy"
+  },
+  "devDependencies": {
+    "vite-plus": "catalog:"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.15.0",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}

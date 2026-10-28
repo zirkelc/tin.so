@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: popover-two-files
+expected_outcome: |
+  One PNG image with the code of main.ts and worker.ts side by side (two panes in one window, or two
+  windows in a row), in the vercel theme, with a popover on the word worker in main.ts whose code names
+  the Worker type. The code of both files is unchanged.
+context:
+  scaffold_script: place-files.sh

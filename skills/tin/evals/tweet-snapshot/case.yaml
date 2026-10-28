@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: tweet-snapshot
+expected_outcome: |
+  A PNG image of the debounce function, sized for a post on X (16:9), with the code exactly as given,
+  highlighted as TypeScript, saved in the working directory. The answer gives the file path, the editor
+  link and the main settings.

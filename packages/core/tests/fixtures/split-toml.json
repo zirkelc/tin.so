@@ -1,0 +1,27 @@
+{
+  "theme": "vercel",
+  "windows": [
+    {
+      "split": "row",
+      "panes": [
+        {
+          "title": "main.ts",
+          "code": "import plans from \"./plans.toml\";",
+          "annotations": [
+            {
+              "line": 1,
+              "match": "plans",
+              "code": "const plans: {\n    readonly free: {\n        readonly price: 0;\n        readonly seats: 1;\n    };\n    readonly pro: {\n        readonly price: 12;\n        readonly seats: 10;\n    };\n}"
+            }
+          ]
+        },
+        {
+          "title": "plans.toml",
+          "code": "[free]\nprice = 0\nseats = 1\n\n[pro]\nprice = 12\nseats = 10"
+        }
+      ],
+      "titleBar": false,
+      "tabs": true
+    }
+  ]
+}

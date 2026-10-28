@@ -1,0 +1,60 @@
+{
+  "name": "@tin.so/core",
+  "version": "0.1.0",
+  "description": "Renders code images from a JSON spec to SVG and PNG",
+  "keywords": [
+    "cli",
+    "code",
+    "code-image",
+    "image",
+    "ray.so",
+    "screenshot",
+    "shiki"
+  ],
+  "homepage": "https://tin.so",
+  "license": "MIT",
+  "author": "Chris Cook",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zirkelc/tin.so.git"
+  },
+  "files": [
+    "dist",
+    "fonts"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./node": "./dist/node.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "port-themes": "node scripts/port-rayso-themes.ts",
+    "download-fonts": "node scripts/download-fonts.ts",
+    "generate-icons": "node scripts/generate-icons.ts"
+  },
+  "dependencies": {
+    "@resvg/resvg-wasm": "catalog:",
+    "@valibot/to-json-schema": "catalog:",
+    "get-east-asian-width": "catalog:",
+    "shiki": "catalog:",
+    "valibot": "catalog:"
+  },
+  "devDependencies": {
+    "@types/culori": "catalog:",
+    "@types/fontkit": "catalog:",
+    "@types/node": "^26.6.5",
+    "culori": "catalog:",
+    "fontkit": "catalog:",
+    "simple-icons": "catalog:",
+    "typescript": "^7.0.2",
+    "vite-plus": "catalog:"
+  }
+}

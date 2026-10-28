@@ -1,0 +1,171 @@
+/* The colors of the editor, so that the about page looks like a part of the app */
+:root {
+  --bg: #0b0b0d;
+  --panel: #141417;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #ececf1;
+  --text-muted: #8b8b94;
+  --accent: #7c3aed;
+  --accent-text: #ffffff;
+  --link: #a78bfa;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f4f4f6;
+    --panel: #ffffff;
+    --border: rgba(0, 0, 0, 0.1);
+    --text: #18181b;
+    --text-muted: #6b6b75;
+    --link: #6d28d9;
+    color-scheme: light;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    16px/1.6 Inter,
+    system-ui,
+    sans-serif;
+}
+
+a {
+  color: var(--link);
+}
+
+.site-header,
+main,
+.site-footer {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-header nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.site-header nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.site-header nav a:hover {
+  color: var(--text);
+}
+
+.site-header nav .button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.site-header nav .button:hover {
+  color: var(--accent-text);
+}
+
+h1 {
+  margin: 48px 0 16px;
+  font-size: 36px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  margin: 48px 0 12px;
+  font-size: 22px;
+}
+
+.lead {
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.example {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 32px 0 0;
+  border-radius: 12px;
+}
+
+ul,
+ol {
+  padding-left: 22px;
+}
+
+li + li {
+  margin-top: 6px;
+}
+
+code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.9em;
+}
+
+pre {
+  overflow-x: auto;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+dt {
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+dd {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.site-footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  padding-bottom: 48px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  h1 {
+    margin-top: 32px;
+    font-size: 28px;
+  }
+
+  .site-header nav a:not(.button) {
+    display: none;
+  }
+}

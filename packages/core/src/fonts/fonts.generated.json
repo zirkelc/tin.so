@@ -1,0 +1,400 @@
+[
+  {
+    "id": "jetbrains-mono",
+    "name": "JetBrains Mono",
+    "kind": "code",
+    "faces": [
+      {
+        "weight": 500,
+        "italic": false,
+        "file": "jetbrains-mono/jetbrains-mono-500.ttf",
+        "family": "JetBrains Mono"
+      },
+      {
+        "weight": 700,
+        "italic": false,
+        "file": "jetbrains-mono/jetbrains-mono-700.ttf",
+        "family": "JetBrains Mono"
+      },
+      {
+        "weight": 500,
+        "italic": true,
+        "file": "jetbrains-mono/jetbrains-mono-500-italic.ttf",
+        "family": "JetBrains Mono"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 1000,
+      "ascender": 1020,
+      "descender": -300,
+      "lineGap": 0,
+      "advance": 600
+    }
+  },
+  {
+    "id": "geist-mono",
+    "name": "Geist Mono",
+    "kind": "code",
+    "faces": [
+      {
+        "weight": 400,
+        "italic": false,
+        "file": "geist-mono/geist-mono-400.ttf",
+        "family": "Geist Mono"
+      },
+      {
+        "weight": 700,
+        "italic": false,
+        "file": "geist-mono/geist-mono-700.ttf",
+        "family": "Geist Mono"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 1000,
+      "ascender": 1005,
+      "descender": -295,
+      "lineGap": 0,
+      "advance": 600
+    }
+  },
+  {
+    "id": "ibm-plex-mono",
+    "name": "IBM Plex Mono",
+    "kind": "code",
+    "faces": [
+      {
+        "weight": 500,
+        "italic": false,
+        "file": "ibm-plex-mono/ibm-plex-mono-500.ttf",
+        "family": "IBM Plex Mono Medium"
+      },
+      {
+        "weight": 700,
+        "italic": false,
+        "file": "ibm-plex-mono/ibm-plex-mono-700.ttf",
+        "family": "IBM Plex Mono"
+      },
+      {
+        "weight": 500,
+        "italic": true,
+        "file": "ibm-plex-mono/ibm-plex-mono-500-italic.ttf",
+        "family": "IBM Plex Mono Medium"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 1000,
+      "ascender": 1025,
+      "descender": -275,
+      "lineGap": 0,
+      "advance": 600
+    }
+  },
+  {
+    "id": "fira-code",
+    "name": "Fira Code",
+    "kind": "code",
+    "faces": [
+      {
+        "weight": 400,
+        "italic": false,
+        "file": "fira-code/fira-code-400.ttf",
+        "family": "Fira Code"
+      },
+      {
+        "weight": 700,
+        "italic": false,
+        "file": "fira-code/fira-code-700.ttf",
+        "family": "Fira Code"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 2000,
+      "ascender": 1980,
+      "descender": -644,
+      "lineGap": 0,
+      "advance": 1200
+    }
+  },
+  {
+    "id": "roboto-mono",
+    "name": "Roboto Mono",
+    "kind": "code",
+    "faces": [
+      {
+        "weight": 400,
+        "italic": false,
+        "file": "roboto-mono/roboto-mono-400.ttf",
+        "family": "Roboto Mono"
+      },
+      {
+        "weight": 700,
+        "italic": false,
+        "file": "roboto-mono/roboto-mono-700.ttf",
+        "family": "Roboto Mono"
+      },
+      {
+        "weight": 400,
+        "italic": true,
+        "file": "roboto-mono/roboto-mono-400-italic.ttf",
+        "family": "Roboto Mono"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 2048,
+      "ascender": 2146,
+      "descender": -555,
+      "lineGap": 0,
+      "advance": 1229
+    }
+  },
+  {
+    "id": "commit-mono",
+    "name": "Commit Mono",
+    "kind": "code",
+    "faces": [
+      {
+        "weight": 400,
+        "italic": false,
+        "file": "commit-mono/commit-mono-400.ttf",
+        "family": "CommitMono"
+      },
+      {
+        "weight": 700,
+        "italic": false,
+        "file": "commit-mono/commit-mono-700.ttf",
+        "family": "CommitMono"
+      },
+      {
+        "weight": 400,
+        "italic": true,
+        "file": "commit-mono/commit-mono-400-italic.ttf",
+        "family": "CommitMonoV143"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 1000,
+      "ascender": 900,
+      "descender": -200,
+      "lineGap": 0,
+      "advance": 600
+    }
+  },
+  {
+    "id": "space-mono",
+    "name": "Space Mono",
+    "kind": "code",
+    "faces": [
+      {
+        "weight": 400,
+        "italic": false,
+        "file": "space-mono/space-mono-400.ttf",
+        "family": "Space Mono"
+      },
+      {
+        "weight": 700,
+        "italic": false,
+        "file": "space-mono/space-mono-700.ttf",
+        "family": "Space Mono"
+      },
+      {
+        "weight": 400,
+        "italic": true,
+        "file": "space-mono/space-mono-400-italic.ttf",
+        "family": "Space Mono"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 1000,
+      "ascender": 1120,
+      "descender": -361,
+      "lineGap": 0,
+      "advance": 612
+    }
+  },
+  {
+    "id": "source-code-pro",
+    "name": "Source Code Pro",
+    "kind": "code",
+    "faces": [
+      {
+        "weight": 400,
+        "italic": false,
+        "file": "source-code-pro/source-code-pro-400.ttf",
+        "family": "Source Code Pro"
+      },
+      {
+        "weight": 700,
+        "italic": false,
+        "file": "source-code-pro/source-code-pro-700.ttf",
+        "family": "Source Code Pro"
+      },
+      {
+        "weight": 400,
+        "italic": true,
+        "file": "source-code-pro/source-code-pro-400-italic.ttf",
+        "family": "Source Code Pro"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 1000,
+      "ascender": 984,
+      "descender": -273,
+      "lineGap": 0,
+      "advance": 600
+    }
+  },
+  {
+    "id": "google-sans-code",
+    "name": "Google Sans Code",
+    "kind": "code",
+    "faces": [
+      {
+        "weight": 400,
+        "italic": false,
+        "file": "google-sans-code/google-sans-code-400.ttf",
+        "family": "Google Sans Code"
+      },
+      {
+        "weight": 700,
+        "italic": false,
+        "file": "google-sans-code/google-sans-code-700.ttf",
+        "family": "Google Sans Code"
+      },
+      {
+        "weight": 400,
+        "italic": true,
+        "file": "google-sans-code/google-sans-code-400-italic.ttf",
+        "family": "Google Sans Code"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 2000,
+      "ascender": 1932,
+      "descender": -572,
+      "lineGap": 0,
+      "advance": 1200
+    }
+  },
+  {
+    "id": "inter",
+    "name": "Inter",
+    "kind": "ui",
+    "faces": [
+      {
+        "weight": 400,
+        "italic": false,
+        "file": "inter/inter-400.ttf",
+        "family": "Inter"
+      },
+      {
+        "weight": 500,
+        "italic": false,
+        "file": "inter/inter-500.ttf",
+        "family": "Inter"
+      }
+    ],
+    "metrics": {
+      "unitsPerEm": 2048,
+      "ascender": 1984,
+      "descender": -494,
+      "lineGap": 0,
+      "advances": {
+        "0": 1292,
+        "1": 833,
+        "2": 1249,
+        "3": 1265,
+        "4": 1323,
+        "5": 1215,
+        "6": 1270,
+        "7": 1159,
+        "8": 1267,
+        "9": 1270,
+        " ": 576,
+        "!": 589,
+        "\"": 954,
+        "#": 1297,
+        "$": 1314,
+        "%": 2011,
+        "&": 1319,
+        "'": 614,
+        "(": 747,
+        ")": 747,
+        "*": 1026,
+        "+": 1355,
+        ",": 590,
+        "-": 942,
+        ".": 590,
+        "/": 738,
+        ":": 590,
+        ";": 618,
+        "<": 1355,
+        "=": 1355,
+        ">": 1355,
+        "?": 1047,
+        "@": 1978,
+        "A": 1413,
+        "B": 1340,
+        "C": 1496,
+        "D": 1478,
+        "E": 1231,
+        "F": 1209,
+        "G": 1528,
+        "H": 1522,
+        "I": 550,
+        "J": 1169,
+        "K": 1376,
+        "L": 1158,
+        "M": 1850,
+        "N": 1543,
+        "O": 1566,
+        "P": 1308,
+        "Q": 1566,
+        "R": 1318,
+        "S": 1314,
+        "T": 1322,
+        "U": 1524,
+        "V": 1413,
+        "W": 2018,
+        "X": 1397,
+        "Y": 1390,
+        "Z": 1288,
+        "[": 747,
+        "\\": 738,
+        "]": 747,
+        "^": 965,
+        "_": 934,
+        "`": 661,
+        "a": 1150,
+        "b": 1254,
+        "c": 1170,
+        "d": 1254,
+        "e": 1194,
+        "f": 758,
+        "g": 1256,
+        "h": 1211,
+        "i": 496,
+        "j": 496,
+        "k": 1124,
+        "l": 496,
+        "m": 1794,
+        "n": 1210,
+        "o": 1228,
+        "p": 1254,
+        "q": 1254,
+        "r": 771,
+        "s": 1081,
+        "t": 670,
+        "u": 1211,
+        "v": 1151,
+        "w": 1676,
+        "x": 1118,
+        "y": 1151,
+        "z": 1131,
+        "{": 873,
+        "|": 681,
+        "}": 873,
+        "~": 1355
+      }
+    }
+  }
+]

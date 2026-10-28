@@ -1,0 +1,15 @@
+{
+  "theme": "midnight",
+  "windows": [
+    {
+      "panes": [
+        {
+          "title": "nub.jsonc",
+          "code": "{\n  \"$schema\": \"https://nubjs.com/schema/latest.json\",\n\n  \"envFile\": [\".env\", \".env.local\"],       // disable with false\n  \"loader\": { \".graphql\": \"text\" },        // map exts <-> loaders\n  \"tsconfig\": \"./tsconfig.runtime.json\",   // JSX, decorators, paths/baseURL\n  \"verifyDeps\": \"error\",                   // pre-run node_modules freshness\n  \"conditions\": [\"development\"],           // custom export conditions\n  \"preload\": [                             // telemetry, hardening, etc.\n    \"./instrumentation.ts\",\n    \"dd-trace/initialize.mjs\"\n  ],\n  \"nodeOptions\": [\"--stack-trace-limit=50\", \"--max-old-space-size=8192\"],\n  \"v8Flags\": [\"--stack-size=2000\", \"--prof\", \"--allow-natives-syntax\"],\n}"
+        }
+      ],
+      "titleBar": false,
+      "tabs": true
+    }
+  ]
+}

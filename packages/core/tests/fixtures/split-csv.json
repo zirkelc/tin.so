@@ -1,0 +1,27 @@
+{
+  "theme": "vercel",
+  "windows": [
+    {
+      "split": "row",
+      "panes": [
+        {
+          "title": "main.ts",
+          "code": "import posts from \"./posts.csv\";",
+          "annotations": [
+            {
+              "line": 1,
+              "match": "posts",
+              "code": "const posts: readonly {\n    readonly slug: string;\n    readonly title: string;\n    readonly published: string;\n}[]"
+            }
+          ]
+        },
+        {
+          "title": "posts.csv",
+          "code": "slug,title,published\nhello,Hello world,2026-10-01\nloaders,Loaders,2026-10-06"
+        }
+      ],
+      "titleBar": false,
+      "tabs": true
+    }
+  ]
+}
