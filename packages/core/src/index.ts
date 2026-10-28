@@ -9,7 +9,14 @@ export {
   type Icon,
 } from "./icons/index.ts";
 export { isSpecSchemaUrl, SPEC_SCHEMA_URL, specJsonSchema } from "./json-schema.ts";
-export { createLink, decodeSpec, DEFAULT_APP_URL, encodeSpec, readLink } from "./link.ts";
+export {
+  createLink,
+  type DecodeOptions,
+  decodeSpec,
+  DEFAULT_APP_URL,
+  encodeSpec,
+  readLink,
+} from "./link.ts";
 export {
   highlight,
   inferLanguage,

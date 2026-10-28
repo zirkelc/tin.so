@@ -1,4 +1,4 @@
-import type { SpecInput } from "@tin.so/core";
+import { parseSpec, type SpecInput } from "@tin.so/core";
 import { describe, expect, test } from "vite-plus/test";
 import {
   centerWindow,
@@ -32,6 +32,7 @@ import {
   resizeImage,
   snapBox,
   windowsOnly,
+  withAspectRatio,
   withoutMissingParts,
 } from "../src/spec-edits.ts";
 
@@ -335,6 +336,23 @@ describe("positionWindows", () => {
     expect(result.windows[0]).toEqual({ x: 100, y: 51, panes: [{ code: "a" }] });
   });
 
+  test("should keep a valid spec when the spec has an aspect ratio and a height", () => {
+    // Arrange
+    const spec = { aspectRatio: "16:9", height: 900, windows: [{ panes: [{ code: "a" }] }] };
+    const scene = {
+      width: 1_600,
+      height: 900,
+      windows: [{ x: 100, y: 50, width: 300, height: 200, natural: { width: 300, height: 200 } }],
+    };
+
+    // Act
+    const result = positionWindows(spec, scene);
+
+    // Assert
+    expect([result.width, result.height]).toEqual([1_600, undefined]);
+    expect(() => parseSpec(result)).not.toThrow();
+  });
+
   test("should remove the places again", () => {
     // Arrange
     const spec = { width: 800, height: 600, windows: [{ x: 1, y: 2, panes: [{ code: "a" }] }] };
@@ -521,6 +539,31 @@ describe("fitToRatio", () => {
       width: 600,
       height: 600,
     });
+  });
+});
+
+describe("withAspectRatio", () => {
+  test("should drop the height of an image with a width and a height", () => {
+    // Arrange
+    const spec = { width: 800, height: 600, windows: [{ panes: [{ code: "a" }] }] };
+
+    // Act
+    const result = withAspectRatio(spec, "16:9");
+
+    // Assert
+    expect([result.aspectRatio, result.width, result.height]).toEqual(["16:9", 800, undefined]);
+    expect(() => parseSpec(result)).not.toThrow();
+  });
+
+  test("should keep the size when the ratio is removed", () => {
+    // Arrange
+    const spec = { aspectRatio: "16:9", width: 800, windows: [{ panes: [{ code: "a" }] }] };
+
+    // Act
+    const result = withAspectRatio(spec, undefined);
+
+    // Assert
+    expect([result.aspectRatio, result.width, result.height]).toEqual([undefined, 800, undefined]);
   });
 });
 

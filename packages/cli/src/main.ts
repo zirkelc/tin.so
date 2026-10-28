@@ -449,9 +449,16 @@ async function renderCommand(values: RenderValues, io: Io) {
   if (values.copy && format !== "png")
     throw new UsageError(`--copy needs a PNG image, received the format "${format}"`);
   const scale = toNumber(values.scale, "scale") ?? 2;
+  if (scale <= 0) throw new UsageError(`--scale must be larger than 0, received "${values.scale}"`);
   // With --copy and no -o, the image goes only to the clipboard
   const output =
     values.copy && !values.output ? null : resolve(io.cwd, values.output ?? `${name}.${format}`);
+  // The default output has the name of the first input, so an input such as logo.svg must not get lost
+  const inputs = (values._ ?? []).map((input) => resolve(io.cwd, input));
+  if (output && !values.output && inputs.includes(output))
+    throw new UsageError(
+      `The image would replace its input file ${output}. Use -o to give another output file.`,
+    );
 
   const scene = await layout(spec);
   const image = await renderScene(scene, {

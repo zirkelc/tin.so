@@ -1,5 +1,5 @@
 import { escapeXml } from "./frames/draw.ts";
-import { createLink, DEFAULT_APP_URL, readLink } from "./link.ts";
+import { createLink, DEFAULT_APP_URL, inflate, readLink } from "./link.ts";
 import { migrateLegacySpec, stampSpecVersion } from "./migrate.ts";
 
 /**
@@ -131,31 +131,6 @@ function textChunk(keyword: string, text: string): Uint8Array {
   );
 }
 
-/** Inflates zlib data, or returns undefined when the data is bad or larger than the limit */
-async function inflate(bytes: Uint8Array, limit: number): Promise<Uint8Array | undefined> {
-  const stream = new Blob([bytes as BlobPart])
-    .stream()
-    .pipeThrough(new DecompressionStream("deflate"));
-  const reader = stream.getReader();
-  const parts: Array<Uint8Array> = [];
-  let size = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      size += value.length;
-      if (size > limit) {
-        await reader.cancel().catch(() => undefined);
-        return undefined;
-      }
-      parts.push(value);
-    }
-  } catch {
-    return undefined;
-  }
-  return concat(parts);
-}
-
 function isPng(bytes: Uint8Array): boolean {
   return PNG_SIGNATURE.every((byte, index) => bytes[index] === byte);
 }
@@ -236,7 +211,8 @@ function readPngEntries(png: Uint8Array): Map<string, TextEntry> {
 async function entryText(entry: TextEntry | undefined): Promise<string | undefined> {
   if (!entry) return undefined;
   if (!entry.compressed) return decoder.decode(entry.text);
-  const bytes = await inflate(entry.text, MAX_SPEC_BYTES);
+  // The compressed text of an iTXt chunk is zlib data
+  const bytes = await inflate(entry.text, "deflate", MAX_SPEC_BYTES);
   return bytes && decoder.decode(bytes);
 }
 
@@ -253,7 +229,7 @@ function parseSpecJson(json: string | undefined): unknown {
 async function specFromLink(link: string | undefined): Promise<unknown> {
   if (!link) return undefined;
   try {
-    const spec = await readLink(link);
+    const spec = await readLink(link, { maxBytes: MAX_SPEC_BYTES });
     return typeof spec === "object" && spec !== null ? spec : undefined;
   } catch {
     return undefined;

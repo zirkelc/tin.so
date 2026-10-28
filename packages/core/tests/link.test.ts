@@ -73,6 +73,19 @@ describe("decodeSpec", () => {
   });
 });
 
+describe("decodeSpec limit", () => {
+  test("should refuse a spec that inflates past the limit", async () => {
+    // Arrange
+    const encoded = await encodeSpec({ windows: [{ panes: [{ code: "a".repeat(10_000) }] }] });
+
+    // Act
+    const result = decodeSpec(encoded, { maxBytes: 1_000 });
+
+    // Assert
+    await expect(result).rejects.toThrow();
+  });
+});
+
 describe("spec version in links", () => {
   test("should put version 1 first into a spec without a version", async () => {
     // Act

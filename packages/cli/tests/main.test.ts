@@ -214,6 +214,33 @@ describe("render", () => {
     expect(code).toBe(1);
     expect(io.errors()).toContain("--colour");
   });
+
+  test.each(["0", "-1"])("should report a scale of %s", async (scale) => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    const code = await main(["render", "main.ts", "--scale", scale], io);
+
+    // Assert
+    expect(code).toBe(1);
+    expect(io.errors()).toContain("--scale");
+  });
+
+  test("should not write the image over its input file", async () => {
+    // Arrange
+    const source = '<svg xmlns="http://www.w3.org/2000/svg"/>\n';
+    await writeFile(join(cwd, "logo.svg"), source);
+    const io = createIo();
+
+    // Act
+    const code = await main(["render", "logo.svg", "--format", "svg"], io);
+
+    // Assert
+    expect(code).toBe(1);
+    expect(io.errors()).toContain("-o");
+    expect(await readFile(join(cwd, "logo.svg"), "utf8")).toBe(source);
+  });
 });
 
 describe("render metadata", () => {

@@ -84,7 +84,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - Zoom in and out, fit the image to the screen, or show it at 100%. The image size shows below the image.
 - Keyboard shortcuts: ⌘B, ⌘I, ⌘U and ⌘⇧X for styles, ⇧⌥F to format, ⌥-click to highlight a line, ⌘A and Esc to select, ⌘D to duplicate, ⌘C and ⌘V to copy and paste windows, ⌘[ ⌘] ⌘⇧[ ⌘⇧] for the layers, ⌫ to remove. The shortcut list is in the toolbar.
 - Edit the full spec as JSON, with syntax colors and each problem shown while you type.
-- Short messages confirm a copied image, window or link, and tell you when a copy fails. A dropped file gives "Opened main.png", "has no tin.so spec" or "has an invalid spec". A link with an invalid spec opens the default image with a message. Problems in the spec show above the image.
+- Short messages confirm a copied image, window or link, and tell you when a copy or an export fails. A dropped file gives "Opened main.png", "has no tin.so spec" or "has an invalid spec". A link with an invalid spec opens the default image with a message. Problems in the spec show above the image.
 
 ### Share
 
@@ -97,7 +97,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - A CLI that renders code files or a JSON spec to PNG or SVG, with no browser. Rendering is the default command: `tin main.ts` is `tin render main.ts`, and options can come before the files (`tin --theme vercel main.ts`).
 - Pipe plain code to the CLI: `pbpaste | tin --title main.ts --copy`. `--title` gives the language and the file name, and `--language` sets the language. JSON on stdin without a title becomes a JSON image. `--code 'x = 1'` gives the code as text.
 - A spec on stdin starts with `"$schema"` (the URL of `tin schema`), which tells the CLI that it is a spec and not code. A `.json` file is a spec when it has this `"$schema"` or a `windows` array. `--spec` and `--no-spec` turn off the detection.
-- Set the output file (`-o`), the format (`-f png|svg`, or from the file extension) and the PNG scale (`-s`, default 2).
+- Set the output file (`-o`), the format (`-f png|svg`, or from the file extension) and the PNG scale (`-s`, default 2). The default output never replaces an input file: the CLI stops and asks for `-o`.
 - `tin link` prints an editor link for a spec, files or code on stdin, and makes no image. `tin link main.ts --open` opens the link in the browser, and `--copy` copies the link.
 - Copy the image to the clipboard from the CLI with `--copy` (macOS, Linux and Windows), with or without a file.
 - Render several files in one command: one pane per file, or one window per file.

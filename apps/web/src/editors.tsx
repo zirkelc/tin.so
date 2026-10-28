@@ -37,6 +37,7 @@ import {
   resetPositions,
   setLineNumbers,
   titleBarTarget,
+  withAspectRatio,
   type WindowInput,
 } from "./spec-edits.ts";
 
@@ -115,7 +116,7 @@ export function Settings(props: {
   // In the free layout the image has its own size: a format or a padding fits it to the windows
   const setFormat = (aspectRatio: string) => {
     if (positioned && scene) return onChange(fitToRatio(spec, scene, aspectRatio || undefined));
-    onChange({ ...spec, aspectRatio: aspectRatio || undefined });
+    onChange(withAspectRatio(spec, aspectRatio || undefined));
   };
   const setPadding = (padding: number | typeof AUTO) => {
     if (padding === AUTO) return;
@@ -336,7 +337,6 @@ function PaneEditor(props: {
   );
 }
 
-/** The settings of the selected window. The code, highlights, styles and popovers are edited in the image. */
 /** The name of a window in the list: its title, or the file names of its panes */
 function windowName(window: WindowInput, index: number): string {
   const titles = window.panes.flatMap((pane) => (pane.title ? [pane.title] : []));
@@ -420,7 +420,10 @@ export function WindowList(props: {
   );
 }
 
-/** The settings of a window, in the list of windows */
+/**
+ * The settings of a window, in the list of windows. The code, highlights, styles and popovers are
+ * edited in the image.
+ */
 export function WindowEditor(props: {
   window: WindowInput;
   onChange: (window: WindowInput) => void;

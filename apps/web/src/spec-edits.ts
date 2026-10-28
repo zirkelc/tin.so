@@ -4,6 +4,7 @@ import {
   normalizeCode,
   parseSpec,
   resolveLanguage,
+  SPEC_LIMITS,
   type SpecInput,
 } from "@tin.so/core";
 
@@ -45,10 +46,6 @@ export function toggleHighlight(pane: PaneInput, line: number): PaneInput {
 }
 
 /**
- * The title that the title bar shows and edits. A single pane without a tab shows its own title
- * there, as in ray.so, so the title bar edits the pane title, which also gives the language.
- */
-/**
  * Sets the line numbers of the image. The value is explicit, because a theme can show line numbers
  * by default, and the panes lose their own values, so that every pane follows the switch.
  */
@@ -63,6 +60,10 @@ export function setLineNumbers(spec: SpecInput, lineNumbers: boolean): SpecInput
   };
 }
 
+/**
+ * The title that the title bar shows and edits. A single pane without a tab shows its own title
+ * there, as in ray.so, so the title bar edits the pane title, which also gives the language.
+ */
 export function titleBarTarget(window: WindowInput): "window" | "pane" {
   return window.panes.length === 1 && !window.tabs && window.title === undefined
     ? "pane"
@@ -268,12 +269,7 @@ type SceneSize = { width: number; height: number; windows: Array<SceneWindow> };
  * does not make the image smaller.
  */
 export function keepImageSize(spec: SpecInput, scene: SceneSize): SpecInput {
-  return {
-    ...spec,
-    width: scene.width,
-    // With an aspect ratio, the width alone gives the height
-    ...(!spec.aspectRatio && { height: scene.height }),
-  };
+  return withImageSize(spec, scene.width, scene.height);
 }
 
 /**
@@ -326,10 +322,6 @@ export function withFormattedCode(pane: PaneInput, input: string, formatted: str
 }
 
 /**
- * Sets the code of a pane and moves the line highlights, marks and popovers with their lines,
- * when the edit adds or removes lines above them.
- */
-/**
  * How the line numbers change when the code changes: lines below the edit move with it, and lines
  * in and above it keep their number.
  */
@@ -350,6 +342,10 @@ function lineMover(previous: string, code: string): (line: number) => number {
   return (line: number) => (line > before.length - suffix ? line + delta : line);
 }
 
+/**
+ * Sets the code of a pane and moves the line highlights, marks and popovers with their lines,
+ * when the edit adds or removes lines above them.
+ */
 export function withCode(pane: PaneInput, code: string): PaneInput {
   const move = lineMover(pane.code, code);
   const lineCount = code.split("\n").length;
@@ -454,13 +450,26 @@ function ratioOf(aspectRatio: string): number {
   return width / height;
 }
 
-/** Sets the image size. With an aspect ratio, the width alone gives the height. */
+/**
+ * Sets the image size. With an aspect ratio, the width alone gives the height, and the spec loses
+ * its height, because the spec validation refuses a ratio together with a width and a height.
+ */
 function withImageSize(spec: SpecInput, width: number, height: number): SpecInput {
   return {
     ...spec,
     width: Math.round(width),
     height: spec.aspectRatio ? undefined : Math.round(height),
   };
+}
+
+/**
+ * Sets the aspect ratio of the normal layout. When the image has a width and a height, the width
+ * stays and gives the height with the ratio.
+ */
+export function withAspectRatio(spec: SpecInput, aspectRatio: string | undefined): SpecInput {
+  const next = { ...spec, aspectRatio };
+  if (!aspectRatio || spec.width === undefined || spec.height === undefined) return next;
+  return withImageSize(next, spec.width, spec.height);
 }
 
 /** Moves every window by the same distance */
@@ -520,11 +529,6 @@ export function fitToRatio(
 }
 
 /**
- * Grows the image of the free layout when a window gets larger and reaches past the right or
- * bottom edge, so that the window keeps its distance to that edge. A window that only moved
- * does not grow the image.
- */
-/**
  * Puts the window boxes of a scene in the order of the windows in a new spec. A window that only
  * moved to another layer keeps its box. A changed window has a new object, so it keeps its index.
  */
@@ -537,6 +541,11 @@ export function alignScene(before: SceneSize, beforeSpec: SpecInput, spec: SpecI
   return { ...before, windows };
 }
 
+/**
+ * Grows the image of the free layout when a window gets larger and reaches past the right or
+ * bottom edge, so that the window keeps its distance to that edge. A window that only moved
+ * does not grow the image.
+ */
 export function growForLargerWindows(
   spec: SpecInput,
   before: SceneSize,
@@ -571,7 +580,7 @@ export function growForLargerWindows(
  * padding button makes it. An aspect ratio adds the same space on two sides.
  */
 export function fittedPadding(spec: SpecInput, scene: SceneSize): number | undefined {
-  const padding = spec.padding ?? 64;
+  const padding = spec.padding ?? DEFAULT_PADDING;
   const left = Math.min(...scene.windows.map((box) => box.x));
   const top = Math.min(...scene.windows.map((box) => box.y));
   const right = scene.width - Math.max(...scene.windows.map((box) => box.x + box.width));
@@ -646,7 +655,7 @@ export function boundsOf(boxes: Array<Bounds>): Bounds {
 }
 
 // The largest side of an image that the renderer makes
-const MAX_IMAGE_SIZE = 8_192;
+const MAX_IMAGE_SIZE = SPEC_LIMITS.size;
 
 /**
  * The smallest image that still shows all windows with the padding around them. A window of the
@@ -680,8 +689,7 @@ export function resizeImage(
       ...(size.height !== undefined && { height: fit(size.height, min.height) }),
     };
   }
-  const [ratioWidth, ratioHeight] = spec.aspectRatio.split(":").map(Number) as [number, number];
-  const ratio = ratioWidth / ratioHeight;
+  const ratio = ratioOf(spec.aspectRatio);
   const minWidth = Math.max(min.width, min.height * ratio);
   const { width: _width, height: _height, ...rest } = spec;
   return size.width !== undefined

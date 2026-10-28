@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => {
     define: Object.fromEntries(
       Object.entries(site).map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
     ),
-    server: { port: 5173 },
+    server: { port: 5_173 },
     build: {
       rollupOptions: { input: { main: "index.html", about: "about.html" } },
     },

@@ -201,6 +201,18 @@ describe("readImageSpec", () => {
     expect(spec).toEqual(STORED);
   });
 
+  test("should return undefined for a link that inflates past the size limit", async () => {
+    // Arrange
+    const huge = { windows: [{ panes: [{ code: "a".repeat(17 * 1_024 * 1_024) }] }] };
+    const svg = `<svg>${svgMetadata(await createImageMetadata(huge))}</svg>`;
+
+    // Act
+    const spec = await readImageSpec(svg);
+
+    // Assert
+    expect(spec).toBe(undefined);
+  });
+
   test("should return undefined for a PNG without metadata", async () => {
     // Act
     const spec = await readImageSpec(tinyPng());

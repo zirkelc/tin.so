@@ -97,7 +97,8 @@ function download(blob: Blob, name: string) {
   anchor.href = url;
   anchor.download = name;
   anchor.click();
-  URL.revokeObjectURL(url);
+  // Some browsers start the download after the click returns, so the URL must stay valid a moment
+  setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
 export function App() {
@@ -209,9 +210,13 @@ export function App() {
 
   const exportImage = async (format: ImageFormat) => {
     const spec = withoutMissingParts(specRef.current);
-    const { blob } = await renderImage(spec, format, scale, metadata);
     const name = specRef.current.windows[0]?.panes[0]?.title?.replace(/\.[^.]+$/, "") ?? "code";
-    download(blob, `${name}.${format}`);
+    try {
+      const { blob } = await renderImage(spec, format, scale, metadata);
+      download(blob, `${name}.${format}`);
+    } catch {
+      flash("Could not export the image");
+    }
   };
 
   // Without windows, copies the full image
