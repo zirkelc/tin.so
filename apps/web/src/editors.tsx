@@ -57,15 +57,16 @@ const PARTNER_LOGOS = Object.fromEntries(
   ).map(([path, svg]) => [path.split("/").at(-1)!.replace(".svg", ""), svg]),
 );
 
-// Partner themes first, as in ray.so
+// The classic themes first, then the themes of companies with their brand colors
 const THEME_OPTIONS: Array<SelectOption<string>> = [
-  ...VISIBLE_THEMES.filter((theme) => theme.partner),
   ...VISIBLE_THEMES.filter((theme) => !theme.partner),
+  ...VISIBLE_THEMES.filter((theme) => theme.partner),
 ].map((theme) => {
   const logo = PARTNER_LOGOS[theme.id];
   return {
     value: theme.id,
     label: theme.name,
+    group: theme.partner ? "Companies" : "Classic",
     icon: logo ? (
       <span
         className="select-icon theme-logo"
@@ -92,12 +93,12 @@ const FONT_OPTIONS: Array<SelectOption<string>> = [
 // Aspect ratios of the image, with the places that use them
 const FORMAT_OPTIONS: Array<SelectOption<string>> = [
   { value: "", label: "Auto" },
-  { value: "16:9", label: "16:9 · X post, YouTube" },
-  { value: "1.91:1", label: "1.91:1 · Open Graph, LinkedIn" },
-  { value: "1:1", label: "1:1 · Instagram square" },
-  { value: "4:5", label: "4:5 · Instagram portrait" },
-  { value: "9:16", label: "9:16 · Story, Reels, TikTok" },
-  { value: "4:3", label: "4:3 · Slides" },
+  { value: "16:9", label: "16:9 · X post, YouTube", shortLabel: "16:9" },
+  { value: "1.91:1", label: "1.91:1 · Open Graph, LinkedIn", shortLabel: "1.91:1" },
+  { value: "1:1", label: "1:1 · Instagram square", shortLabel: "1:1" },
+  { value: "4:5", label: "4:5 · Instagram portrait", shortLabel: "4:5" },
+  { value: "9:16", label: "9:16 · Story, Reels, TikTok", shortLabel: "9:16" },
+  { value: "4:3", label: "4:3 · Slides", shortLabel: "4:3" },
   { value: "3:2", label: "3:2" },
   { value: "2:1", label: "2:1" },
 ];

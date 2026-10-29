@@ -813,6 +813,8 @@ describe("skill", () => {
     const output = io.output();
     expect(output).toContain("  npx skills add zirkelc/tin.so\n");
     expect(output).toContain("https://github.com/zirkelc/tin.so/tree/main/skills/tin");
+    expect(output).toContain("~/.claude/skills/tin");
+    expect(output).toContain("~/.agents/skills/tin");
   });
 
   test("should list the skill command in the help", async () => {
