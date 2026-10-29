@@ -524,7 +524,9 @@ Add it with the skills CLI, for Claude Code, Codex, Cursor and other agents:
   npx skills add zirkelc/tin.so
 
 Or copy the folder ${SKILL_URL}
-into the skills folder of your agent, for example ~/.claude/skills/tin.
+into the skills folder of your agent: ~/.claude/skills/tin for Claude Code, or
+~/.agents/skills/tin for the agents that read .agents/skills.
+Use .claude/skills or .agents/skills in a project to add it only there.
 `;
 
 // The context data of each command is the Io of the run

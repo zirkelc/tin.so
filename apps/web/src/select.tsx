@@ -18,6 +18,8 @@ export type SelectOption<VALUE extends string> = {
   icon?: ReactNode;
   /** Options with the same group follow each other below a group heading */
   group?: string;
+  /** A shorter text for the closed select, when the label is long */
+  shortLabel?: string;
 };
 
 const POPOVER_MIN_WIDTH = 220;
@@ -204,7 +206,7 @@ export function Select<VALUE extends string>(props: {
         {props.trigger ?? (
           <>
             {selected?.icon}
-            <span className="select-value">{selected?.label ?? value}</span>
+            <span className="select-value">{selected?.shortLabel ?? selected?.label ?? value}</span>
             <svg className="select-chevron" viewBox="0 0 16 16" aria-hidden="true">
               <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
             </svg>
