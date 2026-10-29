@@ -82,7 +82,7 @@ body {
 }
 
 .page-nav a:not(.brand):hover {
-  color: var(--text);
+  color: var(--accent);
 }
 
 .page h1 {
@@ -167,5 +167,5 @@ body {
 }
 
 .page-footer a:hover {
-  color: var(--text);
+  color: var(--accent);
 }
