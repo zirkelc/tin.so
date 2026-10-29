@@ -515,6 +515,18 @@ async function linkCommand(values: LinkValues, io: Io) {
   }
 }
 
+const SKILL_URL = "https://github.com/zirkelc/tin.so/tree/main/skills/tin";
+
+const SKILL_TEXT = `The tin skill shows coding agents how to make code images with this CLI.
+
+Add it with the skills CLI, for Claude Code, Codex, Cursor and other agents:
+
+  npx skills add zirkelc/tin.so
+
+Or copy the folder ${SKILL_URL}
+into the skills folder of your agent, for example ~/.claude/skills/tin.
+`;
+
 // The context data of each command is the Io of the run
 const COMMANDS = {
   render: defineCommand({
@@ -558,6 +570,10 @@ const COMMANDS = {
   schema: defineCommand({
     meta: { name: "schema", description: "Print the JSON Schema of the spec" },
     run: ({ data }) => data.stdout(`${JSON.stringify(specJsonSchema(), null, 2)}\n`),
+  }),
+  skill: defineCommand({
+    meta: { name: "skill", description: "Show how to add the tin skill to a coding agent" },
+    run: ({ data }) => data.stdout(SKILL_TEXT),
   }),
   // The router in main shows the help, so this command only gives the entry in the list
   help: defineCommand({

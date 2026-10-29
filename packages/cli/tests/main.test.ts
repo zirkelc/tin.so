@@ -801,6 +801,32 @@ describe("schema", () => {
   });
 });
 
+describe("skill", () => {
+  test("should print the command that adds the skill and the link to its folder", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    await main(["skill"], io);
+
+    // Assert
+    const output = io.output();
+    expect(output).toContain("  npx skills add zirkelc/tin.so\n");
+    expect(output).toContain("https://github.com/zirkelc/tin.so/tree/main/skills/tin");
+  });
+
+  test("should list the skill command in the help", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    await main(["--help"], io);
+
+    // Assert
+    expect(io.output()).toContain("Show how to add the tin skill to a coding agent");
+  });
+});
+
 describe("themes", () => {
   test("should list the font that a theme uses", async () => {
     // Arrange

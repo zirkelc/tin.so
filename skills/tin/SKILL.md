@@ -9,7 +9,7 @@ The `tin` CLI renders images of code on the local machine. It needs no browser a
 
 Run it as `npx -y tin.so <files>` (Node 22.18 or later). If `tin` is already installed, `tin <files>` is the same. Below, `tin` means either form.
 
-Rendering is the default command: `tin main.ts` is the same as `tin render main.ts`. The other commands are `link`, `themes`, `languages`, `fonts`, `schema` and `help`. A file with the name of a command needs a path, such as `./themes`.
+Rendering is the default command: `tin main.ts` is the same as `tin render main.ts`. The other commands are `link`, `themes`, `languages`, `fonts`, `schema`, `skill` and `help`. A file with the name of a command needs a path, such as `./themes`.
 
 ## Choose the path
 
