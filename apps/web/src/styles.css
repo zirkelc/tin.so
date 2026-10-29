@@ -138,10 +138,12 @@ textarea {
   left: 8px;
 }
 
-.examples-trigger {
+/* More specific than .tool, which has the fixed width of an icon button */
+.sidebar-header .examples-trigger {
   width: auto;
   padding: 0 8px;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .examples-menu {
