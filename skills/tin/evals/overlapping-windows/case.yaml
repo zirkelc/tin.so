@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: overlapping-windows
+expected_outcome: |
+  A 1200x800 image (2400x1600 PNG at 2x) with two windows that both have x and y, overlapping, server.ts after client.ts and further down and right.

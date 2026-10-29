@@ -41,7 +41,9 @@ export default defineConfig(({ mode }) => {
     ),
     server: { port: 5_173 },
     build: {
-      rollupOptions: { input: { main: "index.html", privacy: "privacy.html" } },
+      rollupOptions: {
+        input: { main: "index.html", privacy: "privacy.html", legal: "legal.html" },
+      },
     },
     test: {
       projects: [

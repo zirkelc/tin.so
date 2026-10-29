@@ -1,0 +1,171 @@
+/* The text pages of the site, such as the privacy notice and the legal notice */
+
+/* The fonts come from this site, so that no font service gets the address of a visitor */
+@font-face {
+  font-family: "Inter";
+  font-weight: 400;
+  src: url("../../../packages/core/fonts/inter/inter-400.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-weight: 500 700;
+  src: url("../../../packages/core/fonts/inter/inter-500.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 500;
+  src: url("../../../packages/core/fonts/jetbrains-mono/jetbrains-mono-500.ttf") format("truetype");
+}
+
+:root {
+  color-scheme: dark light;
+  --bg: #0b0b0d;
+  --text: #ececf1;
+  --text-muted: #a1a1aa;
+  --border: rgba(255, 255, 255, 0.1);
+  --code-bg: rgba(255, 255, 255, 0.07);
+  --accent: #a78bfa;
+  --selection: rgba(124, 58, 237, 0.45);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #fafafa;
+    --text: #18181b;
+    --text-muted: #52525b;
+    --border: rgba(0, 0, 0, 0.1);
+    --code-bg: rgba(0, 0, 0, 0.05);
+    --accent: #6d28d9;
+    --selection: rgba(124, 58, 237, 0.25);
+  }
+}
+
+::selection {
+  background: var(--selection);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 65ch;
+  margin: 0 auto;
+  padding: 40px 16px 80px;
+}
+
+.page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 48px;
+  font-size: 14px;
+}
+
+.page-nav .brand {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.page-nav a:not(.brand) {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.page-nav a:not(.brand):hover {
+  color: var(--text);
+}
+
+.page h1 {
+  margin: 0 0 4px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.page .updated {
+  margin: 0 0 40px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.page h2 {
+  margin: 40px 0 12px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.page p,
+.page ul {
+  margin: 0 0 20px;
+  color: var(--text-muted);
+}
+
+.page ul {
+  padding-left: 1.4em;
+}
+
+.page li {
+  margin: 6px 0;
+}
+
+.page li::marker {
+  color: var(--text-muted);
+}
+
+.page strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.page a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.page code {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--code-bg);
+  color: var(--text);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.875em;
+}
+
+.page address {
+  margin: 0 0 20px;
+  color: var(--text-muted);
+  font-style: normal;
+}
+
+.page-footer {
+  display: flex;
+  gap: 16px;
+  margin-top: 64px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.page-footer a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.page-footer a:hover {
+  color: var(--text);
+}
