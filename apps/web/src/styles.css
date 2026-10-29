@@ -616,31 +616,152 @@ button.icon {
   width: 132px;
 }
 
-.shortcuts {
+.about {
+  width: min(820px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.about::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.about-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-height: calc(100vh - 50px);
+}
+
+.about-text,
+.about-shortcuts {
   display: flex;
-  width: 340px;
+  min-height: 0;
   flex-direction: column;
-  gap: 2px;
-  margin: 0;
-  padding: 6px;
+  padding: 24px 28px;
+  overflow: auto;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.about-text {
+  border-right: 1px solid var(--border);
+}
+
+.about h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.about p + h2 {
+  margin-top: 14px;
+}
+
+.about p {
+  margin: 0 0 10px;
+  color: var(--text-muted);
+}
+
+.about a {
+  color: var(--text);
+}
+
+.about code {
   font-size: 12px;
 }
 
-.shortcuts div {
+.about-footer {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.about-links {
+  display: flex;
+  gap: 12px;
+}
+
+.about-links a {
+  display: flex;
+  color: var(--text-muted);
+}
+
+.about-links a:hover {
+  color: var(--text);
+}
+
+.about-shortcuts dl {
+  margin: 0;
+}
+
+.about-shortcuts dl div {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 4px 0;
 }
 
-.shortcuts dt {
-  font-weight: 500;
+.about-shortcuts dd {
+  display: flex;
+  gap: 4px;
+  margin: 0;
 }
 
-.shortcuts dd {
-  margin: 0;
+.about kbd {
+  min-width: 22px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--panel-raised);
   color: var(--text-muted);
-  text-align: right;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.about-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel-raised);
+  color: var(--text-muted);
+}
+
+.about-close:hover {
+  color: var(--text);
+}
+
+@media (max-width: 640px) {
+  .about-body {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .about-text {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .about-text,
+  .about-shortcuts {
+    overflow: visible;
+  }
 }
 
 .preview-frame {

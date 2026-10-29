@@ -342,6 +342,52 @@ describe("author", () => {
   });
 });
 
+describe("about dialog", () => {
+  test("should open from the toolbar with the shortcuts and the privacy notice", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await page.getByRole("button", { name: "About and shortcuts" }).click();
+
+    // Assert
+    const dialog = page.getByRole("dialog", { name: "About" });
+    await expect.element(dialog).toBeVisible();
+    await expect.element(dialog.getByRole("heading", { name: "Shortcuts" })).toBeVisible();
+    await expect
+      .element(dialog.getByRole("link", { name: "Privacy notice" }))
+      .toHaveAttribute("href", "/privacy");
+    await expect
+      .element(dialog.getByRole("link", { name: "info@tin.so" }))
+      .toHaveAttribute("href", "mailto:info@tin.so");
+  });
+
+  test("should open with the ? key and close with Escape", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await userEvent.keyboard("?");
+    const opened = document.querySelector("dialog.about")?.hasAttribute("open");
+    await userEvent.keyboard("{Escape}");
+
+    // Assert
+    expect(opened).toBe(true);
+    await expect.element(page.getByRole("dialog", { name: "About" })).not.toBeInTheDocument();
+  });
+
+  test("should not open when ? is typed into the code", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await userEvent.type(codeField(1, 1), "?");
+
+    // Assert
+    expect(document.querySelector("dialog.about")?.hasAttribute("open")).toBe(false);
+  });
+});
+
 describe("style panel", () => {
   test("should color and style the selected text", async () => {
     // Arrange

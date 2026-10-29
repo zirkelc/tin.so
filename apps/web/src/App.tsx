@@ -8,6 +8,7 @@ import {
   type SpecInput,
 } from "@tin.so/core";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AboutDialog, isTyping } from "./about.tsx";
 import { installApi, markApiReady } from "./api.ts";
 import { JsonEditor, PopoverEditor, Settings, WindowEditor, WindowList } from "./editors.tsx";
 import {
@@ -72,25 +73,6 @@ function writeExportChoice(choice: ExportChoice) {
   } catch {}
 }
 
-const SHORTCUTS: Array<[string, string]> = [
-  ["Right-click code", "Highlight, popovers, clear styles"],
-  ["⌥ Click a line", "Highlight the line"],
-  ["Select code", "Colors and styles"],
-  ["⌘B  ⌘I  ⌘U", "Bold, italic, underline"],
-  ["⌘⇧X", "Strikethrough"],
-  ["⇧⌥F", "Format the code"],
-  ["Drag a window", "Move it"],
-  ["Drag an edge, a corner or a divider", "Resize. Double-click to fit."],
-  ["Drag on the background", "Select windows"],
-  ["⇧ Click a window", "Add it to the selection"],
-  ["⌘A  Esc", "Select all, select none"],
-  ["⌘D", "Duplicate the window"],
-  ["⌘C  ⌘V", "Copy and paste windows"],
-  ["Drag the image corner", "Resize the image. Double-click to fit."],
-  ["⌫", "Remove the selection"],
-  ["Drop an exported image", "Edit it again"],
-];
-
 function download(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -112,6 +94,7 @@ export function App() {
   const [status, setStatus] = useState<string>();
   // The window that the pointer is on in the list of windows
   const [hovered, setHovered] = useState<number>();
+  const [about, setAbout] = useState(false);
   const specRef = useRef<SpecInput>(DEFAULT_SPEC);
   const renderId = useRef(0);
   // The last rendered spec and its scene
@@ -173,6 +156,14 @@ export function App() {
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, [showSpec, update]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "?" && !isTyping(event.target)) setAbout(true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const flash = (message: string) => {
     setStatus(message);
@@ -388,18 +379,16 @@ export function App() {
           >
             <GitHubIcon />
           </a>
-          <Dropdown label="Shortcuts" className="tool bordered" trigger={<QuestionIcon />}>
-            {() => (
-              <dl className="shortcuts">
-                {SHORTCUTS.map(([keys, action]) => (
-                  <div key={keys}>
-                    <dt>{keys}</dt>
-                    <dd>{action}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </Dropdown>
+          <button
+            type="button"
+            className="tool bordered"
+            aria-label="About and shortcuts"
+            title="About and shortcuts"
+            onClick={() => setAbout(true)}
+          >
+            <QuestionIcon />
+          </button>
+          <AboutDialog open={about} onClose={() => setAbout(false)} />
           <button type="button" className="secondary" onClick={() => void copyLink()}>
             <LinkIcon />
             Copy link
