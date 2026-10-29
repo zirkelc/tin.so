@@ -56,12 +56,12 @@ Common options: `--theme <id>` (`tin themes` lists them), `--mode light`, `--lin
 
 Write the spec as JSON and pipe it to `tin`. Do not write the code to temporary files first: the code goes into the spec.
 
-Always start the spec with `"$schema"`, set to the URL in the `$id` field of `tin schema` (`https://code-image.zirkelc.workers.dev/schema/v1.json`). This field tells the CLI that the JSON on stdin is a spec. Without it, the CLI renders the JSON as code. If you cannot add the field, pass `--spec`.
+Always start the spec with `"$schema"`, set to the URL in the `$id` field of `tin schema` (`https://tin.so/schema/v1.json`). This field tells the CLI that the JSON on stdin is a spec. Without it, the CLI renders the JSON as code. If you cannot add the field, pass `--spec`.
 
 ```bash
 tin -o plans.png <<'EOF'
 {
-  "$schema": "https://code-image.zirkelc.workers.dev/schema/v1.json",
+  "$schema": "https://tin.so/schema/v1.json",
   "theme": "vercel",
   "windows": [
     {

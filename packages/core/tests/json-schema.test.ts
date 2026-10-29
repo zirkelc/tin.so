@@ -34,19 +34,21 @@ describe("specJsonSchema", () => {
 
   test("should put the schema at the versioned path of the app", () => {
     // Assert
-    expect(SPEC_SCHEMA_URL).toBe("https://code-image.zirkelc.workers.dev/schema/v1.json");
+    expect(SPEC_SCHEMA_URL).toBe("https://tin.so/schema/v1.json");
   });
 });
 
 describe("isSpecSchemaUrl", () => {
-  test("should accept the schema URL of the hosted app and of tin.so", () => {
+  test("should accept the schema URL of the hosted app and of its earlier host", () => {
     // Act
     const hosted = isSpecSchemaUrl(SPEC_SCHEMA_URL);
     const tin = isSpecSchemaUrl("https://tin.so/schema/v2.json");
+    const earlier = isSpecSchemaUrl("https://code-image.zirkelc.workers.dev/schema/v1.json");
 
     // Assert
     expect(hosted).toBe(true);
     expect(tin).toBe(true);
+    expect(earlier).toBe(true);
   });
 
   test("should accept the schema URL on the host of the given app", () => {

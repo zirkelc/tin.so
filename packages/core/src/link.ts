@@ -5,7 +5,7 @@ import { migrateLegacySpec, stampSpecVersion } from "./migrate.ts";
  * The hosted web app. The CLI takes another app from its TIN_APP_URL environment variable,
  * for example the local editor during development.
  */
-export const DEFAULT_APP_URL = "https://code-image.zirkelc.workers.dev/";
+export const DEFAULT_APP_URL = "https://tin.so/";
 
 const HASH_KEY = "spec=";
 

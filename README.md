@@ -145,7 +145,7 @@ To collect page views with Cloudflare Web Analytics, put the token of the site i
 
 ```json
 {
-  "$schema": "https://code-image.zirkelc.workers.dev/schema/v1.json",
+  "$schema": "https://tin.so/schema/v1.json",
   "theme": "vercel",
   "windows": [
     {
@@ -165,7 +165,7 @@ To collect page views with Cloudflare Web Analytics, put the token of the site i
 }
 ```
 
-The spec is defined with valibot in `packages/core/src/spec.ts`. Its JSON Schema is on the site at `https://code-image.zirkelc.workers.dev/schema/v1.json`, and `tin schema` prints it. Add the `"$schema"` field to a spec file, and editors such as VS Code check the spec and complete its fields. A link from the CLI or the editor carries the spec in the URL fragment (`#spec=<deflate + base64url>`), so it never goes to a server.
+The spec is defined with valibot in `packages/core/src/spec.ts`. Its JSON Schema is on the site at `https://tin.so/schema/v1.json`, and `tin schema` prints it. Add the `"$schema"` field to a spec file, and editors such as VS Code check the spec and complete its fields. A link from the CLI or the editor carries the spec in the URL fragment (`#spec=<deflate + base64url>`), so it never goes to a server.
 
 ## Agents in a browser
 

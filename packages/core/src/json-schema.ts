@@ -30,15 +30,15 @@ function allowExtensions(node: unknown): any {
   return out;
 }
 
-// The hosts that serve the spec schema in addition to the host of the hosted app
-const SPEC_SCHEMA_HOSTS = ["tin.so"];
+// Earlier hosts of the app, so that specs with an older schema URL are still specs
+const SPEC_SCHEMA_HOSTS = ["code-image.zirkelc.workers.dev"];
 
 const SPEC_SCHEMA_PATH = /\/schema\/v\d+\.json$/;
 
 /**
  * True when the value is the URL of a tin.so spec schema: a path that ends with
- * /schema/v<number>.json on the host of the hosted app, on tin.so, or on the host of the given
- * app URL (for example a local editor).
+ * /schema/v<number>.json on the host of the hosted app, on an earlier host of the app, or on the
+ * host of the given app URL (for example a local editor).
  */
 export function isSpecSchemaUrl(value: unknown, appUrl?: string): boolean {
   if (typeof value !== "string" || !URL.canParse(value)) return false;

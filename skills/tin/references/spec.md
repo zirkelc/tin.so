@@ -17,7 +17,7 @@ This page has the fields that matter most, recipes, and the rules behind the usu
 
 ```json
 {
-  "$schema": "https://code-image.zirkelc.workers.dev/schema/v1.json",
+  "$schema": "https://tin.so/schema/v1.json",
   "theme": "candy",
   "windows": [
     {
