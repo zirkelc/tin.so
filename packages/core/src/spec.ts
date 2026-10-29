@@ -2,7 +2,12 @@ import * as v from "valibot";
 import { CODE_FONT_IDS } from "./fonts/index.ts";
 import { isKnownLanguage } from "./highlight/index.ts";
 import { AUTO_ICON, ICON_IDS, NO_ICON } from "./icons/index.ts";
-import { IMPLICIT_SPEC_VERSION, migrateLegacySpec } from "./migrate.ts";
+import {
+  IMPLICIT_SPEC_VERSION,
+  migrateLegacySpec,
+  schemaVersion,
+  withoutExtensions,
+} from "./migrate.ts";
 import { DEFAULT_THEME, THEME_IDS } from "./themes/index.ts";
 
 const LINE_RANGE = /^\d+(-\d+)?$/;
@@ -121,7 +126,14 @@ const MarkWithEffectSchema = v.pipe(
   ),
 );
 
+// The kinds of annotations. A popover is the only kind today, and later kinds get a new value.
+export const ANNOTATION_TYPES = ["popover"] as const;
+
 const AnnotationSchema = v.strictObject({
+  type: describe(
+    v.optional(v.picklist(ANNOTATION_TYPES), "popover"),
+    "Kind of the annotation. popover is a card below the text, as the hover card of an editor",
+  ),
   line: describe(v.pipe(v.number(), v.integer(), v.minValue(1)), "Line of the anchor, from 1"),
   match: describe(
     v.pipe(v.string(), v.minLength(1)),
@@ -250,8 +262,14 @@ const WindowSchema = v.strictObject({
  * Versions of the spec format.
  *
  * - Increase v only for a breaking change: a field that changes its meaning, gets a new name or
- *   goes away. A new optional field does not increase v, because older specs stay valid.
- * - A spec without v is version 1, now and in all later versions, because older specs have no v.
+ *   goes away, a changed default, a value that a list no longer has (a theme, font, icon or
+ *   language id), or a smaller limit. Specs leave out the defaults, so a new default changes old
+ *   images. A new optional field, a new value or a larger limit does not increase v, because older
+ *   specs stay valid.
+ * - The version is v, or the version of the $schema URL (/schema/v<number>.json) without v. When
+ *   both are there, they must be the same. A spec without both is version 1, now and in all later
+ *   versions, because older specs have neither.
+ * - Keys that start with "x-" are for other tools. The renderer ignores them in every object.
  * - For a new version, add its schema (with v as a required literal of the new number) to
  *   SPEC_SCHEMAS, a function that changes a parsed spec of the version before into the new
  *   version to MIGRATIONS, and increase LATEST_SPEC_VERSION. The schema of the latest version is
@@ -263,11 +281,11 @@ const SpecV1Schema = v.pipe(
   v.strictObject({
     $schema: describe(
       v.optional(v.pipe(v.string(), v.url())),
-      "URL of the JSON Schema of the spec, so that an editor can check the spec and complete its fields. The renderer does not use it",
+      "URL of the JSON Schema of the spec, so that an editor can check the spec and complete its fields. Its path names the version, such as /schema/v1.json, which counts as v. The CLI also uses it to tell a spec from other JSON",
     ),
     v: describe(
       v.optional(v.literal(1), IMPLICIT_SPEC_VERSION),
-      "Version of the spec format. Leave it out or use 1. A spec without v is version 1",
+      "Version of the spec format. Leave it out or use 1. Without v, the version of the $schema URL counts, and without both, the version is 1",
     ),
     theme: describe(v.optional(v.picklist(THEME_IDS), DEFAULT_THEME), "Theme from ray.so"),
     mode: describe(
@@ -366,33 +384,52 @@ function formatIssue(issue: v.BaseIssue<unknown>): string {
   if (issue.type === "strict_object" && issue.input === undefined)
     return `${path}: required field missing`;
   if (issue.type === "picklist" && issue.expected)
-    return `${path}: expected one of ${issue.expected}, received ${issue.received}`;
+    return `${path}: expected one of ${issue.expected}, received ${issue.received}. Check the value, or update tin.so, because a newer version can support it`;
   return `${path}: ${issue.message}`;
 }
 
-/** The version of a spec input. A spec without v is version 1. */
+/**
+ * The version of a spec input: v, or the version of the $schema URL without v. A spec without
+ * both is version 1.
+ */
 function readVersion(input: unknown): number {
-  if (typeof input !== "object" || input === null || !("v" in input)) return IMPLICIT_SPEC_VERSION;
-  const version = (input as { v: unknown }).v;
-  if (version === undefined) return IMPLICIT_SPEC_VERSION;
-  if (typeof version !== "number" || !Number.isInteger(version) || version < 1)
+  const fromSchema = schemaVersion(input);
+  const field =
+    typeof input === "object" && input !== null && "v" in input
+      ? (input as { v: unknown }).v
+      : undefined;
+  if (field === undefined) {
+    const version = fromSchema ?? IMPLICIT_SPEC_VERSION;
+    if (version < 1)
+      throw new SpecError([`$schema: the URL names version ${version}, but versions start at 1`]);
+    return checkSupported(version, "$schema");
+  }
+  if (typeof field !== "number" || !Number.isInteger(field) || field < 1)
     throw new SpecError([
-      `v: the version must be a whole number from 1, received ${typeof version === "number" ? version : (JSON.stringify(version) ?? typeof version)}`,
+      `v: the version must be a whole number from 1, received ${typeof field === "number" ? field : (JSON.stringify(field) ?? typeof field)}`,
     ]);
+  if (fromSchema !== undefined && fromSchema !== field)
+    throw new SpecError([
+      `v: the spec has version ${field}, but its $schema URL names version ${fromSchema}. Make them the same, or remove one`,
+    ]);
+  return checkSupported(field, "v");
+}
+
+function checkSupported(version: number, path: string): number {
   if (version > LATEST_SPEC_VERSION)
     throw new SpecError([
-      `v: This spec has version ${version}, but this tin.so supports up to version ${LATEST_SPEC_VERSION}. Update tin.so.`,
+      `${path}: This spec has version ${version}, but this tin.so supports up to version ${LATEST_SPEC_VERSION}. Update tin.so.`,
     ]);
   return version;
 }
 
 /**
- * Validates a spec and applies the defaults. It first changes the fields of older specs, then
- * validates the spec with the schema of its version and changes it to the latest version. Throws
- * a SpecError that lists every issue.
+ * Validates a spec and applies the defaults. It first removes the keys of other tools and changes
+ * the fields of older specs, then validates the spec with the schema of its version and changes it
+ * to the latest version. Throws a SpecError that lists every issue.
  */
 export function parseSpec(input: unknown): Spec {
-  const migrated = migrateLegacySpec(input);
+  const migrated = migrateLegacySpec(withoutExtensions(input));
   const version = readVersion(migrated);
   const result = v.safeParse(SPEC_SCHEMAS[version]!, migrated);
   if (!result.success) throw new SpecError(result.issues.map(formatIssue));

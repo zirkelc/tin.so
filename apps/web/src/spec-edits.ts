@@ -322,62 +322,97 @@ export function withFormattedCode(pane: PaneInput, input: string, formatted: str
 }
 
 /**
- * How the line numbers change when the code changes: lines below the edit move with it, and lines
- * in and above it keep their number.
+ * How the line numbers change when the code changes. Lines above the edit keep their number, lines
+ * below it move with it, and a line that the edit removed with its line break gives undefined. The
+ * caret after the edit tells where the edit is when the same text is on several lines.
  */
-function lineMover(previous: string, code: string): (line: number) => number {
-  const before = previous.split("\n");
-  const after = code.split("\n");
+function lineMover(
+  previous: string,
+  code: string,
+  caret?: number,
+): { move: (line: number) => number | undefined; editLine: number } {
+  const maxPrefix = Math.min(previous.length, code.length, caret ?? code.length);
   let prefix = 0;
-  while (prefix < before.length && prefix < after.length && before[prefix] === after[prefix])
-    prefix++;
+  while (prefix < maxPrefix && previous[prefix] === code[prefix]) prefix++;
+  const maxSuffix = Math.min(
+    previous.length - prefix,
+    code.length - prefix,
+    caret === undefined ? code.length : code.length - caret,
+  );
   let suffix = 0;
   while (
-    suffix < before.length - prefix &&
-    suffix < after.length - prefix &&
-    before[before.length - 1 - suffix] === after[after.length - 1 - suffix]
+    suffix < maxSuffix &&
+    previous[previous.length - 1 - suffix] === code[code.length - 1 - suffix]
   )
     suffix++;
-  const delta = after.length - before.length;
-  return (line: number) => (line > before.length - suffix ? line + delta : line);
+
+  const removedEnd = previous.length - suffix;
+  const breaks = (text: string) => text.split("\n").length - 1;
+  const delta =
+    breaks(code.slice(prefix, code.length - suffix)) - breaks(previous.slice(prefix, removedEnd));
+  const starts = [0];
+  for (let index = 0; index < previous.length; index++)
+    if (previous[index] === "\n") starts.push(index + 1);
+
+  const move = (line: number) => {
+    const start = starts[line - 1];
+    // A line after the last line, for example of a popover that is not visible, moves as a line below
+    if (start === undefined) return line + delta;
+    const end = line < starts.length ? starts[line]! - 1 : previous.length;
+    const removed = start >= prefix && end <= removedEnd && (end < removedEnd || start > prefix);
+    if (removed) return undefined;
+    return start < prefix ? line : line + delta;
+  };
+  return { move, editLine: breaks(previous.slice(0, prefix)) + 1 };
 }
 
 /**
- * Sets the code of a pane and moves the line highlights, marks and popovers with their lines,
- * when the edit adds or removes lines above them.
+ * Sets the code of a pane and moves the line highlights, marks and popovers with their lines, when
+ * the edit adds or removes lines above them. The edit removes the highlights and marks of a line
+ * that it removes. A popover of such a line moves to the line of the edit, so that its content
+ * stays. The caret is the cursor position after the edit, when the user typed it.
  */
-export function withCode(pane: PaneInput, code: string): PaneInput {
-  const move = lineMover(pane.code, code);
+export function withCode(pane: PaneInput, code: string, caret?: number): PaneInput {
+  const { move, editLine } = lineMover(pane.code, code, caret);
   const lineCount = code.split("\n").length;
   const lines = [...expandLineRanges(pane.highlight ?? [])]
-    .map(move)
+    .flatMap((line) => move(line) ?? [])
     .filter((line) => line >= 1 && line <= lineCount);
   return {
     ...pane,
     code,
     highlight: [...new Set(lines)].sort((a, b) => a - b),
-    ...(pane.marks && { marks: pane.marks.map((mark) => ({ ...mark, line: move(mark.line) })) }),
+    ...(pane.marks && { marks: moveMarks(pane.marks, move) }),
     ...(pane.annotations && {
       annotations: pane.annotations.map((annotation) => ({
         ...annotation,
-        line: move(annotation.line),
+        line: move(annotation.line) ?? editLine,
       })),
     }),
   };
+}
+
+function moveMarks(
+  marks: NonNullable<Marked["marks"]>,
+  move: (line: number) => number | undefined,
+): NonNullable<Marked["marks"]> {
+  return marks.flatMap((mark) => {
+    const line = move(mark.line);
+    return line === undefined ? [] : [{ ...mark, line }];
+  });
 }
 
 /** New code for a popover. Its marks move with their lines, as in a pane. */
 export function withPopoverCode<MARKED extends Marked>(
   popover: MARKED,
   code: string,
+  caret?: number,
 ): MARKED & Marked {
-  const move = lineMover(popover.code, code);
+  const { move } = lineMover(popover.code, code, caret);
   return {
     ...popover,
     code,
-    ...(popover.marks && {
-      marks: popover.marks.map((mark) => ({ ...mark, line: move(mark.line) })),
-    }),
+    ...(popover.marks && { marks: moveMarks(popover.marks, move) }),
   };
 }
 

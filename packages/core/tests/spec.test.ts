@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vite-plus/test";
 import { SPEC_SCHEMA_URL } from "../src/json-schema.ts";
+import { stampSpecVersion } from "../src/migrate.ts";
 import { expandLineRanges, LATEST_SPEC_VERSION, parseSpec, SpecError } from "../src/spec.ts";
+import PINNED_IDS from "./spec-ids-v1.json" with { type: "json" };
 
 const PANE = { code: "x" };
 
@@ -85,7 +87,7 @@ describe("parseSpec", () => {
     // Assert
     expect(error?.issues.length).toBe(1);
     expect(error?.issues[0]).toMatch(/^theme: expected one of .*"candy"/);
-    expect(error?.issues[0]).toMatch(/received "dracula"$/);
+    expect(error?.issues[0]).toMatch(/received "dracula"\. Check the value, or update tin\.so/);
   });
 
   test("should reject a window without panes", () => {
@@ -478,5 +480,159 @@ describe("$schema", () => {
 
     // Assert
     expect(result.$schema).toBe(SPEC_SCHEMA_URL);
+  });
+});
+
+describe("version from $schema", () => {
+  const schemaUrl = (version: number) => `https://tin.so/schema/v${version}.json`;
+
+  test("should read the version of the $schema URL without v", () => {
+    // Act
+    const spec = parseSpec({ $schema: schemaUrl(1), windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(spec.v).toBe(1);
+  });
+
+  test("should ask for an update for a newer version in the $schema URL", () => {
+    // Act
+    const issues = specIssues({ $schema: schemaUrl(2), windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(issues).toEqual([
+      "$schema: This spec has version 2, but this tin.so supports up to version 1. Update tin.so.",
+    ]);
+  });
+
+  test("should reject a v that is not the version of the $schema URL", () => {
+    // Act
+    const issues = specIssues({ $schema: schemaUrl(2), v: 1, windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(issues).toEqual([
+      "v: the spec has version 1, but its $schema URL names version 2. Make them the same, or remove one",
+    ]);
+  });
+
+  test("should read a $schema URL without a version as version 1", () => {
+    // Act
+    const spec = parseSpec({
+      $schema: "https://example.com/spec.json",
+      windows: [{ panes: [PANE] }],
+    });
+
+    // Assert
+    expect(spec.v).toBe(1);
+  });
+
+  test("should stamp the version of the $schema URL", () => {
+    // Act
+    const result = stampSpecVersion({ $schema: schemaUrl(2), windows: [] });
+
+    // Assert
+    expect(result).toEqual({ v: 2, $schema: schemaUrl(2), windows: [] });
+  });
+});
+
+describe("extension keys", () => {
+  test("should ignore the keys that start with x- in every object", () => {
+    // Arrange
+    const input = {
+      "x-editor": { zoom: 2 },
+      windows: [
+        {
+          "x-id": "w1",
+          panes: [
+            {
+              code: "a",
+              "x-note": "keep",
+              marks: [{ line: 1, match: "a", style: "strong", "x-by": "me" }],
+              annotations: [{ line: 1, match: "a", code: "A", "x-pinned": true }],
+            },
+          ],
+        },
+      ],
+    };
+
+    // Act
+    const spec = parseSpec(input);
+
+    // Assert
+    const pane = spec.windows[0]!.panes[0]!;
+    expect(Object.keys(spec).some((key) => key.startsWith("x-"))).toBe(false);
+    expect(Object.keys(pane).some((key) => key.startsWith("x-"))).toBe(false);
+    expect(pane.marks[0]).toEqual({ line: 1, match: "a", occurrence: 1, style: "strong" });
+    expect(pane.annotations[0]!.code).toBe("A");
+  });
+});
+
+describe("annotation type", () => {
+  test("should make an annotation without a type a popover", () => {
+    // Act
+    const spec = parseSpec(
+      paneSpec({ code: "a", annotations: [{ line: 1, match: "a", code: "A" }] }),
+    );
+
+    // Assert
+    expect(spec.windows[0]!.panes[0]!.annotations[0]!.type).toBe("popover");
+  });
+
+  test("should reject an unknown annotation type", () => {
+    // Act
+    const issues = specIssues(
+      paneSpec({ code: "a", annotations: [{ type: "arrow", line: 1, match: "a", code: "A" }] }),
+    );
+
+    // Assert
+    expect(issues.length).toBe(1);
+    expect(issues[0]).toMatch(
+      /^windows\.0\.panes\.0\.annotations\.0\.type: expected one of "popover"/,
+    );
+  });
+});
+
+/**
+ * Specs in links and images use these ids, so each id that a version accepted must stay valid.
+ * A dependency update that removes an id fails here: keep the old id as an alias instead. New ids
+ * go into the list when they are added.
+ */
+describe("pinned ids", () => {
+  test.each(PINNED_IDS.themes)("should accept the theme %s", (theme) => {
+    // Act
+    const spec = parseSpec({ theme, windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(spec.theme).toBe(theme);
+  });
+
+  test.each(PINNED_IDS.fonts)("should accept the font %s", (font) => {
+    // Act
+    const spec = parseSpec({ font, windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(spec.font).toBe(font);
+  });
+
+  test.each(PINNED_IDS.icons)("should accept the icon %s", (icon) => {
+    // Act
+    const spec = parseSpec(paneSpec({ icon }));
+
+    // Assert
+    expect(spec.windows[0]!.panes[0]!.icon).toBe(icon);
+  });
+
+  test("should accept all pinned languages", () => {
+    // Act
+    const rejected = PINNED_IDS.languages.filter((language) => {
+      try {
+        parseSpec(paneSpec({ language }));
+        return false;
+      } catch {
+        return true;
+      }
+    });
+
+    // Assert
+    expect(rejected).toEqual([]);
   });
 });

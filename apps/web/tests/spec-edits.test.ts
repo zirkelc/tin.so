@@ -246,6 +246,79 @@ describe("withCode", () => {
     expect(result.marks![0]!.line).toBe(4);
     expect(result.annotations![0]!.line).toBe(4);
   });
+
+  test("should keep a highlight on its line when an earlier line is deleted", () => {
+    // Arrange
+    const pane: PaneInput = { code: "a\nb\nc\nd", highlight: [3] };
+
+    // Act
+    const result = withCode(pane, "b\nc\nd", 0);
+
+    // Assert
+    expect(result.highlight).toEqual([2]);
+  });
+
+  test("should remove the highlight and the marks of a deleted line", () => {
+    // Arrange
+    const pane: PaneInput = {
+      code: "a\nb\nc",
+      highlight: [2, 3],
+      marks: [{ line: 2, match: "b", style: "strong" }],
+      annotations: [{ line: 2, match: "b", code: "B" }],
+    };
+
+    // Act
+    const result = withCode(pane, "a\nc", 2);
+
+    // Assert
+    expect(result.highlight).toEqual([2]);
+    expect(result.marks).toEqual([]);
+    expect(result.annotations![0]!.line).toBe(2);
+  });
+
+  test("should use the caret to find the deleted line among equal lines", () => {
+    // Arrange
+    const pane: PaneInput = { code: "x\nx\nx", highlight: [3] };
+
+    // Act
+    const result = withCode(pane, "x\nx", 0);
+
+    // Assert
+    expect(result.highlight).toEqual([2]);
+  });
+
+  test("should move a highlight down when a line break is typed at its start", () => {
+    // Arrange
+    const pane: PaneInput = { code: "a\nb", highlight: [2] };
+
+    // Act
+    const result = withCode(pane, "a\n\nb", 3);
+
+    // Assert
+    expect(result.highlight).toEqual([3]);
+  });
+
+  test("should keep a highlight when text in its line changes", () => {
+    // Arrange
+    const pane: PaneInput = { code: "a\nb\nc", highlight: [2] };
+
+    // Act
+    const result = withCode(pane, "a\nbb\nc", 4);
+
+    // Assert
+    expect(result.highlight).toEqual([2]);
+  });
+
+  test("should keep the highlight of a line that a backspace joins to the line above", () => {
+    // Arrange
+    const pane: PaneInput = { code: "a\nb\nc", highlight: [3] };
+
+    // Act
+    const result = withCode(pane, "a\nbc", 3);
+
+    // Assert
+    expect(result.highlight).toEqual([2]);
+  });
 });
 
 describe("withoutMissingParts", () => {

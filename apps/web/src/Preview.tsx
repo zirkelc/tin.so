@@ -358,7 +358,7 @@ function CodeEditor(
 
   const update = (change: (pane: PaneInput) => PaneInput) =>
     onChange((current) => updatePane(current, windowIndex, paneIndex, change));
-  const setCode = (next: string) => update((pane) => withCode(pane, next));
+  const setCode = (next: string, caret?: number) => update((pane) => withCode(pane, next, caret));
 
   const panel = useStylePanel(
     code,
@@ -422,7 +422,7 @@ function CodeEditor(
         autoComplete="off"
         style={style}
         value={code}
-        onChange={(event) => setCode(event.target.value)}
+        onChange={(event) => setCode(event.target.value, event.target.selectionStart)}
         onKeyDown={onKeyDown}
         onPaste={onPaste}
         onMouseDown={onMouseDown}
@@ -522,7 +522,8 @@ function PopoverCodeField(props: {
   const { code, popover, scene, zoom, onChange } = props;
   const text = scene.popoverText;
   const panel = useStylePanel(code, props.style, text, zoom);
-  const setCode = (next: string) => onChange((old) => withPopoverCode(old, next));
+  const setCode = (next: string, caret?: number) =>
+    onChange((old) => withPopoverCode(old, next, caret));
   return (
     <>
       <textarea
@@ -536,7 +537,7 @@ function PopoverCodeField(props: {
           props.onFocus();
           panel.track(event);
         }}
-        onChange={(event) => setCode(event.target.value)}
+        onChange={(event) => setCode(event.target.value, event.target.selectionStart)}
         onKeyDown={(event) => {
           if (!applyMarkShortcut(event, onChange)) insertSpaces(event, setCode);
         }}

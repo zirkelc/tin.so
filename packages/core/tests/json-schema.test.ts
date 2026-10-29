@@ -18,6 +18,20 @@ describe("specJsonSchema", () => {
     expect(Object.keys(result.properties).includes("$schema")).toBe(true);
   });
 
+  test("should allow the keys of other tools in each closed object", () => {
+    // Act
+    const result = specJsonSchema() as {
+      patternProperties: Record<string, unknown>;
+      definitions?: unknown;
+    };
+
+    // Assert
+    const closed = JSON.stringify(result).match(/"additionalProperties":false/g)!.length;
+    const open = JSON.stringify(result).match(/"patternProperties":\{"\^x-":\{\}\}/g)!.length;
+    expect(result.patternProperties).toEqual({ "^x-": {} });
+    expect(open).toBe(closed);
+  });
+
   test("should put the schema at the versioned path of the app", () => {
     // Assert
     expect(SPEC_SCHEMA_URL).toBe("https://code-image.zirkelc.workers.dev/schema/v1.json");

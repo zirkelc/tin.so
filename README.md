@@ -1,12 +1,14 @@
 # tin.so
 
+> Life's too short for ugly code
+
 Create images of code, with several snippets in one image: split panes, stacked windows, popovers that point to a token, and all ray.so themes. A web editor for people, and a CLI and a skill for agents. Both make the same image, because both use the same renderer, and neither needs a browser to render or a server.
 
 ## Features
 
 ### Several snippets in one image
 
-- Split a window into panes, side by side (columns) or below each other (rows).
+- Split a window into panes, side by side or below each other.
 - Stack several windows in one image, below each other or side by side.
 - Put windows anywhere in a free layout, and let them overlap. The image grows when a window gets larger. Reset the layout to go back to padding and direction.
 - Resize windows and panes in the image. In a spec, set the size of each pane, each window, the image and the gap between the windows in px.
@@ -36,7 +38,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - Bold, italic, underline and strikethrough on any part of a line, in the code and in popovers. Select code and right-click "Clear styles" to remove its styles, colors and fills.
 - A text color and a fill on any part of a line, in the code and in popovers, from a palette of 16 colors in the editor, or any hex color with or without alpha in a spec. The fill is translucent, as a highlighter, so the code stays readable.
 - Select code or popover code in the image to open a panel above the selection with the text colors, the fills and the styles. "None" removes a text color or a fill, "Clear" removes all styles and colors of the selection, and the panel shows the current colors and styles.
-- Highlights, styles and popovers move with their lines when you add or remove lines above them.
+- Highlights, styles and popovers stay on their lines when you add or remove lines above them, also when several lines have the same text. Deleting a line removes its highlight and styles, also in popover code, and its popovers move to the line of the edit.
 - Popovers below a word that look like the hover card of an editor, for example to show a type. A popover has its own code and language. Select a word in one line, right-click and choose "Add popover": the popover starts with the selected word as its code.
 - Click a popover to select it. Its right-click menu and the sidebar reset, fit or remove it, the sidebar sets its language, and ⌫ removes it.
 - Move a popover, and resize it at its corner. Double-click it to put it back below its word.
@@ -111,7 +113,9 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - A versioned API on `window.tin` for agents that drive a browser: read and set a spec, wait until the first image is ready, and export an image, with or without the spec in the file.
 - Clear errors for an invalid spec, with every issue and its path: unknown fields, missing fields, unknown languages, and images larger than 8192 px.
 - A JSON Schema of the spec on the site. A spec file with `"$schema"` gets checks and completion in editors such as VS Code.
-- A versioned spec (`"v": 1`). Links and image files carry the version, so they keep working when the spec changes. Old links and images without a version still open, and a spec from a newer version gives the error "Update tin.so".
+- A versioned spec (`"v": 1`, or the version in the `$schema` URL, such as `/schema/v1.json`). Links and image files carry the version, so they keep working when the spec changes. Old links and images without a version still open, and a spec from a newer version gives the error "Update tin.so". A `v` that does not agree with the `$schema` URL is an error.
+- Keys that start with `x-` hold data of other tools in any object of a spec. The renderer ignores them, so they never make a spec invalid.
+- Unknown fields and unknown theme, font or icon ids are errors that say to check the name or to update tin.so, so a typo or a newer spec does not give a wrong image.
 - Limits keep images safe to render: 50 windows, 20 panes per window, 100,000 characters of code per pane or popover, 200 popovers, 200 marks (styles and colors) and 1,000 highlight entries per pane, titles up to 200 characters, and sides up to 8192 px.
 
 ## Packages

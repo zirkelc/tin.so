@@ -54,11 +54,18 @@ export {
   SOFTWARE,
   SVG_NAMESPACE,
 } from "./metadata.ts";
-export { IMPLICIT_SPEC_VERSION, migrateLegacySpec, stampSpecVersion } from "./migrate.ts";
+export {
+  EXTENSION_PREFIX,
+  IMPLICIT_SPEC_VERSION,
+  migrateLegacySpec,
+  schemaVersion,
+  stampSpecVersion,
+} from "./migrate.ts";
 export { initPng, loadSceneFonts, sceneFontFiles, svgToPng, type PngOptions } from "./png.ts";
 export {
   expandLineRanges,
   LATEST_SPEC_VERSION,
+  ANNOTATION_TYPES,
   MARK_STYLES,
   parseSpec,
   SPEC_LIMITS,

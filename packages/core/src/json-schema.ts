@@ -1,5 +1,6 @@
 import { toJsonSchema } from "@valibot/to-json-schema";
 import { DEFAULT_APP_URL } from "./link.ts";
+import { EXTENSION_PREFIX } from "./migrate.ts";
 import { LATEST_SPEC_VERSION, SpecSchema } from "./spec.ts";
 
 /** The URL of the JSON Schema of the latest spec version, on the hosted app */
@@ -14,7 +15,19 @@ export const SPEC_SCHEMA_URL = new URL(
  */
 export function specJsonSchema(): Record<string, unknown> {
   const { $schema, ...schema } = toJsonSchema(SpecSchema, { errorMode: "ignore" });
-  return { $schema, $id: SPEC_SCHEMA_URL, title: "tin.so spec", ...schema };
+  return { $schema, $id: SPEC_SCHEMA_URL, title: "tin.so spec", ...allowExtensions(schema) };
+}
+
+// Each closed object also accepts the keys of other tools, which the renderer ignores
+function allowExtensions(node: unknown): any {
+  if (Array.isArray(node)) return node.map(allowExtensions);
+  if (typeof node !== "object" || node === null) return node;
+  const out = Object.fromEntries(
+    Object.entries(node).map(([key, value]) => [key, allowExtensions(value)]),
+  );
+  if (out.type === "object" && out.additionalProperties === false)
+    out.patternProperties = { [`^${EXTENSION_PREFIX}`]: {} };
+  return out;
 }
 
 // The hosts that serve the spec schema in addition to the host of the hosted app

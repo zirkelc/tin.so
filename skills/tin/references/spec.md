@@ -2,7 +2,7 @@
 
 A spec is JSON that describes one image: the image settings, its windows, the panes of each window, and the code of each pane with its highlights, styles and popovers. Pipe it to `tin`, or give a file: `tin spec.json`.
 
-Always put `"$schema"` first, with the URL from the `$id` field of `tin schema`. On stdin, this field is how the CLI knows that the JSON is a spec: JSON without it becomes an image of the JSON text. `--spec` reads the input as a spec also without the field.
+Always put `"$schema"` first, with the URL from the `$id` field of `tin schema`. On stdin, this field is how the CLI knows that the JSON is a spec: JSON without it becomes an image of the JSON text. `--spec` reads the input as a spec also without the field. The URL also gives the version of the spec (`/schema/v1.json` is version 1), so `"v"` is not necessary. If you write both, they must agree.
 
 This page has the fields that matter most, recipes, and the rules behind the usual errors. `tin schema` prints the full JSON Schema with a description, a default and the limits of every field. Use it for a field that is not here.
 
@@ -86,6 +86,7 @@ Use several marks on the same text to combine them, for example one with `"style
 
 | Field                         | Default               | What it does                                                           |
 | ----------------------------- | --------------------- | ---------------------------------------------------------------------- |
+| `type`                        | `popover`             | the kind of annotation; `popover` is the only kind today               |
 | `line`, `match`, `occurrence` | required, required, 1 | the word that the popover points to                                    |
 | `code`                        | required              | the content, for example a type                                        |
 | `language`                    | the pane language     | the language of the popover code                                       |
@@ -181,12 +182,14 @@ Use several marks on the same text to combine them, for example one with `"style
 
 ## Rules that cause errors
 
-- **`match` must be in its line exactly**, with the same case and spacing, and `line` counts from 1. For popovers and marks inside a popover, `line` counts the lines of the popover code. Check the line in the code before you write the mark.
+- **`line` counts the lines of `code` from 1**, in highlights, marks and popovers. It does not depend on the line numbers that the image shows.
+- **`match` must be in its line exactly**, with the same case and spacing. For popovers and marks inside a popover, `line` counts the lines of the popover code. Check the line in the code before you write the mark.
 - **A word that appears twice in a line:** set `occurrence` to 2 for the second one.
 - **No `"$schema"` on stdin:** the CLI renders the JSON as code, and says so on stderr. Add the field, or pass `--spec`.
+- **Keys that start with `x-` are ignored** in every object. Use them for your own notes or tool data, never for image settings.
 - **Unknown fields are errors.** The names are case-sensitive: `lineNumbers`, `titleBar`, `aspectRatio`, `offsetX`. The style names are `strong` and `emphasis`, not `bold` and `italic`.
 - **Colors are hex only:** `"#f43f5e"` or `"#f43f5e40"`, not `"red"`.
 - **`aspectRatio` with both `width` and `height` is an error.** Use it alone, or with one of the two.
 - **`language` must be a known id.** An unknown language is an error; use `"text"` for plain text, or leave `language` out and give a `title` with the right extension.
 - **`x` and `y`** put a window at a fixed place, and that window no longer follows `direction`, `gap` and `padding`. Use them only when the user wants overlapping or freely placed windows, and then set them on every window, and set the image `width` and `height`.
-- **Limits:** at most 50 windows, 20 panes per window, 100,000 characters of code per pane or popover, and 8192 px per image side. A very long or wide snippet hits the size limit: show less code.
+- **Limits** can grow in later versions. A smaller limit comes only with a new version, so a spec keeps working. Today: at most 50 windows, 20 panes per window, 100,000 characters of code per pane or popover, and 8192 px per image side. A very long or wide snippet hits the size limit: show less code.
