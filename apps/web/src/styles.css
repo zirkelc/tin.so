@@ -8,6 +8,8 @@
   --accent: #7c3aed;
   --accent-text: #ffffff;
   --text-selection: rgba(124, 58, 237, 0.45);
+  /* The accent for text on the panels, lighter than the accent so that it stays readable */
+  --link-hover: #a78bfa;
   --error: #ff6b6b;
   --dot: #26262b;
   --pressed: rgba(255, 255, 255, 0.1);
@@ -27,6 +29,7 @@
 
 @media (prefers-color-scheme: light) {
   :root {
+    --link-hover: #6d28d9;
     --bg: #f4f4f6;
     --panel: #ffffff;
     --panel-raised: #f4f4f6;
@@ -706,6 +709,11 @@ button.icon {
 
 .about a {
   color: var(--text);
+  transition: color 0.15s;
+}
+
+.about a:hover {
+  color: var(--link-hover);
 }
 
 .about code,
@@ -741,7 +749,7 @@ button.icon {
 }
 
 .about-legal > a:hover {
-  color: var(--text);
+  color: var(--link-hover);
 }
 
 .about-footer {
@@ -763,7 +771,7 @@ button.icon {
 }
 
 .about-links a:hover {
-  color: var(--text);
+  color: var(--link-hover);
 }
 
 .about-shortcuts dl {

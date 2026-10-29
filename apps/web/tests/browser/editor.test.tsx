@@ -384,6 +384,7 @@ describe("about dialog", () => {
       .element(dialog.getByRole("link", { name: "Legal", exact: true }))
       .toHaveAttribute("href", "/legal");
     await expect.element(dialog.getByText("npx skills add zirkelc/tin.so")).toBeVisible();
+    expect(document.activeElement?.getAttribute("aria-label")).toBe("Close");
   });
 
   test("should open with the ? key and close with Escape", async () => {

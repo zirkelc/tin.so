@@ -42,11 +42,16 @@ export function isTyping(target: EventTarget | null): boolean {
 /** The about dialog with the shortcuts, opened from the toolbar or with the ? key */
 export function AboutDialog(props: { open: boolean; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (props.open && !dialog.open) dialog.showModal();
+    if (props.open && !dialog.open) {
+      dialog.showModal();
+      // The first focus goes to the close button, not to the first link of the text
+      closeRef.current?.focus();
+    }
     if (!props.open && dialog.open) dialog.close();
   }, [props.open]);
 
@@ -141,12 +146,11 @@ export function AboutDialog(props: { open: boolean; onClose: () => void }) {
           </dl>
         </section>
       </div>
-      {/* The first focus goes to the close button, not to the first link of the text */}
       <button
+        ref={closeRef}
         type="button"
         className="about-close"
         aria-label="Close"
-        autoFocus
         onClick={props.onClose}
       >
         <CloseIcon />
