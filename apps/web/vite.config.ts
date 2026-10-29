@@ -40,6 +40,9 @@ export default defineConfig(({ mode }) => {
       Object.entries(site).map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
     ),
     server: { port: 5_173 },
+    build: {
+      rollupOptions: { input: { main: "index.html", privacy: "privacy.html" } },
+    },
     test: {
       projects: [
         {

@@ -139,7 +139,7 @@ The browser tests of the web editor run in headless Chromium with Vitest browser
 
 The links of the CLI open the hosted editor. To open the local editor instead, set `TIN_APP_URL=http://localhost:5173/`. The GitHub links of the site come from `VITE_GITHUB_URL` (see `apps/web/.env.example`).
 
-To collect page views with Cloudflare Web Analytics, put the token of the site into `apps/web/.env.production` (see `apps/web/.env.example`) before the deploy. Without a token, the app loads no analytics. The analytics use no cookies, and they get the page address without the fragment, so the code in a link never goes to Cloudflare.
+The site loads no analytics script. The visitor counts come from the analytics of the tin.so zone in Cloudflare, which count the requests on the server. The privacy notice is `apps/web/privacy.html`: change it when the site starts to send data to a new service.
 
 ### Releases
 
