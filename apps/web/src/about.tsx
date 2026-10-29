@@ -74,10 +74,6 @@ export function AboutDialog(props: { open: boolean; onClose: () => void }) {
             Save a PNG or an SVG, copy the image, or copy a link. An exported image keeps its code,
             so you can drop it into the editor and edit it again.
           </p>
-          <p>
-            Your code stays in your browser. A link keeps it after the <code>#</code>, which does
-            not go to a server. <a href="/privacy">Privacy notice</a>
-          </p>
           <h2>For agents</h2>
           <p>
             The <code>tin</code> CLI makes the same images on your machine, with no browser:
@@ -85,7 +81,7 @@ export function AboutDialog(props: { open: boolean; onClose: () => void }) {
           <pre>npx tin.so main.ts</pre>
           <p>
             The <code>tin</code> skill shows coding agents such as Claude Code, Codex and Cursor how
-            to use it. Add it with:
+            to use it:
           </p>
           <pre>npx skills add zirkelc/tin.so</pre>
           <h2>Contribute</h2>
