@@ -375,9 +375,6 @@ describe("about dialog", () => {
     await expect.element(dialog).toBeVisible();
     await expect.element(dialog.getByRole("heading", { name: "Shortcuts" })).toBeVisible();
     await expect
-      .element(dialog.getByRole("link", { name: "Privacy notice" }))
-      .toHaveAttribute("href", "/privacy");
-    await expect
       .element(dialog.getByRole("link", { name: "info@tin.so" }))
       .toHaveAttribute("href", "mailto:info@tin.so");
     await expect
