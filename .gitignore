@@ -10,6 +10,9 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# The copy of the agent skill in the CLI package, made by its build
+packages/cli/skill
 *.local
 
 # dotenv environment variable files

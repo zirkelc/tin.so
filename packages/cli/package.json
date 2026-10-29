@@ -23,11 +23,12 @@
     "tin.so": "./dist/cli.mjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "skill"
   ],
   "type": "module",
   "scripts": {
-    "build": "vp pack",
+    "build": "node scripts/copy-skill.ts && vp pack",
     "dev": "vp pack --watch",
     "test": "vp test",
     "check": "vp check"

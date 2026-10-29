@@ -112,7 +112,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - The CLI lists the themes, languages and fonts, and prints the JSON Schema of the spec.
 - Help per command (`tin link --help`) with only the options of that command. `tin --help` shows the options of rendering first, then the commands. An unknown option is an error that names the closest option (`Unknown option --them for render, did you mean --theme?`), and an unknown theme or font names the closest one. Fixed choices such as `--format png|svg` and `--mode dark|light` reject other values.
 - `TIN_APP_URL` sets the web editor of the links.
-- An agent skill that shows agents how to use the CLI. Add it with `npx skills add zirkelc/tin.so`, and `tin skill` prints this command and the other ways to add it.
+- An agent skill that shows agents how to use the CLI. Add it with `npx skills add zirkelc/tin.so`, and `tin skill` prints this command and the other ways to add it. `tin skill --print` prints the skill itself for agents without skills, so the skill always matches the installed CLI.
 - A versioned API on `window.tin` for agents that drive a browser: read and set a spec, wait until the first image is ready, and export an image, with or without the spec in the file.
 - Clear errors for an invalid spec, with every issue and its path: unknown fields, missing fields, unknown languages, and images larger than 8192 px.
 - A JSON Schema of the spec on the site. A spec file with `"$schema"` gets checks and completion in editors such as VS Code.

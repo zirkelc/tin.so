@@ -42,16 +42,16 @@ Each run prints the file and an `Edit:` link. The image file also contains the s
 
 ## Commands
 
-| Command                | What it does                                                                                   |
-| ---------------------- | ---------------------------------------------------------------------------------------------- |
-| `tin [render] <input>` | Renders code files, code from stdin or a spec to a PNG or SVG. `render` is the default command |
-| `tin link <input>`     | Prints the editor link without an image. `--copy` copies it, `--open` opens it in the browser  |
-| `tin themes`           | Lists the themes                                                                               |
-| `tin languages`        | Lists the languages                                                                            |
-| `tin fonts`            | Lists the fonts                                                                                |
-| `tin schema`           | Prints the JSON Schema of the spec                                                             |
-| `tin skill`            | Shows how to add the tin skill to a coding agent                                               |
-| `tin help [command]`   | Shows the help of tin, or of a command. `tin <command> --help` is the same                     |
+| Command                | What it does                                                                                                               |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `tin [render] <input>` | Renders code files, code from stdin or a spec to a PNG or SVG. `render` is the default command                             |
+| `tin link <input>`     | Prints the editor link without an image. `--copy` copies it, `--open` opens it in the browser                              |
+| `tin themes`           | Lists the themes                                                                                                           |
+| `tin languages`        | Lists the languages                                                                                                        |
+| `tin fonts`            | Lists the fonts                                                                                                            |
+| `tin schema`           | Prints the JSON Schema of the spec                                                                                         |
+| `tin skill`            | Shows how to add the tin skill to a coding agent. `--print` prints the skill itself, and `--print spec` its spec reference |
+| `tin help [command]`   | Shows the help of tin, or of a command. `tin <command> --help` is the same                                                 |
 
 A file with the name of a command needs a path, such as `./themes`.
 

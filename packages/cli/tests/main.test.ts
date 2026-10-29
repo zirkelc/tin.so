@@ -817,6 +817,42 @@ describe("skill", () => {
     expect(output).toContain("~/.agents/skills/tin");
   });
 
+  test("should print the skill with a note on its references", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    await main(["skill", "--print"], io);
+
+    // Assert
+    const output = io.output();
+    expect(output.startsWith("---\nname: tin\n")).toBe(true);
+    expect(output).toContain("- references/spec.md: tin skill --print spec");
+  });
+
+  test("should print a reference of the skill", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    await main(["skill", "--print", "spec"], io);
+
+    // Assert
+    expect(io.output().startsWith("# The tin.so spec\n")).toBe(true);
+  });
+
+  test("should name the references for an unknown reference", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    const code = await main(["skill", "--print", "nope"], io);
+
+    // Assert
+    expect(code).toBe(1);
+    expect(io.errors()).toBe('Unknown reference "nope". The references are: spec\n');
+  });
+
   test("should list the skill command in the help", async () => {
     // Arrange
     const io = createIo();
