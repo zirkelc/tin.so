@@ -1603,7 +1603,10 @@ export function Preview(props: {
     selectWindows,
   ]);
 
-  // ⌘C and ⌘V copy and paste the selected windows as spec text, outside of the text fields
+  /**
+   * ⌘C and ⌘V copy and paste the selected windows as spec text, outside of the text fields. Text
+   * that the user selected on the page, for example in a dialog, is copied as text.
+   */
   useEffect(() => {
     const inText = (event: globalThis.ClipboardEvent) => {
       const target = event.target as HTMLElement;
@@ -1614,7 +1617,9 @@ export function Preview(props: {
       );
     };
     const onCopy = (event: globalThis.ClipboardEvent) => {
-      if (inText(event) || windows.length === 0 || !event.clipboardData) return;
+      const selectedText = document.getSelection()?.toString() ?? "";
+      if (inText(event) || selectedText !== "" || windows.length === 0 || !event.clipboardData)
+        return;
       event.preventDefault();
       event.clipboardData.setData("text/plain", copyWindows(spec, windows));
     };
