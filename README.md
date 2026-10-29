@@ -2,7 +2,7 @@
 
 > Life's too short for ugly code
 
-Create images of code, with several snippets in one image: split panes, stacked windows, popovers that point to a token, and all ray.so themes. A web editor for people, and a CLI and a skill for agents. Both make the same image, because both use the same renderer, and neither needs a browser to render or a server.
+Create images of code, with several snippets in one image: split panes, stacked windows, popovers that point to a token, and all ray.so themes. A web editor for people, and a CLI and a skill for agents. Both use the same renderer, so they make the same image. Neither needs a server or a browser to render.
 
 ## Features
 
@@ -28,7 +28,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - No window: the code goes directly on the background.
 - Turn the window, the title bar, the tabs and the control colors on and off with the toggle buttons in the Frame row.
 - Edit the window title and the file names of the tabs directly in the image.
-- The language is found from the file name ("Auto (TypeScript)"), or you select it.
+- The editor finds the language from the file name ("Auto (TypeScript)"), or you select it.
 - Some frames show the language name at the right of the title bar: Auth0, Cloudflare, Resend, Supabase and Trigger.dev.
 
 ### Code
@@ -42,12 +42,12 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - A text color and a fill on any part of a line, in the code and in popovers, from a palette of 16 colors in the editor, or any hex color with or without alpha in a spec. The fill is translucent, as a highlighter, so the code stays readable.
 - Select code or popover code in the image to open a panel above the selection with the text colors, the fills and the styles. "None" removes a text color or a fill, "Clear" removes all styles and colors of the selection, and the panel shows the current colors and styles.
 - Highlights, styles and popovers stay on their lines when you add or remove lines above them, also when several lines have the same text. Deleting a line removes its highlight and styles, also in popover code, and its popovers move to the line of the edit.
-- Popovers below a word that look like the hover card of an editor, for example to show a type. A popover has its own code and language. Select a word in one line, right-click and choose "Add popover": the popover starts with the selected word as its code.
+- Popovers below a word that look like the hover card of an editor, for example to show a type. A popover has its own code and language. Select a word in one line, right-click and choose "Add popover". The popover starts with the selected word as its code.
 - Click a popover to select it. Its right-click menu and the sidebar reset, fit or remove it, the sidebar sets its language, and ⌫ removes it.
 - Move a popover, and resize it at its corner. Double-click it to put it back below its word.
 - A notice shows popovers whose word is no longer in the code, with a Remove button.
 - Line numbers in all panes with one switch, or per pane in the spec. Some themes show line numbers by default, as in ray.so.
-- Format the code with Prettier: JavaScript, JSX, TypeScript, TSX, JSON, JSONC, JSON5, CSS, SCSS, Less, HTML, Vue, Markdown, YAML and GraphQL. Code that you paste into an empty pane is formatted.
+- Format the code with Prettier: JavaScript, JSX, TypeScript, TSX, JSON, JSONC, JSON5, CSS, SCSS, Less, HTML, Vue, Markdown, YAML and GraphQL. The editor formats code that you paste into an empty pane.
 - Tab inserts two spaces in the code, in a popover and in the JSON editor.
 
 ### Themes and look
@@ -67,7 +67,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - The saved file takes its name from the first pane, for example `main.png`.
 - Copy an image of only one window or of the selected windows.
 - The SVG contains the fonts, so it shows the same everywhere.
-- The PNG and the SVG contain an editor link that holds the full spec, "tin.so" as the software and the editor URL as the source. The spec is stored only once, in the link, so the metadata adds less than 1 KB to an image. The "Embed the spec" switch in the export menu turns this off.
+- The PNG and the SVG contain an editor link that holds the full spec, "tin.so" as the software and the editor URL as the source. The image stores the spec only once, in the link, so the metadata adds less than 1 KB. The "Embed the spec" switch in the export menu turns this off.
 - Drop an exported PNG or SVG into the editor to edit the image again, with all its windows, code and settings.
 - The image renders on your computer, with no server and no browser screenshot. The web editor and the CLI make the same image.
 
@@ -83,7 +83,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - Select several windows with a box, with Shift-click or with ⌘A. Align or distribute them (distribute needs 3 or more), copy their image, copy them as spec with ⌘C, or remove them.
 - A toolbar above the selected window: add a pane to the right or below, center, format and remove, and in the free layout with 2 or more windows also bring to front and send to back.
 - A toolbar above several selected windows: align in 6 ways, distribute, copy their image and remove. Right-click the selected windows for the same actions.
-- Sidebar notices with a one-click fix: the free layout has a Reset button, and a window or pane with a fixed size has a Fit button.
+- Sidebar notices have a one-click fix. The free layout has a Reset button, and a window or pane with a fixed size has a Fit button.
 - In the free layout, change the order of overlapping windows as in Figma: bring forward (⌘]), bring to front (⌘⇧]), send backward (⌘[) and send to back (⌘⇧[).
 - The window list in the sidebar outlines a window in the image when you point to it. Shift-click or ⌘-click selects several windows.
 - Zoom in and out, fit the image to the screen, or show it at 100%. The image size shows below the image.
@@ -102,7 +102,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - A CLI that renders code files or a JSON spec to PNG or SVG, with no browser. Rendering is the default command: `tin main.ts` is `tin render main.ts`, and options can come before the files (`tin --theme vercel main.ts`).
 - Pipe plain code to the CLI: `pbpaste | tin --title main.ts --copy`. `--title` gives the language and the file name, and `--language` sets the language. JSON on stdin without a title becomes a JSON image. `--code 'x = 1'` gives the code as text.
 - A spec on stdin starts with `"$schema"` (the URL of `tin schema`), which tells the CLI that it is a spec and not code. A `.json` file is a spec when it has this `"$schema"` or a `windows` array. `--spec` and `--no-spec` turn off the detection.
-- Set the output file (`-o`), the format (`-f png|svg`, or from the file extension) and the PNG scale (`-s`, default 2). The default output never replaces an input file: the CLI stops and asks for `-o`.
+- Set the output file (`-o`), the format (`-f png|svg`, or from the file extension) and the PNG scale (`-s`, default 2). The default output never replaces an input file. The CLI stops and asks for `-o`.
 - `tin link` prints an editor link for a spec, files or code on stdin, and makes no image. `tin link main.ts --open` opens the link in the browser, and `--copy` copies the link.
 - Copy the image to the clipboard from the CLI with `--copy` (macOS, Linux and Windows), with or without a file.
 - Render several files in one command: one pane per file, or one window per file.
@@ -114,7 +114,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - `TIN_APP_URL` sets the web editor of the links.
 - An agent skill that shows agents how to use the CLI. Add it with `npx skills add zirkelc/tin.so`, and `tin skill` prints this command and the other ways to add it. `tin skill --print` prints the skill itself for agents without skills, so the skill always matches the installed CLI.
 - A versioned API on `window.tin` for agents that drive a browser: read and set a spec, wait until the first image is ready, and export an image, with or without the spec in the file.
-- Clear errors for an invalid spec, with every issue and its path: unknown fields, missing fields, unknown languages, and images larger than 8192 px.
+- An invalid spec gives an error that lists every issue with its path, such as unknown fields, missing fields, unknown languages, and images larger than 8192 px.
 - A JSON Schema of the spec on the site. A spec file with `"$schema"` gets checks and completion in editors such as VS Code.
 - A versioned spec (`"v": 1`, or the version in the `$schema` URL, such as `/schema/v1.json`). Links and image files carry the version, so they keep working when the spec changes. Old links and images without a version still open, and a spec from a newer version gives the error "Update tin.so". A `v` that does not agree with the `$schema` URL is an error.
 - Keys that start with `x-` hold data of other tools in any object of a spec. The renderer ignores them, so they never make a spec invalid.
@@ -142,14 +142,14 @@ The browser tests of the web editor run in headless Chromium with Vitest browser
 
 The links of the CLI open the hosted editor. To open the local editor instead, set `TIN_APP_URL=http://localhost:5173/`. The GitHub links of the site come from `VITE_GITHUB_URL` (see `apps/web/.env.example`).
 
-The site loads no analytics script. The visitor counts come from the analytics of the tin.so zone in Cloudflare, which count the requests on the server. The privacy notice is `apps/web/privacy.html`: change it when the site starts to send data to a new service.
+The site loads no analytics script. The visitor counts come from the analytics of the tin.so zone in Cloudflare, which count the requests on the server. The privacy notice is `apps/web/privacy.html`. Change it when the site starts to send data to a new service.
 
 ### Releases
 
 [Release Please](https://github.com/googleapis/release-please-action) makes the releases from conventional commits (`feat:`, `fix:` and so on). `@tin.so/core` and `tin.so` always get the same version.
 
 1. A push to `main` runs the `release` job in `.github/workflows/ci.yml`. It opens or updates a release PR with the new versions and the changelogs.
-2. When the release PR is merged, Release Please makes the tags (`core-v…`, `cli-v…`) and the GitHub releases.
+2. When you merge the release PR, Release Please makes the tags (`core-v…`, `cli-v…`) and the GitHub releases.
 3. A published GitHub release runs `.github/workflows/release.yml`. It publishes each package whose version is not on npm yet, with npm Trusted Publishing and provenance. Do not rename this file, because npm checks its name.
 
 The setup needs a `RELEASE_PLEASE_TOKEN` secret (a fine-grained PAT with read and write access to `Contents` and `Pull requests`), and a Trusted Publisher for `zirkelc/tin.so` and `release.yml` on the npm access page of each package. The web editor is not part of a release: deploy it with `pnpm run deploy`.
@@ -178,7 +178,7 @@ The setup needs a `RELEASE_PLEASE_TOKEN` secret (a fine-grained PAT with read an
 }
 ```
 
-The spec is defined with valibot in `packages/core/src/spec.ts`. Its JSON Schema is on the site at `https://tin.so/schema/v1.json`, and `tin schema` prints it. Add the `"$schema"` field to a spec file, and editors such as VS Code check the spec and complete its fields. A link from the CLI or the editor carries the spec in the URL fragment (`#spec=<deflate + base64url>`), so it never goes to a server.
+`packages/core/src/spec.ts` defines the spec with valibot. Its JSON Schema is on the site at `https://tin.so/schema/v1.json`, and `tin schema` prints it. Add the `"$schema"` field to a spec file, and editors such as VS Code check the spec and complete its fields. A link from the CLI or the editor carries the spec in the URL fragment (`#spec=<deflate + base64url>`), so it never goes to a server.
 
 ## Agents in a browser
 
