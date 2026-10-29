@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: occurrence-mark
+expected_outcome: |
+  A PNG of the line, unchanged. Exactly the second occurrence of user is bold and red; the first is not styled.

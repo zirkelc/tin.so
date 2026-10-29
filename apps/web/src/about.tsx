@@ -80,9 +80,14 @@ export function AboutDialog(props: { open: boolean; onClose: () => void }) {
           </p>
           <h2>For agents</h2>
           <p>
-            The <code>tin</code> CLI makes the same images on your machine:{" "}
-            <code>npx tin.so main.ts</code>. An agent skill shows coding agents how to use it.
+            The <code>tin</code> CLI makes the same images on your machine, with no browser:
           </p>
+          <pre>npx tin.so main.ts</pre>
+          <p>
+            The <code>tin</code> skill shows coding agents such as Claude Code, Codex and Cursor how
+            to use it. Add it with:
+          </p>
+          <pre>npx skills add zirkelc/tin.so</pre>
           <h2>Contribute</h2>
           <p>
             The project is open source and{" "}
@@ -99,11 +104,15 @@ export function AboutDialog(props: { open: boolean; onClose: () => void }) {
             or send an email to <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
           </p>
           <footer className="about-footer">
-            <span>
-              Made by{" "}
-              <a href={X_URL} target="_blank" rel="noopener noreferrer">
-                @zirkelc
-              </a>
+            <span className="about-legal">
+              <span>
+                Made by{" "}
+                <a href={X_URL} target="_blank" rel="noopener noreferrer">
+                  @zirkelc
+                </a>
+              </span>
+              <a href="/privacy">Privacy</a>
+              <a href="/legal">Legal</a>
             </span>
             <span className="about-links">
               <a
@@ -136,7 +145,14 @@ export function AboutDialog(props: { open: boolean; onClose: () => void }) {
           </dl>
         </section>
       </div>
-      <button type="button" className="about-close" aria-label="Close" onClick={props.onClose}>
+      {/* The first focus goes to the close button, not to the first link of the text */}
+      <button
+        type="button"
+        className="about-close"
+        aria-label="Close"
+        autoFocus
+        onClick={props.onClose}
+      >
         <CloseIcon />
       </button>
     </dialog>

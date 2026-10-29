@@ -326,7 +326,7 @@ describe("open an image", () => {
 });
 
 describe("author", () => {
-  test("should link to the privacy notice, the X account of the author and the source code", async () => {
+  test("should link to the X account of the author and the source code", async () => {
     // Act
     await mountApp();
 
@@ -335,16 +335,13 @@ describe("author", () => {
       .element(page.getByRole("link", { name: "@zirkelc on X" }))
       .toHaveAttribute("href", "https://x.com/zirkelc");
     await expect
-      .element(page.getByRole("link", { name: "Privacy" }))
-      .toHaveAttribute("href", "/privacy");
-    await expect
       .element(page.getByRole("link", { name: "Source code on GitHub" }))
       .toHaveAttribute("href", "https://github.com/zirkelc/tin.so");
   });
 });
 
 describe("about dialog", () => {
-  test("should open from the toolbar with the shortcuts and the privacy notice", async () => {
+  test("should open from the toolbar with the shortcuts, the skill and the legal pages", async () => {
     // Arrange
     await mountApp();
 
@@ -361,6 +358,13 @@ describe("about dialog", () => {
     await expect
       .element(dialog.getByRole("link", { name: "info@tin.so" }))
       .toHaveAttribute("href", "mailto:info@tin.so");
+    await expect
+      .element(dialog.getByRole("link", { name: "Privacy", exact: true }))
+      .toHaveAttribute("href", "/privacy");
+    await expect
+      .element(dialog.getByRole("link", { name: "Legal", exact: true }))
+      .toHaveAttribute("href", "/legal");
+    await expect.element(dialog.getByText("npx skills add zirkelc/tin.so")).toBeVisible();
   });
 
   test("should open with the ? key and close with Escape", async () => {

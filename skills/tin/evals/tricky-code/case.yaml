@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: tricky-code
+expected_outcome: |
+  A PNG whose code is byte for byte the snippet, with backslashes, $, quotes and backticks unchanged.

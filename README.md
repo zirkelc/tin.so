@@ -87,7 +87,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - In the free layout, change the order of overlapping windows as in Figma: bring forward (⌘]), bring to front (⌘⇧]), send backward (⌘[) and send to back (⌘⇧[).
 - The window list in the sidebar outlines a window in the image when you point to it. Shift-click or ⌘-click selects several windows.
 - Zoom in and out, fit the image to the screen, or show it at 100%. The image size shows below the image.
-- Keyboard shortcuts: ⌘B, ⌘I, ⌘U and ⌘⇧X for styles, ⇧⌥F to format, ⌥-click to highlight a line, ⌘A and Esc to select, ⌘D to duplicate, ⌘C and ⌘V to copy and paste windows, ⌘[ ⌘] ⌘⇧[ ⌘⇧] for the layers, ⌫ to remove. The ? button in the toolbar, or the ? key, opens an about dialog with all shortcuts.
+- Keyboard shortcuts: ⌘B, ⌘I, ⌘U and ⌘⇧X for styles, ⇧⌥F to format, ⌥-click to highlight a line, ⌘A and Esc to select, ⌘D to duplicate, ⌘C and ⌘V to copy and paste windows, ⌘[ ⌘] ⌘⇧[ ⌘⇧] for the layers, ⌫ to remove. The ? button in the toolbar, or the ? key, opens an about dialog with all shortcuts, the commands for the CLI and the agent skill, and links to the privacy notice and the legal notice.
 - Edit the full spec as JSON, with syntax colors and each problem shown while you type.
 - Short messages confirm a copied image, window or link, and tell you when a copy or an export fails. A dropped file gives "Opened main.png", "has no tin.so spec" or "has an invalid spec". A link with an invalid spec opens the default image with a message. Problems in the spec show above the image.
 

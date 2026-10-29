@@ -5,75 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="The privacy notice of tin.so" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/src/page.css" />
     <title>Privacy · tin.so</title>
-    <style>
-      :root {
-        color-scheme: dark light;
-        --bg: #0b0b0d;
-        --text: #ececf1;
-        --text-muted: #8b8b94;
-        --border: rgba(255, 255, 255, 0.08);
-        --accent: #a78bfa;
-      }
-      @media (prefers-color-scheme: light) {
-        :root {
-          --bg: #f4f4f6;
-          --text: #18181b;
-          --text-muted: #5b5b66;
-          --border: rgba(0, 0, 0, 0.1);
-          --accent: #6d28d9;
-        }
-      }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font:
-          15px/1.6 system-ui,
-          -apple-system,
-          sans-serif;
-      }
-      main {
-        max-width: 680px;
-        margin: 0 auto;
-        padding: 48px 16px 64px;
-      }
-      h1 {
-        margin: 0 0 4px;
-        font-size: 28px;
-      }
-      h2 {
-        margin: 32px 0 8px;
-        font-size: 18px;
-      }
-      p,
-      li {
-        color: var(--text);
-      }
-      .muted {
-        color: var(--text-muted);
-      }
-      a {
-        color: var(--accent);
-      }
-      nav {
-        margin-bottom: 32px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid var(--border);
-      }
-    </style>
   </head>
   <body>
-    <main>
-      <nav><a href="/">← Back to the editor</a></nav>
+    <main class="page">
+      <nav class="page-nav">
+        <a class="brand" href="/">tin.so</a>
+        <a href="/">Back to the editor</a>
+      </nav>
 
       <h1>Privacy notice</h1>
-      <p class="muted">Last change: 29 October 2026</p>
+      <p class="updated">Last change: 29 October 2026</p>
 
       <h2>Who is responsible</h2>
       <p>
-        Chris Cook is responsible for this website. Email:
-        <a href="mailto:info@tin.so">info@tin.so</a>
+        Christian Cook is responsible for this website. The address is in the
+        <a href="/legal">legal notice</a>. Email: <a href="mailto:info@tin.so">info@tin.so</a>
       </p>
 
       <h2>Your code stays in your browser</h2>
@@ -118,6 +66,14 @@
         can delete it in the settings of your browser.
       </p>
 
+      <h2>Email</h2>
+      <p>
+        When you write to info@tin.so, Cloudflare receives the email and forwards it to our mailbox
+        at Google (Gmail). We use your email only to answer you, and we delete it when the matter is
+        done, unless the law requires that we keep it. The legal basis is Art. 6(1)(f) GDPR. Google
+        is certified under the EU-US Data Privacy Framework.
+      </p>
+
       <h2>Links to other websites</h2>
       <p>
         The links to GitHub and X open other websites. Their own privacy notices apply there. The
@@ -138,6 +94,12 @@
         We do not store your IP address or other data about you ourselves. Only Cloudflare has the
         request data, for a short time.
       </p>
+
+      <footer class="page-footer">
+        <a href="/">Editor</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/legal">Legal notice</a>
+      </footer>
     </main>
   </body>
 </html>
