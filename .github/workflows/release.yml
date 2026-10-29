@@ -9,7 +9,7 @@ on:
     types: [published]
   workflow_dispatch:
 
-# A release of core and the CLI publishes two GitHub releases at the same time
+# A release of several packages publishes several GitHub releases at the same time
 concurrency:
   group: release
   cancel-in-progress: false
@@ -38,3 +38,9 @@ jobs:
       # Publishes each public package whose version is not on npm yet, core before the CLI. A run
       # for the second release of the same version finds nothing to publish.
       - run: pnpm -r publish --provenance --no-git-checks
+      # Deploys the web editor, which uses the new core. A release of several packages deploys more
+      # than once, and a deploy without changes uploads nothing.
+      - name: Deploy
+        run: pnpm --filter @tin.so/web exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

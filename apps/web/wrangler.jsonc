@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   // Static assets only: the app renders everything in the browser and has no server code
   "name": "tin",
+  "account_id": "1c3baadb167aacf289943d4583e4782c",
   "compatibility_date": "2026-10-01",
   // tin.zirkelc.workers.dev and the preview URLs of each version stay on next to the custom domains
   "workers_dev": true,

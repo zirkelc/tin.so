@@ -28,6 +28,7 @@
   ],
   "packages": {
     "packages/core": { "component": "core" },
-    "packages/cli": { "component": "cli" }
+    "packages/cli": { "component": "cli" },
+    "apps/web": { "component": "web" }
   }
 }
