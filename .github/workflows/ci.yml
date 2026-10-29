@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.15.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+      - name: Install
+        run: pnpm install
+      # The type check of the CLI and the web app reads the built types of core
+      - name: Build
+        run: pnpm exec vp run -r build
+      - name: Lint
+        run: pnpm exec vp check
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.15.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "pnpm"
+      - name: Install
+        run: pnpm install
+      # The browser tests of the web app run in Chromium
+      - name: Install Chromium
+        run: pnpm --filter @tin.so/web exec playwright install --with-deps chromium
+      - name: Build
+        run: pnpm exec vp run -r build
+      - name: Test
+        run: pnpm exec vp run -r test
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write # needed for the release PR, tags and GitHub releases
+      pull-requests: write # needed for the release PR
+    steps:
+      # https://github.com/googleapis/release-please-action
+      - name: Release Please
+        uses: googleapis/release-please-action@v5
+        with:
+          # https://github.com/googleapis/release-please-action?tab=readme-ov-file#github-credentials
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}

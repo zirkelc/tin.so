@@ -1,0 +1,42 @@
+# IMPORTANT: DO NOT RENAME THIS FILE
+# It uses npm Trusted Publishing to deploy without a token.
+# The workflow name and filename must match what is configured on npmjs.com.
+
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+# A release of core and the CLI publishes two GitHub releases at the same time
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # needed for npm publish with provenance
+  contents: read
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/actions/checkout
+      - uses: actions/checkout@v6
+      # https://github.com/pnpm/action-setup
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.15.0
+      # https://github.com/actions/setup-node
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          cache: "pnpm"
+      - run: pnpm install
+      - run: pnpm exec vp run -r build
+      # Publishes each public package whose version is not on npm yet, core before the CLI. A run
+      # for the second release of the same version finds nothing to publish.
+      - run: pnpm -r publish --provenance --no-git-checks
