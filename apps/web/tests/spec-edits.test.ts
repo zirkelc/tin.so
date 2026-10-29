@@ -20,6 +20,7 @@ import {
   markColor,
   setMarkColor,
   withCode,
+  withLanguage,
   withPopoverCode,
   withFormattedCode,
   alignWindows,
@@ -1163,5 +1164,62 @@ describe("pasteWindows", () => {
       [88, 88],
     ]);
     expect(result.indexes).toEqual([1, 2]);
+  });
+});
+
+describe("withLanguage", () => {
+  const EXAMPLES = {
+    python: { title: "main.py", code: 'print("hi")' },
+    rust: { title: "main.rs", code: 'fn main() {\n    println!("hi");\n}' },
+    dotenv: { title: ".env", code: "PORT=3000" },
+  };
+
+  test("should replace an example with the example of the new language", () => {
+    // Arrange
+    const pane: PaneInput = {
+      title: "main.py",
+      code: 'print("hi")',
+      highlight: [1],
+      marks: [{ line: 1, match: "print", style: "strong" }],
+    };
+
+    // Act
+    const result = withLanguage(pane, "rust", EXAMPLES);
+
+    // Assert
+    expect(result).toEqual({ title: "main.rs", code: EXAMPLES.rust.code, language: undefined });
+  });
+
+  test("should keep the language when no file name gives it", () => {
+    // Arrange
+    const pane: PaneInput = { code: "" };
+
+    // Act
+    const result = withLanguage(pane, "dotenv", EXAMPLES);
+
+    // Assert
+    expect(result).toEqual({ title: ".env", code: "PORT=3000", language: "dotenv" });
+  });
+
+  test("should replace the code of the default image", () => {
+    // Arrange
+    const pane: PaneInput = { title: "main.ts", code: "const a = 1;" };
+
+    // Act
+    const result = withLanguage(pane, "python", EXAMPLES, ["const a = 1;"]);
+
+    // Assert
+    expect(result.code).toBe('print("hi")');
+  });
+
+  test("should keep code that the user wrote", () => {
+    // Arrange
+    const pane: PaneInput = { title: "main.py", code: "x = 1", highlight: [1] };
+
+    // Act
+    const result = withLanguage(pane, "rust", EXAMPLES);
+
+    // Assert
+    expect(result).toEqual({ title: "main.py", code: "x = 1", highlight: [1], language: "rust" });
   });
 });

@@ -34,6 +34,9 @@ Create images of code, with several snippets in one image: split panes, stacked 
 ### Code
 
 - Syntax highlighting with Shiki, for all Shiki languages.
+- A short example for each of the 242 languages. When you pick a language for a pane that has no code or still has an example, the pane gets the example of that language with a typical file name, such as `main.py` or `Dockerfile`. Code that you wrote stays.
+- An Examples menu in the sidebar opens 22 larger examples for popular languages, with tabs, several windows, popovers, highlights and styles. The back button of the browser returns to the image before.
+- The language comes from the file name, also for extensions such as `.ex`, `.sol`, `.ml` and `.service`.
 - Highlight lines and ranges of lines.
 - Bold, italic, underline and strikethrough on any part of a line, in the code and in popovers. Select code and right-click "Clear styles" to remove its styles, colors and fills.
 - A text color and a fill on any part of a line, in the code and in popovers, from a palette of 16 colors in the editor, or any hex color with or without alpha in a spec. The fill is translucent, as a highlighter, so the code stays readable.

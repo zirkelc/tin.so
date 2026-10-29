@@ -1,6 +1,7 @@
 import { DEFAULT_THEME, encodeSpec, type SpecInput, UI_FONT } from "@tin.so/core";
 import { afterEach, describe, expect, test } from "vite-plus/test";
 import { page, userEvent } from "vite-plus/test/browser";
+import { SHOWCASE_EXAMPLES } from "../../src/examples.ts";
 import { DEFAULT_SPEC } from "../../src/state.ts";
 import {
   codeField,
@@ -385,6 +386,45 @@ describe("about dialog", () => {
 
     // Assert
     expect(document.querySelector("dialog.about")?.hasAttribute("open")).toBe(false);
+  });
+});
+
+describe("examples", () => {
+  function languageTrigger(pane: number) {
+    const fields = [...document.querySelectorAll(".field.select")].filter(
+      (element) => element.querySelector(".field-label")?.textContent === "Language",
+    );
+    return fields[pane - 1]!.querySelector("button")!;
+  }
+
+  test("should show the example of a language that the user picks", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "main.ts", code: "" }] }] });
+    languageTrigger(1).click();
+
+    // Act
+    await userEvent.fill(page.getByRole("textbox", { name: "Search Language" }), "python");
+    await userEvent.keyboard("{Enter}");
+
+    // Assert
+    await expect.poll(async () => (await specInUrl())?.windows[0]?.panes[0]?.title).toBe("main.py");
+  });
+
+  test("should open a larger example from the menu", async () => {
+    // Arrange
+    await mountApp();
+    const entries = window.history.length;
+
+    // Act
+    await page.getByRole("button", { name: "Examples" }).click();
+    await page.getByRole("menuitem").first().click();
+
+    // Assert
+    await expect
+      .poll(async () => (await specInUrl())?.windows)
+      .toEqual(SHOWCASE_EXAMPLES[0]!.spec.windows);
+    expect(window.history.length).toBe(entries + 1);
   });
 });
 

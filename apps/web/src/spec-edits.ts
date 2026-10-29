@@ -957,3 +957,34 @@ export function snapBox(
   );
   return { dx, dy, guides };
 }
+
+/** The code of a language example, with the typical file name of the language */
+export type LanguageExample = { title: string; code: string };
+
+/**
+ * The pane with another language. A pane without code, or with code that is one of the given
+ * examples, gets the example of the new language and its file name, so that the language shows at
+ * once. The highlights, marks and popovers of the old code go away with it. Other code stays.
+ */
+export function withLanguage(
+  pane: PaneInput,
+  language: string,
+  examples: Record<string, LanguageExample>,
+  otherExamples: Array<string> = [],
+): PaneInput {
+  const example = examples[language];
+  const replaceable =
+    pane.code.trim() === "" ||
+    otherExamples.includes(pane.code) ||
+    Object.values(examples).some((other) => other.code === pane.code);
+  if (!example || !replaceable) return { ...pane, language };
+
+  const { highlight: _highlight, marks: _marks, annotations: _annotations, ...rest } = pane;
+  return {
+    ...rest,
+    title: example.title,
+    code: example.code,
+    // The file name gives the language, unless it is a language that no file name gives
+    language: inferLanguage(example.title) === language ? undefined : language,
+  };
+}

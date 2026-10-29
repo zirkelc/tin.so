@@ -38,8 +38,10 @@ import {
   setLineNumbers,
   titleBarTarget,
   withAspectRatio,
+  withLanguage,
   type WindowInput,
 } from "./spec-edits.ts";
+import { DEFAULT_SPEC } from "./state.ts";
 
 const PADDINGS = [16, 32, 64, 128];
 const AUTO = "auto" as const;
@@ -259,6 +261,11 @@ function PartToggle(props: {
   );
 }
 
+// The code of the default image counts as an example, so that a new language replaces it
+const DEFAULT_CODES = DEFAULT_SPEC.windows.flatMap((window) =>
+  window.panes.map((pane) => pane.code),
+);
+
 function PaneEditor(props: {
   pane: PaneInput;
   index: number;
@@ -300,7 +307,13 @@ function PaneEditor(props: {
           searchable
           value={pane.language ?? AUTO_LANGUAGE}
           options={languageOptions(language)}
-          onChange={(language) => onChange({ ...pane, language })}
+          onChange={(language) =>
+            language === AUTO_LANGUAGE
+              ? onChange({ ...pane, language })
+              : void import("./examples.ts").then(({ SIMPLE_EXAMPLES }) =>
+                  onChange(withLanguage(pane, language, SIMPLE_EXAMPLES, DEFAULT_CODES)),
+                )
+          }
         />
         <Select
           label="Tab icon"

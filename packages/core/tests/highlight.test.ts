@@ -10,6 +10,10 @@ describe("inferLanguage", () => {
     ["nub.jsonc", "jsonc"],
     ["build.mjs", "javascript"],
     ["Dockerfile", "docker"],
+    ["greeter.ex", "elixir"],
+    ["Counter.sol", "solidity"],
+    ["main.ml", "ocaml"],
+    ["app.service", "systemd"],
     ["notes.unknown", PLAIN_TEXT],
     [undefined, PLAIN_TEXT],
   ])("should infer the language of %s", (fileName, expected) => {

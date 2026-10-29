@@ -118,6 +118,7 @@ textarea {
 }
 
 .sidebar-header {
+  position: relative;
   display: flex;
   flex: none;
   align-items: center;
@@ -125,6 +126,35 @@ textarea {
   height: 56px;
   padding: 0 12px 0 20px;
   border-bottom: 1px solid var(--border);
+}
+
+/* The menus of the header open below the whole header, because the sidebar cuts off wider menus */
+.sidebar-header .dropdown {
+  position: static;
+}
+
+.sidebar-header .dropdown-panel {
+  right: 8px;
+  left: 8px;
+}
+
+.examples-trigger {
+  width: auto;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.examples-menu {
+  display: flex;
+  max-height: 60vh;
+  flex-direction: column;
+  overflow: auto;
+  font-size: 13px;
+}
+
+.examples-language {
+  min-width: 82px;
+  color: var(--text-muted);
 }
 
 .sidebar-header .tool:first-child {

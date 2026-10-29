@@ -9,6 +9,7 @@ import {
 } from "@tin.so/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AboutDialog, isTyping } from "./about.tsx";
+import { ExamplesMenu } from "./examples-menu.tsx";
 import { installApi, markApiReady } from "./api.ts";
 import { JsonEditor, PopoverEditor, Settings, WindowEditor, WindowList } from "./editors.tsx";
 import {
@@ -165,6 +166,13 @@ export function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // A new history entry keeps the current image, so that the back button of the browser returns to it
+  const loadExample = (example: SpecInput) => {
+    window.history.pushState(null, "", window.location.href);
+    setSelected({ windows: [0] });
+    update(example);
+  };
+
   const flash = (message: string) => {
     setStatus(message);
     setTimeout(() => setStatus(undefined), 2_000);
@@ -280,6 +288,7 @@ export function App() {
             </button>
           ) : null}
           <h1>{json ? "JSON" : "tin.so"}</h1>
+          {!json && <ExamplesMenu onPick={loadExample} />}
           {!json && (
             <button
               type="button"
