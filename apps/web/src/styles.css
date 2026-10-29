@@ -1162,17 +1162,6 @@ button.icon {
   white-space: nowrap;
 }
 
-.toolbar-link {
-  padding: 0 6px;
-  color: var(--text-muted);
-  font-size: 13px;
-  text-decoration: none;
-}
-
-.toolbar-link:hover {
-  color: var(--text);
-}
-
 .tool {
   display: flex;
   width: 30px;

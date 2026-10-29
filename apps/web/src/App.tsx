@@ -365,9 +365,6 @@ export function App() {
       <main className="stage">
         <div className="toolbar">
           {status && <span className="status">{status}</span>}
-          <a className="toolbar-link" href="/about">
-            About
-          </a>
           <a
             className="tool bordered"
             href="https://x.com/zirkelc"

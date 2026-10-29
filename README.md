@@ -187,6 +187,6 @@ await window.tin.setSpec(spec); // rejects with the issues of an invalid spec
 const { dataUrl, width, height } = await window.tin.export({ format: "png", scale: 2 });
 ```
 
-## Attribution
+## License
 
-Themes and frame styles from [ray.so](https://github.com/raycast/ray-so) (MIT). Fonts under the SIL Open Font License, Commit Mono under MIT. See `packages/core/README.md`.
+[MIT](LICENSE). The themes and frame styles come from [ray.so](https://github.com/raycast/ray-so) (MIT), the file icon from Lucide (ISC), the language icons from Simple Icons (CC0), and the fonts are under the SIL Open Font License, except Commit Mono (MIT). See [`packages/core/THIRD_PARTY_NOTICES.md`](packages/core/THIRD_PARTY_NOTICES.md).

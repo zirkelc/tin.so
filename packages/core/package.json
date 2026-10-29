@@ -20,7 +20,8 @@
   },
   "files": [
     "dist",
-    "fonts"
+    "fonts",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "type": "module",
   "exports": {

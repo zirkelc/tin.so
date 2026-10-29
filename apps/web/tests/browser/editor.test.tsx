@@ -325,7 +325,7 @@ describe("open an image", () => {
 });
 
 describe("author", () => {
-  test("should link to the about page and the X account of the author", async () => {
+  test("should link to the X account of the author and to the source code", async () => {
     // Act
     await mountApp();
 
@@ -334,8 +334,8 @@ describe("author", () => {
       .element(page.getByRole("link", { name: "@zirkelc on X" }))
       .toHaveAttribute("href", "https://x.com/zirkelc");
     await expect
-      .element(page.getByRole("link", { name: "About" }))
-      .toHaveAttribute("href", "/about");
+      .element(page.getByRole("link", { name: "Source code on GitHub" }))
+      .toHaveAttribute("href", "https://github.com/zirkelc/tin.so");
   });
 });
 
