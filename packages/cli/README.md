@@ -50,6 +50,7 @@ Each run prints the file and an `Edit:` link. The image file also contains the s
 | `tin languages`        | Lists the languages                                                                            |
 | `tin fonts`            | Lists the fonts                                                                                |
 | `tin schema`           | Prints the JSON Schema of the spec                                                             |
+| `tin skill`            | Shows how to add the tin skill to a coding agent                                               |
 | `tin help [command]`   | Shows the help of tin, or of a command. `tin <command> --help` is the same                     |
 
 A file with the name of a command needs a path, such as `./themes`.
