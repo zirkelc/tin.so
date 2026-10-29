@@ -62,7 +62,7 @@ A file with the name of a command needs a path, such as `./themes`.
 | `-o, --output <path>`                   | The output file. A name that ends with `.svg` gives an SVG           |
 | `-f, --format <png\|svg>`               | The image format (default: from the output name, else PNG)           |
 | `-s, --scale <n>`                       | The pixel ratio of a PNG (default: 2)                                |
-| `-c, --copy`                            | Copies the PNG to the clipboard. Writes no file unless `-o` is given |
+| `-c, --copy`                            | Copies the PNG to the clipboard. Writes no file unless you give `-o` |
 | `-t, --theme <id>`                      | The theme (default: `candy`)                                         |
 | `-m, --mode <dark\|light>`              | The color mode (default: dark)                                       |
 | `--font <id>`                           | The code font (default: the font of the theme)                       |
@@ -72,7 +72,7 @@ A file with the name of a command needs a path, such as `./themes`.
 | `--aspect-ratio <w:h>`                  | `16:9` for X, `1.91:1` for LinkedIn, `1:1`, `4:5`, `9:16`            |
 | `--tabs`                                | A tab with the file icon and name above each pane                    |
 | `--no-title-bar`                        | Hides the title bar with the window controls                         |
-| `--no-frame`                            | No window: the code goes directly on the background                  |
+| `--no-frame`                            | No window. The code goes directly on the background                  |
 | `--controls <gray\|color>`              | The colors of the window controls (default: gray)                    |
 | `--split <row\|column>`                 | Panes side by side or below each other (default: row)                |
 | `--windows`                             | Each file in its own window                                          |

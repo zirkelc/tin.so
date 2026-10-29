@@ -56,7 +56,7 @@ const link = await createLink(spec); // https://tin.so/#spec=…
 
 ## The spec
 
-A spec is JSON with the image settings, its windows, the panes of each window, and the code of each pane. Only `windows`, `panes` and `code` are required.
+A spec is JSON with the image settings, its windows, the panes of each window, and the code of each pane. A spec needs only `windows`, `panes` and `code`.
 
 ```json
 {
@@ -74,9 +74,11 @@ A spec is JSON with the image settings, its windows, the panes of each window, a
 
 The full spec, with a description, a default and the limits of each field, is the JSON Schema at [`https://tin.so/schema/v1.json`](https://tin.so/schema/v1.json). `specJsonSchema()` gives the same schema.
 
-- **Versions:** the `$schema` URL (`/schema/v1.json`) or the field `v` gives the version of the spec. A spec without both is version 1. A new version comes only with a change that can break a spec. New optional fields and new themes, fonts or languages come without one.
-- **Your own data:** keys that start with `x-` are ignored in every object.
-- **Errors:** an invalid spec throws a `SpecError` that names each problem with its path, for example `windows.0.panes.0.annotations.0.match: "plnas" (occurrence 1) is not in line 1`.
+The `$schema` URL (`/schema/v1.json`) or the field `v` gives the version of the spec. A spec without both is version 1. A new version comes only with a change that can break a spec. New optional fields and new themes, fonts or languages come without one.
+
+The renderer ignores keys that start with `x-` in every object, so a spec can carry data of other tools.
+
+An invalid spec throws a `SpecError` that names each problem with its path, for example `windows.0.panes.0.annotations.0.match: "plnas" (occurrence 1) is not in line 1`.
 
 ## API
 
@@ -85,7 +87,7 @@ The full spec, with a description, a default and the limits of each field, is th
 | `render(spec, options?)`                                 | Renders a spec to PNG or SVG bytes, in Node (`@tin.so/core/node`)                          |
 | `parseSpec(input)`                                       | Checks a spec and fills in the defaults. Throws a `SpecError`                              |
 | `layout(spec, options?)`                                 | Highlights the code and places the windows, panes and popovers. Gives a `Scene`            |
-| `toSvg(scene, options?)`                                 | Writes the SVG of a scene, optionally with embedded fonts and metadata                     |
+| `toSvg(scene, options?)`                                 | Writes the SVG of a scene, with or without embedded fonts and metadata                     |
 | `initPng(load)`, `svgToPng(svg, fonts, options?)`        | Loads the resvg WebAssembly once, then rasterizes an SVG                                   |
 | `loadSceneFonts(scene, loadFont)`                        | Loads the font files that a scene uses                                                     |
 | `createLink(spec, appUrl?)`, `readLink(link)`            | Writes a spec into an editor link, and reads it back                                       |
