@@ -303,6 +303,28 @@ describe("copy and paste", () => {
     // Assert
     await expect.poll(windowCount).toBe(2);
   });
+
+  test("should copy selected page text, not the selected window", async () => {
+    // Arrange
+    // The first window is selected after the start
+    await mountApp();
+    await page.getByRole("button", { name: "About and shortcuts" }).click();
+    const command = document.querySelector("dialog.about pre")!;
+    document.getSelection()!.selectAllChildren(command);
+    const clipboard = new DataTransfer();
+    const event = new ClipboardEvent("copy", {
+      bubbles: true,
+      cancelable: true,
+      clipboardData: clipboard,
+    });
+
+    // Act
+    command.dispatchEvent(event);
+
+    // Assert
+    expect(event.defaultPrevented).toBe(false);
+    expect(clipboard.getData("text/plain")).toBe("");
+  });
 });
 
 describe("open an image", () => {
