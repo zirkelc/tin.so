@@ -193,3 +193,12 @@ const { dataUrl, width, height } = await window.tin.export({ format: "png", scal
 ## License
 
 [MIT](LICENSE). The themes and frame styles come from [ray.so](https://github.com/raycast/ray-so) (MIT), the file icon from Lucide (ISC), the language icons from Simple Icons (CC0), and the fonts are under the SIL Open Font License, except Commit Mono (MIT). See [`packages/core/THIRD_PARTY_NOTICES.md`](packages/core/THIRD_PARTY_NOTICES.md).
+
+<!--
+TODO (not shown on GitHub)
+
+- Raycast extension: make a code image from the selected text or the clipboard, with the CLI or the core package.
+- VS Code extension: make a code image of the selected code, with the file name and the language of the editor.
+- PWA: install the web editor as an app, with offline use and the share target for code and images.
+- Hidden watermark: a weak pattern in the pixels of a PNG that marks it as made with tin.so (about 32 bits: a marker and a version, no user or image ID). Phase 1 survives JPEG at the same size (8×8 DCT blocks, repeated bits, a `tin detect` command and a check on drop in the editor), about 1 to 2 days. Phase 2 survives scaling, cropping and screenshots (a sync pattern or a scale search), about a week, with an open result. Risk: noise or banding in the smooth gradients and flat panels of code images. The privacy notice must mention it. A cheap alternative is an optional visible "tin.so" text in a corner.
+-->
