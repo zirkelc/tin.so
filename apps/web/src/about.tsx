@@ -23,6 +23,7 @@ export const SHORTCUTS: Array<{ action: string; keys: Array<string> }> = [
   { action: "Duplicate the window", keys: ["⌘", "D"] },
   { action: "Copy and paste windows", keys: ["⌘", "C", "⌘", "V"] },
   { action: "Bring forward, send backward", keys: ["⌘", "]", "⌘", "["] },
+  { action: "Bring to front, send to back", keys: ["⌘", "⇧", "]", "⌘", "⇧", "["] },
   { action: "Remove the selection", keys: ["⌫"] },
   { action: "Edit an exported image", keys: ["Drop the file"] },
   { action: "Open this dialog", keys: ["?"] },
