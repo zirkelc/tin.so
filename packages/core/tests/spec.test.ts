@@ -90,6 +90,35 @@ describe("parseSpec", () => {
     expect(error?.issues[0]).toMatch(/received "dracula"\. Check the value, or update tin\.so/);
   });
 
+  test("should name only the listed themes for an unknown theme", () => {
+    // Arrange
+    const input = { theme: "dracula", windows: [{ panes: [{ code: "x" }] }] };
+
+    // Act
+    const result = () => parseSpec(input);
+
+    // Assert
+    let message = "";
+    try {
+      result();
+    } catch (caught) {
+      message = (caught as SpecError).issues[0] ?? "";
+    }
+    expect(message).toContain('"midnight"');
+    expect(message).not.toContain('"vercel"');
+  });
+
+  test("should still accept a company theme", () => {
+    // Arrange
+    const input = { theme: "vercel", windows: [{ panes: [{ code: "x" }] }] };
+
+    // Act
+    const spec = parseSpec(input);
+
+    // Assert
+    expect(spec.theme).toBe("vercel");
+  });
+
   test("should reject a window without panes", () => {
     // Arrange
     const input = { windows: [{ panes: [] }] };

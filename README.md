@@ -2,7 +2,7 @@
 
 > Life's too short for ugly code
 
-Create images of code, with several snippets in one image: split panes, stacked windows, popovers that point to a token, and all ray.so themes. A web editor for people, and a CLI and a skill for agents. Both use the same renderer, so they make the same image. Neither needs a server or a browser to render.
+Create images of code, with several snippets in one image: split panes, stacked windows, popovers that point to a token, and 14 themes. A web editor for people, and a CLI and a skill for agents. Both use the same renderer, so they make the same image. Neither needs a server or a browser to render.
 
 ## Features
 
@@ -29,7 +29,6 @@ Create images of code, with several snippets in one image: split panes, stacked 
 - Turn the window, the title bar, the tabs and the control colors on and off with the toggle buttons in the Frame row.
 - Edit the window title and the file names of the tabs directly in the image.
 - The editor finds the language from the file name ("Auto (TypeScript)"), or you select it.
-- Some frames show the language name at the right of the title bar: Auth0, Cloudflare, Resend, Supabase and Trigger.dev.
 
 ### Code
 
@@ -52,10 +51,10 @@ Create images of code, with several snippets in one image: split panes, stacked 
 
 ### Themes and look
 
-- All 32 ray.so themes, with dark and light mode. A theme with only one mode turns off the mode switch.
-- The theme list shows the classic themes with a color swatch, and it has a search field. It hides the themes of companies for now, but a spec, a link or the CLI can still use them, and the list shows such a theme when the image uses it. The Format field shows only the aspect ratio, and its list also names the places that use it.
+- 14 themes, with dark and light mode. A theme with only one mode turns off the mode switch.
+- The theme list shows each theme with a color swatch, and it has a search field. The Format field shows only the aspect ratio, and its list also names the places that use it.
 - Use the arrow keys in the theme list to see each theme on the image at once. Escape gives back the theme you had before.
-- The frames of the ray.so partner themes and of Bitmap, Noir and Ice, such as Vercel, Supabase, Stripe and Tailwind: their backgrounds, grid lines, glows and title bars. They also work with tabs and without a window.
+- The frames of Bitmap, Noir and Ice, with their backgrounds, glows and title bars. They also work with tabs and without a window.
 - 9 code fonts: JetBrains Mono, Geist Mono, IBM Plex Mono, Fira Code, Roboto Mono, Commit Mono, Space Mono, Source Code Pro and Google Sans Code.
 - Padding around the windows: 16, 32, 64 or 128 px in the editor (Auto in the free layout), from 0 to 256 px in a spec.
 - A transparent background.
@@ -159,7 +158,7 @@ The setup needs a `RELEASE_PLEASE_TOKEN` secret (a fine-grained PAT with read an
 ```json
 {
   "$schema": "https://tin.so/schema/v1.json",
-  "theme": "vercel",
+  "theme": "midnight",
   "windows": [
     {
       "titleBar": false,

@@ -54,6 +54,14 @@ export const THEMES = raysoThemes as Array<Theme>;
 
 export const THEME_IDS = THEMES.map((theme) => theme.id);
 
+/**
+ * The themes that lists and error messages name: the classic themes. The themes of companies stay
+ * valid in a spec, but the lists do not show them for now.
+ */
+export const LISTED_THEME_IDS = THEMES.filter((theme) => !theme.hidden && !theme.partner).map(
+  (theme) => theme.id,
+);
+
 export const DEFAULT_THEME = "candy";
 
 /**

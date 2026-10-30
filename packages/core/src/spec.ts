@@ -8,7 +8,7 @@ import {
   schemaVersion,
   withoutExtensions,
 } from "./migrate.ts";
-import { DEFAULT_THEME, THEME_IDS } from "./themes/index.ts";
+import { DEFAULT_THEME, LISTED_THEME_IDS, THEME_IDS } from "./themes/index.ts";
 
 const LINE_RANGE = /^\d+(-\d+)?$/;
 const RATIO = /^\d+(\.\d+)?:\d+(\.\d+)?$/;
@@ -287,7 +287,7 @@ const SpecV1Schema = v.pipe(
       v.optional(v.literal(1), IMPLICIT_SPEC_VERSION),
       "Version of the spec format. Leave it out or use 1. Without v, the version of the $schema URL counts, and without both, the version is 1",
     ),
-    theme: describe(v.optional(v.picklist(THEME_IDS), DEFAULT_THEME), "Theme from ray.so"),
+    theme: describe(v.optional(v.picklist(THEME_IDS), DEFAULT_THEME), "The theme. tin themes lists them."),
     mode: describe(
       v.optional(v.picklist(["dark", "light"]), "dark"),
       "Color mode. A theme with only one mode ignores it",
@@ -383,8 +383,14 @@ function formatIssue(issue: v.BaseIssue<unknown>): string {
     return `${path}: unknown field. Check the name, or update tin.so, because a newer version can support it`;
   if (issue.type === "strict_object" && issue.input === undefined)
     return `${path}: required field missing`;
-  if (issue.type === "picklist" && issue.expected)
-    return `${path}: expected one of ${issue.expected}, received ${issue.received}. Check the value, or update tin.so, because a newer version can support it`;
+  if (issue.type === "picklist" && issue.expected) {
+    // A wrong theme names only the listed themes
+    const expected =
+      path === "theme"
+        ? LISTED_THEME_IDS.map((id) => JSON.stringify(id)).join(" | ")
+        : issue.expected;
+    return `${path}: expected one of ${expected}, received ${issue.received}. Check the value, or update tin.so, because a newer version can support it`;
+  }
   return `${path}: ${issue.message}`;
 }
 

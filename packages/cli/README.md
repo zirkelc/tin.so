@@ -2,7 +2,7 @@
 
 The `tin` CLI makes images of code (code screenshots) on your machine, without a browser and without an account. Give it code files, pipe code to it, or give it a JSON spec for an image with several windows, panes and popovers. It saves a PNG or SVG, or copies the image to the clipboard, and prints a link that opens the same image in the [tin.so](https://tin.so) web editor.
 
-It has all [ray.so](https://ray.so) themes, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media. An [agent skill](https://github.com/zirkelc/tin.so/tree/main/skills/tin) shows coding agents how to use it.
+It has 14 themes, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media. An [agent skill](https://github.com/zirkelc/tin.so/tree/main/skills/tin) shows coding agents how to use it.
 
 ## Installation
 

@@ -1,6 +1,6 @@
 ---
 name: tin
-description: Make images of code (code screenshots) with the tin.so CLI, locally and without a browser. Use it whenever the user wants a picture of code to share or show, such as a code image, a code screenshot, a snippet image for X, LinkedIn, a blog post, docs or slides, a "ray.so" or "carbon" style image, or several files side by side in one image, even if they do not name a tool. It covers quick snapshots of piped code or files, and composed images with several windows or panes, popovers that point to a word (for example a type), line highlights, text colors and highlighter fills, tabs with file icons, all ray.so themes and social media sizes. Saves a PNG or SVG (or copies it to the clipboard) and returns a link that opens the image in the tin.so web editor.
+description: Make images of code (code screenshots) with the tin.so CLI, locally and without a browser. Use it whenever the user wants a picture of code to share or show, such as a code image, a code screenshot, a snippet image for X, LinkedIn, a blog post, docs or slides, a "ray.so" or "carbon" style image, or several files side by side in one image, even if they do not name a tool. It covers quick snapshots of piped code or files, and composed images with several windows or panes, popovers that point to a word (for example a type), line highlights, text colors and highlighter fills, tabs with file icons, 14 themes and social media sizes. Saves a PNG or SVG (or copies it to the clipboard) and returns a link that opens the image in the tin.so web editor.
 ---
 
 # Code images with tin.so
@@ -62,7 +62,7 @@ Always start the spec with `"$schema"`, set to the URL in the `$id` field of `ti
 tin -o plans.png <<'EOF'
 {
   "$schema": "https://tin.so/schema/v1.json",
-  "theme": "vercel",
+  "theme": "midnight",
   "windows": [
     {
       "tabs": true,

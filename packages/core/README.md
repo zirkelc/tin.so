@@ -1,6 +1,6 @@
 # @tin.so/core
 
-Renders code images from a JSON spec, to SVG and PNG. One image can show several snippets: windows next to each other or below each other, panes in a window, and popovers that point to a word. It has all [ray.so](https://ray.so) themes, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media.
+Renders code images from a JSON spec, to SVG and PNG. One image can show several snippets: windows next to each other or below each other, panes in a window, and popovers that point to a word. It has 14 themes, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media.
 
 The pipeline is `spec → Shiki tokens → layout → SVG → PNG` and needs no browser. The layout puts every character on a monospace grid with the metrics of the bundled fonts, and [resvg](https://github.com/linebender/resvg) (WebAssembly) rasterizes the SVG. The same code runs in Node and in the browser.
 
@@ -21,7 +21,7 @@ import { writeFile } from "node:fs/promises";
 import { render } from "@tin.so/core/node";
 
 const png = await render({
-  theme: "vercel",
+  theme: "midnight",
   windows: [
     {
       tabs: true,

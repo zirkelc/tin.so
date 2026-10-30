@@ -14,6 +14,7 @@ import {
   SPEC_SCHEMA_URL,
   SpecError,
   specJsonSchema,
+  LISTED_THEME_IDS,
   THEME_IDS,
   THEMES,
 } from "@tin.so/core/node";
@@ -261,21 +262,23 @@ function toNumber(value: string | undefined, name: string): number | undefined {
   return number;
 }
 
+// The suggestions can be fewer than the choices, for example only the listed themes
 function checkChoice(
   value: string | undefined,
   choices: Array<string>,
   name: string,
   list: string,
+  suggestions: Array<string> = choices,
 ) {
   if (value === undefined || choices.includes(value)) return;
   throw new UsageError(
-    `Unknown ${name} "${value}"${didYouMean(value, choices)}\nRun tin ${list} for the list.`,
+    `Unknown ${name} "${value}"${didYouMean(value, suggestions)}\nRun tin ${list} for the list.`,
   );
 }
 
 /** Top-level spec fields from the options. Options that are not given leave the spec as it is. */
 function specOverrides(values: SourceValues): Record<string, unknown> {
-  checkChoice(values.theme, THEME_IDS, "theme", "themes");
+  checkChoice(values.theme, THEME_IDS, "theme", "themes", LISTED_THEME_IDS);
   checkChoice(values.font, CODE_FONT_IDS, "font", "fonts");
   const overrides: Record<string, unknown> = {
     theme: values.theme,
@@ -601,7 +604,7 @@ const COMMANDS = {
   themes: defineCommand({
     meta: { name: "themes", description: "List the themes" },
     run: ({ data }) => {
-      for (const theme of THEMES.filter((theme) => !theme.hidden)) {
+      for (const theme of THEMES.filter((theme) => LISTED_THEME_IDS.includes(theme.id))) {
         const modes = Object.keys(theme.syntax).join("/");
         const font = CODE_FONT_IDS.includes(theme.font ?? "") ? theme.font : DEFAULT_CODE_FONT;
         data.stdout(`${theme.id.padEnd(14)}${theme.name.padEnd(14)}${modes.padEnd(12)}${font}\n`);
