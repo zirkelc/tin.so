@@ -33,18 +33,18 @@ Only `windows`, `panes` and `code` are required, but always add `"$schema"`. Lea
 
 **Image** (top level)
 
-| Field             | Default       | What it does                                                                                                                     |
-| ----------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `theme`           | `candy`       | a theme id; `tin themes` lists them. `bitmap`, `noir` and `ice` bring their own frame                                            |
-| `mode`            | `dark`        | `dark` or `light`                                                                                                                |
-| `background`      | `true`        | `false` makes the background transparent                                                                                         |
-| `padding`         | `64`          | px around the windows                                                                                                            |
-| `font`            | theme font    | a code font id; `tin fonts` lists them                                                                                           |
-| `lineNumbers`     | theme default | line numbers in all panes                                                                                                        |
-| `direction`       | `column`      | windows below each other (`column`) or side by side (`row`)                                                                      |
-| `gap`             | `24`          | px between the windows                                                                                                           |
-| `aspectRatio`     | none          | `"16:9"`, `"1.91:1"`, `"1:1"`, `"4:5"`, `"9:16"` and so on: the image grows in one direction, and the windows stay in the center |
-| `width`, `height` | fit           | the image size in px; the image cuts off what is outside                                                                         |
+| Field             | Default       | What it does                                                                                                                                                    |
+| ----------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `theme`           | `candy`       | a ray.so theme id; `tin themes` lists them. Partner themes such as `vercel`, `supabase`, `stripe`, `tailwind` and `openai` bring their own frame and background |
+| `mode`            | `dark`        | `dark` or `light`                                                                                                                                               |
+| `background`      | `true`        | `false` makes the background transparent                                                                                                                        |
+| `padding`         | `64`          | px around the windows                                                                                                                                           |
+| `font`            | theme font    | a code font id; `tin fonts` lists them                                                                                                                          |
+| `lineNumbers`     | theme default | line numbers in all panes                                                                                                                                       |
+| `direction`       | `column`      | windows below each other (`column`) or side by side (`row`)                                                                                                     |
+| `gap`             | `24`          | px between the windows                                                                                                                                          |
+| `aspectRatio`     | none          | `"16:9"`, `"1.91:1"`, `"1:1"`, `"4:5"`, `"9:16"` and so on: the image grows in one direction, and the windows stay in the center                                |
+| `width`, `height` | fit           | the image size in px; the image cuts off what is outside                                                                                                        |
 
 **Window** (each item of `windows`)
 

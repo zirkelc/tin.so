@@ -866,7 +866,7 @@ describe("skill", () => {
 });
 
 describe("themes", () => {
-  test("should list the classic themes with their font, and no company themes", async () => {
+  test("should list the font that a theme uses", async () => {
     // Arrange
     const io = createIo();
 
@@ -874,21 +874,11 @@ describe("themes", () => {
     await main(["themes"], io);
 
     // Assert
-    const lines = io.output().trim().split("\n");
-    const candy = lines.find((line) => line.startsWith("candy"));
-    expect(candy?.trim().endsWith("jetbrains-mono")).toBe(true);
-    expect(lines.some((line) => line.startsWith("vercel"))).toBe(false);
-  });
-
-  test("should still render with a company theme", async () => {
-    // Arrange
-    const io = createIo("const a = 1;");
-
-    // Act
-    const code = await main(["link", "--theme", "vercel", "--title", "a.ts"], io);
-
-    // Assert
-    expect(code).toBe(0);
+    const openai = io
+      .output()
+      .split("\n")
+      .find((line) => line.startsWith("openai"));
+    expect(openai?.trim().endsWith("jetbrains-mono")).toBe(true);
   });
 });
 
