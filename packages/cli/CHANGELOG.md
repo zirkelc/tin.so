@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/zirkelc/tin.so/compare/cli-v0.2.0...cli-v0.3.0) (2026-10-30)
+
+
+### Features
+
+* list only the classic themes in the CLI, errors and docs ([e73f06d](https://github.com/zirkelc/tin.so/commit/e73f06da699c72e6495536cc026c549603dcc860))
+
 ## [0.2.0](https://github.com/zirkelc/tin.so/compare/cli-v0.1.0...cli-v0.2.0) (2026-10-29)
 
 
