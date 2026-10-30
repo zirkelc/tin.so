@@ -130,6 +130,40 @@ describe("theme", () => {
     await expect.element(page.getByRole("listbox", { name: "Theme" })).not.toBeInTheDocument();
   });
 
+  test("should list only the classic themes, without group headings", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await themeTrigger().click();
+
+    // Assert
+    await expect.element(page.getByRole("listbox", { name: "Theme" })).toBeVisible();
+    const names = [...document.querySelectorAll(".select-option .select-value")].map(
+      (option) => option.textContent,
+    );
+    expect(names).toContain("Candy");
+    expect(names).not.toContain("Vercel");
+    expect(document.querySelectorAll(".select-group").length).toBe(0);
+  });
+
+  test("should show the company theme of an image in the list", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ ...DEFAULT_SPEC, theme: "vercel" });
+
+    // Act
+    await themeTrigger().click();
+
+    // Assert
+    await expect.element(page.getByRole("listbox", { name: "Theme" })).toBeVisible();
+    const names = [...document.querySelectorAll(".select-option .select-value")].map(
+      (option) => option.textContent,
+    );
+    expect(names).toContain("Vercel");
+    expect(names).not.toContain("Stripe");
+  });
+
   test("should find a theme with the search field", async () => {
     // Arrange
     await mountApp();

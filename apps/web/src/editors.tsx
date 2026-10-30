@@ -57,6 +57,27 @@ const PARTNER_LOGOS = Object.fromEntries(
   ).map(([path, svg]) => [path.split("/").at(-1)!.replace(".svg", ""), svg]),
 );
 
+// The theme list hides the themes of companies for now. A spec or a link can still use them.
+const SHOW_COMPANY_THEMES = false;
+
+const COMPANY_THEME_IDS = new Set(
+  VISIBLE_THEMES.filter((theme) => theme.partner).map((theme) => theme.id),
+);
+
+/**
+ * The themes of the list: the classic themes, and the themes of companies when they show or when
+ * the image uses one. Without company themes, the list needs no group headings.
+ */
+function themeOptions(current: string): Array<SelectOption<string>> {
+  if (SHOW_COMPANY_THEMES) return THEME_OPTIONS;
+  const options = THEME_OPTIONS.filter(
+    (option) => !COMPANY_THEME_IDS.has(option.value) || option.value === current,
+  );
+  return COMPANY_THEME_IDS.has(current)
+    ? options
+    : options.map(({ group: _group, ...option }) => option);
+}
+
 // The classic themes first, then the themes of companies with their brand colors
 const THEME_OPTIONS: Array<SelectOption<string>> = [
   ...VISIBLE_THEMES.filter((theme) => !theme.partner),
@@ -135,7 +156,7 @@ export function Settings(props: {
         searchable
         preview
         value={spec.theme ?? DEFAULT_THEME}
-        options={THEME_OPTIONS}
+        options={themeOptions(spec.theme ?? DEFAULT_THEME)}
         onChange={(theme) => onChange({ ...spec, theme })}
       />
       <div className="grid">

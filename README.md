@@ -53,7 +53,7 @@ Create images of code, with several snippets in one image: split panes, stacked 
 ### Themes and look
 
 - All 32 ray.so themes, with dark and light mode. A theme with only one mode turns off the mode switch.
-- The theme list has two groups: the classic themes with a color swatch, then the themes of companies with their logos. It has a search field. The Format field shows only the aspect ratio, and its list also names the places that use it.
+- The theme list shows the classic themes with a color swatch, and it has a search field. It hides the themes of companies for now, but a spec, a link or the CLI can still use them, and the list shows such a theme when the image uses it. The Format field shows only the aspect ratio, and its list also names the places that use it.
 - Use the arrow keys in the theme list to see each theme on the image at once. Escape gives back the theme you had before.
 - The frames of the ray.so partner themes and of Bitmap, Noir and Ice, such as Vercel, Supabase, Stripe and Tailwind: their backgrounds, grid lines, glows and title bars. They also work with tabs and without a window.
 - 9 code fonts: JetBrains Mono, Geist Mono, IBM Plex Mono, Fira Code, Roboto Mono, Commit Mono, Space Mono, Source Code Pro and Google Sans Code.
