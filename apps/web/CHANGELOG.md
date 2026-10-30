@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/zirkelc/tin.so/compare/web-v0.2.0...web-v0.2.1) (2026-10-30)
+
+
+### Documentation
+
+* use the office address in the legal notice ([ea7621b](https://github.com/zirkelc/tin.so/commit/ea7621b3b449e59f3cd2b1d4913fcac41d7a7aa1))
+
 ## [0.2.0](https://github.com/zirkelc/tin.so/compare/web-v0.1.0...web-v0.2.0) (2026-10-29)
 
 
