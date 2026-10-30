@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/zirkelc/tin.so/compare/web-v0.2.0...web-v0.3.0) (2026-10-30)
+
+
+### Features
+
+* hide the company themes in the theme list of the editor ([55bb31c](https://github.com/zirkelc/tin.so/commit/55bb31c864cfbe6b1d4043d74817478ae731a1d0))
+
+
+### Documentation
+
+* use the office address in the legal notice ([0d4ea44](https://github.com/zirkelc/tin.so/commit/0d4ea44c2d1e019ab9bb3ac46c9aca95b7e5c111))
+
 ## [0.2.0](https://github.com/zirkelc/tin.so/compare/web-v0.1.0...web-v0.2.0) (2026-10-29)
 
 
