@@ -6,6 +6,7 @@ import {
   CODE_FONTS,
   createLink,
   DEFAULT_APP_URL,
+  DEFAULT_THEME,
   isCssBackground,
   isSpecSchemaUrl,
   LANGUAGE_IDS,
@@ -132,7 +133,7 @@ const IMAGE_ARGS = defineArgs({
     type: "string",
     alias: "t",
     valueHint: "id",
-    description: "Theme (default: candy). Run tin themes for the list.",
+    description: `Theme (default: ${DEFAULT_THEME}). Run tin themes for the list.`,
   },
   mode: {
     type: "enum",
@@ -230,7 +231,7 @@ const EXAMPLE_SPEC = JSON.stringify({
 const EXAMPLES = `Examples:
   tin main.ts
   tin main.ts plans.toml --tabs --no-title-bar -o plans.png
-  tin worker.ts main.ts --windows --theme midnight
+  tin worker.ts main.ts --windows --theme tokyo-night
   pbpaste | tin --title main.ts --copy
   cat query.sql | tin --language sql -o query.png
   tin --code 'x = 1' --language python

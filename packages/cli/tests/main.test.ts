@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { readImageSpec, readLink, SPEC_SCHEMA_URL } from "@tin.so/core";
+import { DEFAULT_THEME, readImageSpec, readLink, SPEC_SCHEMA_URL, THEME_IDS } from "@tin.so/core";
 import { beforeEach, describe, expect, test, vi } from "vite-plus/test";
 import { type Io, main } from "../src/main.ts";
 
@@ -1004,6 +1004,21 @@ describe("help", () => {
     expect(output).toContain("tin link main.ts --open");
     expect(output).toContain(`"$schema":"${SPEC_SCHEMA_URL}"`);
     expect(output).toContain("TIN_APP_URL");
+  });
+
+  test("should name the default theme and only existing themes", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    await main(["--help"], io);
+
+    // Assert
+    const output = io.output();
+    expect(output).toContain(`Theme (default: ${DEFAULT_THEME})`);
+    const themes = [...output.matchAll(/--theme (\S+)/g)].map((match) => match[1]!);
+    expect(themes.length).toBe(1);
+    expect(themes.every((theme) => THEME_IDS.includes(theme))).toBe(true);
   });
 
   test("should show the root help without arguments", async () => {
