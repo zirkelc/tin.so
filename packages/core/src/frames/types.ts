@@ -1,5 +1,5 @@
 import type { Scene, WindowBox } from "../layout.ts";
-import type { FrameColors, Mode } from "../themes/index.ts";
+import type { Mode } from "../themes/index.ts";
 
 /** The size and the parts of the title bar of a window, which the layout needs */
 export type TitleBarStyle = {
@@ -47,8 +47,6 @@ export type Frame = {
   /** Space between the edge of a window and its panes, on all sides */
   inset: number;
   titleBar: TitleBarStyle;
-  /** Colors that replace the colors of the theme, by mode */
-  colors: Partial<Record<Mode, Partial<FrameColors>>>;
   /** An opaque color near the background, under popovers, which are opaque */
   base: (context: FrameContext) => string;
   /** The background of the whole image. Only when the image has a background. */
@@ -64,9 +62,4 @@ export type Frame = {
   header: (context: FrameContext, window: WindowBox) => string;
   /** Above a window with a frame, after the code: borders and lines */
   border: (context: FrameContext, window: WindowBox) => string;
-};
-
-/** A theme frame changes only some parts of the default frame */
-export type FrameOverrides = Partial<Omit<Frame, "titleBar">> & {
-  titleBar?: Partial<TitleBarStyle>;
 };

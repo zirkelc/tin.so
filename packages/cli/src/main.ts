@@ -6,7 +6,7 @@ import {
   CODE_FONTS,
   createLink,
   DEFAULT_APP_URL,
-  DEFAULT_CODE_FONT,
+  isCssBackground,
   isSpecSchemaUrl,
   LANGUAGE_IDS,
   layout,
@@ -143,7 +143,7 @@ const IMAGE_ARGS = defineArgs({
   font: {
     type: "string",
     valueHint: "id",
-    description: "Code font (default: the font of the theme). Run tin fonts for the list.",
+    description: "Code font (default: JetBrains Mono). Run tin fonts for the list.",
   },
   padding: {
     type: "string",
@@ -151,9 +151,16 @@ const IMAGE_ARGS = defineArgs({
     description: "Space around the windows (default: 64)",
   },
   background: {
-    type: "boolean",
-    description: "Show the background of the theme (default)",
+    type: "string",
+    valueHint: "css",
+    description:
+      'Background: "theme" (default), "transparent", a hex color, "#from,#to" for a gradient, or a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)"',
     negativeDescription: "Transparent background",
+  },
+  "background-opacity": {
+    type: "string",
+    valueHint: "0-1",
+    description: "Opacity of the background, from 0 (transparent) to 1 (default)",
   },
   "line-numbers": { type: "boolean", description: "Show line numbers" },
   direction: {
@@ -273,7 +280,35 @@ function checkChoice(
   );
 }
 
-/** Top-level spec fields from the options. Options that are not given leave the spec as it is. */
+const HEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+
+/**
+ * The background fields of the spec from the options. "theme" removes the background of the spec, so
+ * that the image gets the background of the theme. A transparent image has the opacity 0.
+ */
+function toBackground(
+  value: string | boolean | undefined,
+  opacity: number | undefined,
+): { background?: string | null; backgroundOpacity?: number } {
+  const transparent = value === false || value === "transparent";
+  const backgroundOpacity = opacity ?? (transparent ? 0 : undefined);
+  if (value === undefined || typeof value === "boolean" || transparent)
+    return { backgroundOpacity };
+  if (value === "theme") return { background: null, backgroundOpacity };
+  if (isCssBackground(value)) return { background: value, backgroundOpacity };
+  const colors = value.split(",").map((color) => color.trim());
+  if (colors.length === 2 && colors.every((color) => HEX.test(color))) {
+    return { background: `linear-gradient(140deg, ${colors[0]}, ${colors[1]})`, backgroundOpacity };
+  }
+  throw new UsageError(
+    `Unknown background "${value}". Use theme, transparent, a hex color such as #1e1e2e, #from,#to for a gradient, or a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)".`,
+  );
+}
+
+/**
+ * Top-level spec fields from the options. Options that are not given leave the spec as it is. A
+ * field with the value null removes the field of the spec.
+ */
 function specOverrides(values: SourceValues): Record<string, unknown> {
   checkChoice(values.theme, THEME_IDS, "theme", "themes");
   checkChoice(values.font, CODE_FONT_IDS, "font", "fonts");
@@ -284,7 +319,10 @@ function specOverrides(values: SourceValues): Record<string, unknown> {
     padding: toNumber(values.padding, "padding"),
     direction: values.direction,
     aspectRatio: values["aspect-ratio"],
-    background: values.background,
+    ...toBackground(
+      values.background,
+      toNumber(values["background-opacity"], "background-opacity"),
+    ),
     lineNumbers: values["line-numbers"],
   };
   return Object.fromEntries(Object.entries(overrides).filter(([, value]) => value !== undefined));
@@ -439,7 +477,11 @@ async function readSource(values: SourceValues, io: Io): Promise<Source> {
 
 async function buildSpec(values: SourceValues, io: Io) {
   const { spec, name } = await readSource(values, io);
-  return { spec: { ...(spec as Record<string, unknown>), ...specOverrides(values) }, name };
+  const merged = { ...(spec as Record<string, unknown>), ...specOverrides(values) };
+  return {
+    spec: Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== null)),
+    name,
+  };
 }
 
 async function renderCommand(values: RenderValues, io: Io) {
@@ -601,10 +643,11 @@ const COMMANDS = {
   themes: defineCommand({
     meta: { name: "themes", description: "List the themes" },
     run: ({ data }) => {
-      for (const theme of THEMES.filter((theme) => !theme.hidden)) {
+      const idWidth = Math.max(...THEMES.map((theme) => theme.id.length)) + 2;
+      const nameWidth = Math.max(...THEMES.map((theme) => theme.name.length)) + 2;
+      for (const theme of THEMES) {
         const modes = Object.keys(theme.syntax).join("/");
-        const font = CODE_FONT_IDS.includes(theme.font ?? "") ? theme.font : DEFAULT_CODE_FONT;
-        data.stdout(`${theme.id.padEnd(14)}${theme.name.padEnd(14)}${modes.padEnd(12)}${font}\n`);
+        data.stdout(`${theme.id.padEnd(idWidth)}${theme.name.padEnd(nameWidth)}${modes}\n`);
       }
     },
   }),

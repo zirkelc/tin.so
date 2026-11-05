@@ -1,6 +1,6 @@
 ---
 name: tin
-description: Make images of code (code screenshots) with the tin.so CLI, locally and without a browser. Use it whenever the user wants a picture of code to share or show, such as a code image, a code screenshot, a snippet image for X, LinkedIn, a blog post, docs or slides, a "ray.so" or "carbon" style image, or several files side by side in one image, even if they do not name a tool. It covers quick snapshots of piped code or files, and composed images with several windows or panes, popovers that point to a word (for example a type), line highlights, text colors and highlighter fills, tabs with file icons, all ray.so themes and social media sizes. Saves a PNG or SVG (or copies it to the clipboard) and returns a link that opens the image in the tin.so web editor.
+description: Make images of code (code screenshots) with the tin.so CLI, locally and without a browser. Use it whenever the user wants a picture of code to share or show, such as a code image, a code screenshot, a snippet image for X, LinkedIn, a blog post, docs or slides, a "ray.so" or "carbon" style image, or several files side by side in one image, even if they do not name a tool. It covers quick snapshots of piped code or files, and composed images with several windows or panes, popovers that point to a word (for example a type), line highlights, text colors and highlighter fills, tabs with file icons, editor themes such as GitHub, Dracula, Nord and Catppuccin, gradient backgrounds, and social media sizes. Saves a PNG or SVG (or copies it to the clipboard) and returns a link that opens the image in the tin.so web editor.
 ---
 
 # Code images with tin.so
@@ -47,10 +47,10 @@ Give files directly to show them. Each file becomes a pane in one window, side b
 
 ```bash
 tin main.ts plans.toml --tabs --no-title-bar -o plans.png
-tin worker.ts main.ts --windows --theme midnight -o worker.png
+tin worker.ts main.ts --windows --theme tokyo-night -o worker.png
 ```
 
-Common options: `--theme <id>` (`tin themes` lists them), `--mode light`, `--line-numbers`, `--padding 32`, `--no-background` (transparent), `--aspect-ratio 16:9` (X and YouTube; `1.91:1` for LinkedIn and Open Graph, `1:1`, `4:5`, `9:16`), `--tabs`, `--no-title-bar`, `--no-frame` (code without a window), `--controls color` (red, yellow and green window dots). `tin --help` lists all options. An unknown or misspelled option is an error that names the closest option, so a typo does not go unnoticed.
+Common options: `--theme <id>` (`tin themes` lists them), `--mode light`, `--line-numbers`, `--padding 32`, `--background "#1e1e2e"` (a color, `#from,#to` for a gradient, or a CSS gradient such as `"linear-gradient(135deg, #2e1065, #a78bfa)"`), `--background-opacity 0.5` or `--no-background` (transparent), `--aspect-ratio 16:9` (X and YouTube; `1.91:1` for LinkedIn and Open Graph, `1:1`, `4:5`, `9:16`), `--tabs`, `--no-title-bar`, `--no-frame` (code without a window), `--controls color` (red, yellow and green window dots). `tin --help` lists all options. An unknown or misspelled option is an error that names the closest option, so a typo does not go unnoticed.
 
 ## Composed image
 
@@ -62,7 +62,7 @@ Always start the spec with `"$schema"`, set to the URL in the `$id` field of `ti
 tin -o plans.png <<'EOF'
 {
   "$schema": "https://tin.so/schema/v1.json",
-  "theme": "vercel",
+  "theme": "github",
   "windows": [
     {
       "tabs": true,
@@ -90,7 +90,7 @@ The CLI checks the spec and names every problem with its path, for example `wind
 
 ## Defaults and choices
 
-Do not ask the user about each setting. The defaults make a good image: theme `candy`, dark mode, the theme's background, padding 64, a window with a title bar, the theme's font, a PNG at 2x. Follow what the user asked for, and choose the rest yourself. For example, a post for X gets `--aspect-ratio 16:9`, and two related files get tabs side by side. Then tell the user what you chose, so that they can ask for changes.
+Do not ask the user about each setting. The defaults make a good image: theme `github`, dark mode, the theme's background, padding 64, a window with a title bar, JetBrains Mono, a PNG at 2x. Follow what the user asked for, and choose the rest yourself. For example, a post for X gets `--aspect-ratio 16:9`, and two related files get tabs side by side. Then tell the user what you chose, so that they can ask for changes.
 
 Use the code exactly as the user gave it. Do not reformat it or add lines. For a long file, ask which part to show, or show the part that the user talks about: an image with more than about 40 lines is hard to read.
 

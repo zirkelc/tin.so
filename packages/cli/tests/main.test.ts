@@ -118,7 +118,7 @@ describe("render", () => {
         "plans.toml",
         "--windows",
         "--theme",
-        "midnight",
+        "nord",
         "--aspect-ratio",
         "16:9",
         "--json",
@@ -130,7 +130,7 @@ describe("render", () => {
     const result = JSON.parse(io.output());
     expect(result.width / result.height).toBeCloseTo(16 / 9, 2);
     const spec = (await readLink(result.link)) as any;
-    expect(spec.theme).toBe("midnight");
+    expect(spec.theme).toBe("nord");
     expect(spec.windows.length).toBe(2);
   });
 
@@ -157,19 +157,97 @@ describe("render", () => {
     // Arrange
     await writeFile(
       join(cwd, "spec.json"),
-      JSON.stringify({ theme: "candy", windows: [{ panes: [{ code: "x" }] }] }),
+      JSON.stringify({ theme: "nord", windows: [{ panes: [{ code: "x" }] }] }),
     );
     const io = createIo();
 
     // Act
-    await main(["render", "spec.json", "--theme", "noir", "--no-background", "--json"], io);
+    await main(["render", "spec.json", "--theme", "dracula", "--no-background", "--json"], io);
 
     // Assert
     const result = JSON.parse(io.output());
     expect(result.file).toBe(join(cwd, "spec.png"));
     const spec = (await readLink(result.link)) as any;
-    expect(spec.theme).toBe("noir");
-    expect(spec.background).toBe(false);
+    expect(spec.theme).toBe("dracula");
+    expect(spec.backgroundOpacity).toBe(0);
+  });
+
+  test.each([
+    ["#123456", "#123456"],
+    ["#112233,#445566", "linear-gradient(140deg, #112233, #445566)"],
+    [
+      "radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), #0b0820",
+      "radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), #0b0820",
+    ],
+  ])("should set the background %s", async (value, expected) => {
+    // Arrange
+    await writeFile(join(cwd, "a.ts"), "const a = 1;");
+    const io = createIo();
+
+    // Act
+    await main(["render", "a.ts", "--background", value, "--json"], io);
+
+    // Assert
+    const result = JSON.parse(io.output());
+    const spec = (await readLink(result.link)) as any;
+    expect(spec.background).toBe(expected);
+  });
+
+  test("should make the image transparent with the background transparent", async () => {
+    // Arrange
+    await writeFile(join(cwd, "a.ts"), "const a = 1;");
+    const io = createIo();
+
+    // Act
+    await main(["render", "a.ts", "--background", "transparent", "--json"], io);
+
+    // Assert
+    const spec = (await readLink(JSON.parse(io.output()).link)) as any;
+    expect(spec.background).toBe(undefined);
+    expect(spec.backgroundOpacity).toBe(0);
+  });
+
+  test("should replace the background of a spec with the background of the theme", async () => {
+    // Arrange
+    await writeFile(
+      join(cwd, "spec.json"),
+      JSON.stringify({ background: "#123456", windows: [{ panes: [{ code: "x" }] }] }),
+    );
+    const io = createIo();
+
+    // Act
+    await main(["render", "spec.json", "--background", "theme", "--json"], io);
+
+    // Assert
+    const spec = (await readLink(JSON.parse(io.output()).link)) as any;
+    expect("background" in spec).toBe(false);
+  });
+
+  test("should set the opacity of the background", async () => {
+    // Arrange
+    await writeFile(join(cwd, "a.ts"), "const a = 1;");
+    const io = createIo();
+
+    // Act
+    await main(["render", "a.ts", "--background-opacity", "0.5", "--json"], io);
+
+    // Assert
+    const result = JSON.parse(io.output());
+    const spec = (await readLink(result.link)) as any;
+    expect(spec.backgroundOpacity).toBe(0.5);
+  });
+
+  test("should report a background that is not a color", async () => {
+    // Arrange
+    await writeFile(join(cwd, "a.ts"), "const a = 1;");
+    const io = createIo();
+
+    // Act
+    const code = await main(["render", "a.ts", "--background", "red"], io);
+
+    // Assert
+    expect(code).toBe(1);
+    expect(io.errors()).toContain('Unknown background "red"');
   });
 
   test("should report every issue of an invalid spec", async () => {
@@ -481,7 +559,7 @@ describe("default command", () => {
     const io = createIo();
 
     // Act
-    const code = await main(["--theme", "vercel", "--copy", "main.ts", "--json"], io);
+    const code = await main(["--theme", "tokyo-night", "--copy", "main.ts", "--json"], io);
 
     // Assert
     expect(code).toBe(0);
@@ -489,13 +567,13 @@ describe("default command", () => {
     expect(result.copied).toBe(true);
     expect(copies.length).toBe(1);
     const spec = (await readLink(result.link)) as any;
-    expect(spec.theme).toBe("vercel");
+    expect(spec.theme).toBe("tokyo-night");
     expect(spec.windows[0].panes[0].title).toBe("main.ts");
   });
 
   test("should run the command when a file has the name of the command", async () => {
     // Arrange
-    await writeFile(join(cwd, "themes"), "candy\n");
+    await writeFile(join(cwd, "themes"), "dracula\n");
     const command = createIo();
     const file = createIo();
 
@@ -506,7 +584,7 @@ describe("default command", () => {
     // Assert
     expect(commandCode).toBe(0);
     const lines = command.output().split("\n");
-    expect(lines.some((line) => line.startsWith("candy "))).toBe(true);
+    expect(lines.some((line) => line.startsWith("dracula "))).toBe(true);
     expect(fileCode).toBe(0);
     expect(JSON.parse(file.output()).file).toBe(join(cwd, "themes.png"));
   });
@@ -516,7 +594,7 @@ describe("default command", () => {
     const io = createIo();
 
     // Act
-    const code = await main(["--theme", "vercel"], io);
+    const code = await main(["--theme", "tokyo-night"], io);
 
     // Assert
     expect(code).toBe(1);
@@ -866,7 +944,7 @@ describe("skill", () => {
 });
 
 describe("themes", () => {
-  test("should list the font that a theme uses", async () => {
+  test("should list the modes of a theme", async () => {
     // Arrange
     const io = createIo();
 
@@ -874,11 +952,37 @@ describe("themes", () => {
     await main(["themes"], io);
 
     // Assert
-    const openai = io
+    const lines = io.output().split("\n");
+    expect(
+      lines
+        .find((line) => line.startsWith("github "))
+        ?.trim()
+        .endsWith("dark/light"),
+    ).toBe(true);
+    expect(
+      lines
+        .find((line) => line.startsWith("nord "))
+        ?.trim()
+        .endsWith("dark"),
+    ).toBe(true);
+  });
+
+  test("should list only the themes of code editors", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    await main(["themes"], io);
+
+    // Assert
+    const ids = io
       .output()
+      .trim()
       .split("\n")
-      .find((line) => line.startsWith("openai"));
-    expect(openai?.trim().endsWith("jetbrains-mono")).toBe(true);
+      .map((line) => line.split(" ")[0]);
+    expect(ids.includes("candy")).toBe(false);
+    expect(ids.includes("vercel")).toBe(false);
+    expect(ids.includes("dracula")).toBe(true);
   });
 });
 
@@ -979,7 +1083,7 @@ describe("arguments", () => {
     const io = createIo();
 
     // Act
-    const code = await main(["render", "main.ts", "--them", "midnight"], io);
+    const code = await main(["render", "main.ts", "--them", "nord"], io);
 
     // Assert
     expect(code).toBe(1);
@@ -1057,11 +1161,11 @@ describe("arguments", () => {
     const io = createIo();
 
     // Act
-    const code = await main(["render", "main.ts", "--theme", "candi"], io);
+    const code = await main(["render", "main.ts", "--theme", "draculo"], io);
 
     // Assert
     expect(code).toBe(1);
-    expect(io.errors()).toContain('Unknown theme "candi", did you mean candy?');
+    expect(io.errors()).toContain('Unknown theme "draculo", did you mean dracula?');
   });
 
   test("should reject an option without its value", async () => {

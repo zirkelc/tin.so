@@ -52,11 +52,12 @@ function takesValue(def: ArgDef): boolean {
   return def.type === "string" || def.type === "enum";
 }
 
-/** The long flags of the args, with "--no-" for each boolean that has a negative description */
+/** The long flags of the args, with "--no-" for each option that has a negative description */
 export function longFlags(defs: ArgsDef): Array<string> {
   return Object.entries(defs).flatMap(([name, def]) => {
     if (def.type === "positional") return [];
-    const negative = def.type === "boolean" && def.negativeDescription ? [`--no-${name}`] : [];
+    const negative =
+      "negativeDescription" in def && def.negativeDescription ? [`--no-${name}`] : [];
     return [`--${name}`, ...negative];
   });
 }
@@ -107,9 +108,11 @@ export function checkOptions(args: Array<string>, command: Command, others: Arra
     if (arg.startsWith("--")) {
       const name = arg.slice(2).split("=")[0]!;
       const negated = name.startsWith("no-") ? long.get(name.slice(3)) : undefined;
-      const def = long.get(name) ?? (negated?.type === "boolean" ? negated : undefined);
+      const negative = negated && "negativeDescription" in negated && negated.negativeDescription;
+      const def = long.get(name) ?? (negative ? negated : undefined);
       if (!def) throw unknown(`--${name}`);
-      if (takesValue(def) && !arg.includes("=")) {
+      // A negated option such as --no-background takes no value
+      if (takesValue(def) && !arg.includes("=") && def !== negated) {
         needValue(`--${name}`, i);
         i++;
       }

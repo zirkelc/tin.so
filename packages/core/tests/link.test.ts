@@ -2,7 +2,7 @@ import { describe, expect, test } from "vite-plus/test";
 import { createLink, decodeSpec, encodeSpec, readLink } from "../src/link.ts";
 
 const SPEC = {
-  theme: "vercel",
+  theme: "dracula",
   windows: [
     { panes: [{ title: "main.ts", code: 'import plans from "./plans.toml";\n// → ü 日本' }] },
   ],
@@ -44,32 +44,6 @@ describe("createLink", () => {
 
     // Assert
     expect(spec).toBeUndefined();
-  });
-});
-
-describe("decodeSpec", () => {
-  test("should change the chrome field of old links to the window parts", async () => {
-    // Arrange
-    const old = {
-      windows: [
-        { chrome: "mac", panes: [{ code: "a" }] },
-        { chrome: "tabs", panes: [{ code: "b" }] },
-        { chrome: "none", title: "c", panes: [{ code: "c" }] },
-      ],
-    };
-
-    // Act
-    const decoded = await decodeSpec(await encodeSpec(old));
-
-    // Assert
-    expect(decoded).toEqual({
-      v: 1,
-      windows: [
-        { panes: [{ code: "a" }] },
-        { titleBar: false, tabs: true, panes: [{ code: "b" }] },
-        { titleBar: false, title: "c", panes: [{ code: "c" }] },
-      ],
-    });
   });
 });
 

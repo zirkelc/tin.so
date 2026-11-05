@@ -11,11 +11,18 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { CloseIcon } from "./icons.tsx";
 
 export type SelectOption<VALUE extends string> = {
   value: VALUE;
   label: string;
   icon?: ReactNode;
+  /** A larger picture before the label, only in the list and not in the closed select */
+  thumbnail?: ReactNode;
+  /** Extra content after the label, only in the closed select */
+  trailing?: ReactNode;
+  /** The style of the label, for example the font that the option names */
+  labelStyle?: CSSProperties;
   /** Options with the same group follow each other below a group heading */
   group?: string;
   /** A shorter text for the closed select, when the label is long */
@@ -82,8 +89,15 @@ export function Select<VALUE extends string>(props: {
   value: VALUE;
   options: Array<SelectOption<VALUE>>;
   searchable?: boolean;
-  /** The arrow keys apply the option at once, and Escape restores the value from before */
-  preview?: boolean;
+  /**
+   * Shows the option under the mouse or the arrow keys at once. It gets undefined when the preview
+   * ends without a choice: the mouse leaves the list, Escape, or the popover closes.
+   */
+  onPreview?: (value: VALUE | undefined) => void;
+  /** The list stays open after a choice, with a header that has the label and a close button */
+  sticky?: boolean;
+  /** Called when the list opens, for example to load what the options show */
+  onOpen?: () => void;
   disabled?: boolean;
   onChange: (value: VALUE) => void;
 }) {
@@ -96,8 +110,6 @@ export function Select<VALUE extends string>(props: {
   const popoverRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const listId = useId();
-  // The value when the popover opened, which Escape restores after a preview
-  const initialRef = useRef(value);
   const selected = options.find((option) => option.value === value);
 
   const filtered = useMemo(() => {
@@ -113,12 +125,14 @@ export function Select<VALUE extends string>(props: {
     if (props.disabled || !triggerRef.current) return;
     setPosition(popoverPosition(triggerRef.current));
     setQuery("");
+    scrollToActive.current = true;
     setActive(Math.max(0, options.indexOf(selected!)));
-    initialRef.current = value;
+    props.onOpen?.();
     setOpen(true);
   };
 
   const close = (focusTrigger: boolean) => {
+    props.onPreview?.(undefined);
     setOpen(false);
     if (focusTrigger) triggerRef.current?.focus();
   };
@@ -126,7 +140,7 @@ export function Select<VALUE extends string>(props: {
   const choose = (option: SelectOption<VALUE> | undefined) => {
     if (!option) return;
     props.onChange(option.value);
-    close(true);
+    if (!props.sticky) close(true);
   };
 
   // Closes when the user clicks outside, scrolls the page or resizes the window
@@ -154,9 +168,11 @@ export function Select<VALUE extends string>(props: {
     if (open && !props.searchable) popoverRef.current?.focus();
   }, [open, props.searchable]);
 
-  // Keeps the active option visible while the user moves with the arrow keys
+  // Keeps the active option visible while the user moves with the arrow keys, but not under the
+  // mouse, where a scroll would move another option below the pointer
+  const scrollToActive = useRef(true);
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open || !scrollToActive.current) return;
     const item = listRef.current?.querySelector<HTMLElement>(`[data-index="${active}"]`);
     item?.scrollIntoView({ block: "nearest" });
   }, [open, active]);
@@ -166,15 +182,15 @@ export function Select<VALUE extends string>(props: {
       event.preventDefault();
       const step = event.key === "ArrowDown" ? 1 : -1;
       const next = Math.min(filtered.length - 1, Math.max(0, active + step));
+      scrollToActive.current = true;
       setActive(next);
       const option = filtered[next];
-      if (props.preview && option && option.value !== value) props.onChange(option.value);
+      if (option) props.onPreview?.(option.value);
     } else if (event.key === "Enter") {
       event.preventDefault();
       choose(filtered[active]);
     } else if (event.key === "Escape") {
       event.preventDefault();
-      if (props.preview && value !== initialRef.current) props.onChange(initialRef.current);
       close(true);
     } else if (event.key === "Tab") {
       close(false);
@@ -206,7 +222,10 @@ export function Select<VALUE extends string>(props: {
         {props.trigger ?? (
           <>
             {selected?.icon}
-            <span className="select-value">{selected?.shortLabel ?? selected?.label ?? value}</span>
+            <span className="select-value" style={selected?.labelStyle}>
+              {selected?.shortLabel ?? selected?.label ?? value}
+            </span>
+            {selected?.trailing}
             <svg className="select-chevron" viewBox="0 0 16 16" aria-hidden="true">
               <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
             </svg>
@@ -223,6 +242,19 @@ export function Select<VALUE extends string>(props: {
             // Without a search field, the list takes the keys
             tabIndex={-1}
           >
+            {props.sticky && (
+              <div className="select-header">
+                <span>{props.label}</span>
+                <button
+                  type="button"
+                  className="tool"
+                  aria-label="Close"
+                  onClick={() => close(true)}
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+            )}
             {props.searchable && (
               <input
                 className="select-search"
@@ -235,11 +267,18 @@ export function Select<VALUE extends string>(props: {
                 value={query}
                 onChange={(event) => {
                   setQuery(event.target.value);
+                  scrollToActive.current = true;
                   setActive(0);
                 }}
               />
             )}
-            <ul ref={listRef} id={listId} role="listbox" aria-label={props.label}>
+            <ul
+              ref={listRef}
+              id={listId}
+              role="listbox"
+              aria-label={props.label}
+              onPointerLeave={() => props.onPreview?.(undefined)}
+            >
               {filtered.map((option, index) => (
                 <li key={option.value} role="presentation">
                   {option.group && option.group !== filtered[index - 1]?.group && (
@@ -251,11 +290,19 @@ export function Select<VALUE extends string>(props: {
                     role="option"
                     aria-selected={option.value === value}
                     className={index === active ? "select-option active" : "select-option"}
-                    onPointerMove={() => setActive(index)}
+                    onPointerMove={() => {
+                      if (index === active) return;
+                      scrollToActive.current = false;
+                      setActive(index);
+                      props.onPreview?.(option.value);
+                    }}
                     onClick={() => choose(option)}
                   >
+                    {option.thumbnail}
                     {option.icon}
-                    <span className="select-value">{option.label}</span>
+                    <span className="select-value" style={option.labelStyle}>
+                      {option.label}
+                    </span>
                     {option.value === value && <span className="select-check">✓</span>}
                   </div>
                 </li>

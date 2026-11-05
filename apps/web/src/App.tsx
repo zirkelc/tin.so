@@ -9,9 +9,8 @@ import {
 } from "@tin.so/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AboutDialog, isTyping } from "./about.tsx";
-import { ExamplesMenu } from "./examples-menu.tsx";
 import { installApi, markApiReady } from "./api.ts";
-import { JsonEditor, PopoverEditor, Settings, WindowEditor, WindowList } from "./editors.tsx";
+import { JsonEditor, Settings, WindowEditor, WindowList } from "./editors.tsx";
 import {
   BackIcon,
   ChevronIcon,
@@ -22,14 +21,13 @@ import {
   XIcon,
 } from "./icons.tsx";
 import { Dropdown } from "./menu.tsx";
-import { Preview, type Selection } from "./Preview.tsx";
+import { type HoveredPopover, Preview, type Selection } from "./Preview.tsx";
 import { type ImageFormat, type Rendered, renderImage, renderPreview } from "./renderer.ts";
 import {
   alignScene,
   growForLargerWindows,
   isPositioned,
   type SpecUpdate,
-  updatePane,
   updateWindow,
   windowsOnly,
   withoutMissingParts,
@@ -95,6 +93,8 @@ export function App() {
   const [status, setStatus] = useState<string>();
   // The window that the pointer is on in the list of windows
   const [hovered, setHovered] = useState<number>();
+  // The popover that the pointer is on in the list of popovers
+  const [hoveredPopover, setHoveredPopover] = useState<HoveredPopover>();
   const [about, setAbout] = useState(false);
   const specRef = useRef<SpecInput>(DEFAULT_SPEC);
   const renderId = useRef(0);
@@ -165,13 +165,6 @@ export function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  // A new history entry keeps the current image, so that the back button of the browser returns to it
-  const loadExample = (example: SpecInput) => {
-    window.history.pushState(null, "", window.location.href);
-    setSelected({ windows: [0] });
-    update(example);
-  };
 
   const flash = (message: string) => {
     setStatus(message);
@@ -268,9 +261,6 @@ export function App() {
       : undefined;
   const selectedIndex = selection?.windows.length === 1 ? selection.windows[0] : undefined;
   const selectedWindow = selectedIndex === undefined ? undefined : spec.windows[selectedIndex];
-  const selectedPane = selection?.popover && selectedWindow?.panes[selection.popover.pane];
-  const selectedPopover =
-    selection?.popover && selectedPane?.annotations?.[selection.popover.annotation];
 
   return (
     <div className="app">
@@ -287,8 +277,16 @@ export function App() {
               <BackIcon />
             </button>
           ) : null}
-          <h1>{json ? "JSON" : "tin.so"}</h1>
-          {!json && <ExamplesMenu onPick={loadExample} />}
+          <h1>
+            {json ? (
+              "JSON"
+            ) : (
+              <span className="brand">
+                <img className="logo" src="/logo.svg" alt="" />
+                <span className="brand-name">tin.so</span>
+              </span>
+            )}
+          </h1>
           {!json && (
             <button
               type="button"
@@ -306,32 +304,10 @@ export function App() {
         ) : (
           <>
             <Settings spec={spec} scene={rendered?.scene} onChange={update} />
-            {selectedIndex !== undefined &&
-              selection?.popover &&
-              selectedPane &&
-              selectedPopover && (
-                <PopoverEditor
-                  annotation={selectedPopover}
-                  pane={selectedPane}
-                  onChange={(annotation) => {
-                    const { popover } = selection;
-                    const window = selectedIndex;
-                    if (!popover) return;
-                    update((current) =>
-                      updatePane(current, window, popover.pane, (pane) => ({
-                        ...pane,
-                        annotations: (pane.annotations ?? []).flatMap((old, i) =>
-                          i !== popover.annotation ? [old] : annotation ? [annotation] : [],
-                        ),
-                      })),
-                    );
-                    if (!annotation) setSelected({ windows: [window] });
-                  }}
-                />
-              )}
             <WindowList
               windows={spec.windows}
-              selected={selection?.windows ?? []}
+              // A selected popover keeps its window open, but the list shows only windows as selected
+              selected={selection?.popover ? [] : (selection?.windows ?? [])}
               open={selection?.added ? undefined : selectedIndex}
               onSelect={(windows, added) =>
                 setSelected(windows.length > 0 ? { windows, ...(added && { added }) } : undefined)
@@ -349,8 +325,16 @@ export function App() {
                 <WindowEditor
                   key={selectedIndex}
                   window={selectedWindow}
+                  lineNumbers={spec.lineNumbers ?? false}
                   onChange={(window) =>
                     update((current) => updateWindow(current, selectedIndex, () => window))
+                  }
+                  selectedPopover={selection?.popover}
+                  onSelectPopover={(popover) =>
+                    setSelected({ windows: [selectedIndex], ...(popover && { popover }) })
+                  }
+                  onHoverPopover={(popover) =>
+                    setHoveredPopover(popover && { window: selectedIndex, ...popover })
                   }
                 />
               )}
@@ -471,6 +455,7 @@ export function App() {
           onChange={update}
           onCopyImage={(windowIndexes) => void copyImage(windowIndexes)}
           hovered={hovered}
+          hoveredPopover={hoveredPopover}
         />
       </main>
     </div>

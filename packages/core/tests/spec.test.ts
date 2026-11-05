@@ -33,9 +33,9 @@ describe("parseSpec", () => {
     // Assert
     expect(spec).toEqual({
       v: 1,
-      theme: "candy",
+      theme: "github",
       mode: "dark",
-      background: true,
+      backgroundOpacity: 1,
       padding: 64,
       direction: "column",
       gap: 24,
@@ -74,7 +74,7 @@ describe("parseSpec", () => {
 
   test("should list the valid values of an unknown theme", () => {
     // Arrange
-    const input = { theme: "dracula", windows: [{ panes: [{ code: "x" }] }] };
+    const input = { theme: "zenburn", windows: [{ panes: [{ code: "x" }] }] };
 
     // Act
     let error: SpecError | undefined;
@@ -86,8 +86,8 @@ describe("parseSpec", () => {
 
     // Assert
     expect(error?.issues.length).toBe(1);
-    expect(error?.issues[0]).toMatch(/^theme: expected one of .*"candy"/);
-    expect(error?.issues[0]).toMatch(/received "dracula"\. Check the value, or update tin\.so/);
+    expect(error?.issues[0]).toMatch(/^theme: expected one of .*"github"/);
+    expect(error?.issues[0]).toMatch(/received "zenburn"\. Check the value, or update tin\.so/);
   });
 
   test("should reject a window without panes", () => {
@@ -414,34 +414,6 @@ describe("spec version", () => {
       expect(issues[0]).toMatch(/^v: the version must be a whole number from 1, received /);
     },
   );
-
-  test("should change the chrome field of older specs to the window parts", () => {
-    // Arrange
-    const input = {
-      windows: [
-        { chrome: "tabs", panes: [PANE] },
-        { chrome: "none", panes: [PANE] },
-      ],
-    };
-
-    // Act
-    const spec = parseSpec(input);
-
-    // Assert
-    const parts = spec.windows.map(({ titleBar, tabs }) => ({ titleBar, tabs }));
-    expect(parts).toEqual([
-      { titleBar: false, tabs: true },
-      { titleBar: false, tabs: false },
-    ]);
-  });
-
-  test("should reject an unknown chrome value", () => {
-    // Act
-    const issues = specIssues({ windows: [{ chrome: "round", panes: [PANE] }] });
-
-    // Assert
-    expect(issues.length).toBe(1);
-  });
 });
 
 describe("mark colors", () => {
@@ -634,5 +606,79 @@ describe("pinned ids", () => {
 
     // Assert
     expect(rejected).toEqual([]);
+  });
+});
+
+describe("image background", () => {
+  test.each([
+    ["#123456"],
+    ["#0af"],
+    ["rgba(10, 20, 30, 0.5)"],
+    ["linear-gradient(135deg, #2e1065 0%, #6d28d9 55%, #a78bfa 100%)"],
+    ["linear-gradient(to right top, #4c1d95, #7c3aed, #c026d3)"],
+    ["linear-gradient(0.25turn, rgb(1 2 3 / 50%), transparent)"],
+    ["radial-gradient(circle at top left, #fff, #000 120px)"],
+    [
+      "radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), radial-gradient(at 80% 10%, #db2777 0px, transparent 50%), #0b0820",
+    ],
+  ])("should accept the background %j", (background) => {
+    // Act
+    const spec = parseSpec({ background, windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(spec.background).toEqual(background);
+  });
+
+  test.each([
+    ["red"],
+    ["ambient"],
+    // The ambient backgrounds are not enabled yet
+    ["ambient-blur"],
+    ["ambient-code"],
+    ["ambient-theme"],
+    [true],
+    [false],
+    [{ from: "#123456", to: "#abcdef" }],
+    ["linear-gradient(#123456)"],
+    ["linear-gradient(to middle, #123456, #abcdef)"],
+    ["#123456, linear-gradient(#123456, #abcdef)"],
+    ["conic-gradient(#123456, #abcdef)"],
+    ["linear-gradient(#123456, #abcdef"],
+    ["radial-gradient(at 20% 20%, #123456 10, #abcdef)"],
+  ])("should reject the background %j", (background) => {
+    // Act
+    const issues = specIssues({ background, windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(issues.length).toBe(1);
+  });
+
+  test.each([[0], [0.5], [1]])("should accept the background opacity %j", (backgroundOpacity) => {
+    // Act
+    const spec = parseSpec({ backgroundOpacity, windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(spec.backgroundOpacity).toBe(backgroundOpacity);
+  });
+
+  test.each([[-0.1], [1.5], ["1"]])(
+    "should reject the background opacity %j",
+    (backgroundOpacity) => {
+      // Act
+      const issues = specIssues({ backgroundOpacity, windows: [{ panes: [PANE] }] });
+
+      // Assert
+      expect(issues.length).toBe(1);
+    },
+  );
+});
+
+describe("removed themes", () => {
+  test("should reject a theme of ray.so", () => {
+    // Act
+    const issues = specIssues({ theme: "candy", windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(issues.length).toBe(1);
   });
 });

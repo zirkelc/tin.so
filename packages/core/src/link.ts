@@ -1,5 +1,5 @@
 import { base64UrlToBytes, bytesToBase64Url } from "./base64.ts";
-import { migrateLegacySpec, stampSpecVersion } from "./migrate.ts";
+import { stampSpecVersion } from "./migrate.ts";
 
 /**
  * The hosted web app. The CLI takes another app from its TIN_APP_URL environment variable,
@@ -72,7 +72,7 @@ export async function encodeSpec(spec: unknown): Promise<string> {
 export async function decodeSpec(encoded: string, options: DecodeOptions = {}): Promise<unknown> {
   const json = await inflate(base64UrlToBytes(encoded), "deflate-raw", options.maxBytes);
   if (!json) throw new Error("The link has bad data or a spec that is too large");
-  return migrateLegacySpec(JSON.parse(new TextDecoder().decode(json)));
+  return JSON.parse(new TextDecoder().decode(json));
 }
 
 /**

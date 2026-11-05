@@ -54,11 +54,16 @@ export function themeName(id: string | undefined): string | undefined {
 
 /** The trigger of the theme list. Its label is a separate element, so a role query cannot find it. */
 export function themeTrigger() {
+  return selectTrigger("Theme");
+}
+
+/** The trigger of the list with the label */
+export function selectTrigger(label: string) {
   const field = [...document.querySelectorAll(".field.select")].find(
-    (element) => element.querySelector(".field-label")?.textContent === "Theme",
+    (element) => element.querySelector(".field-label")?.textContent === label,
   );
   const button = field?.querySelector("button");
-  if (!button) throw new Error("Missing theme field");
+  if (!button) throw new Error(`Missing field ${label}`);
   return page.elementLocator(button);
 }
 

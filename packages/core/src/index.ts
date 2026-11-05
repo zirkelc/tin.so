@@ -1,4 +1,13 @@
+export {
+  AMBIENT_BACKGROUNDS,
+  AMBIENT_ENABLED,
+  type AmbientBackground,
+  ambientPreviewCss,
+  isAmbientBackground,
+} from "./ambient.ts";
+export { BACKGROUNDS, type BackgroundPreset, themeBackground } from "./backgrounds.ts";
 export * from "./fonts/index.ts";
+export { isCssBackground } from "./gradient.ts";
 export {
   AUTO_ICON,
   FILE_ICON,
@@ -57,7 +66,6 @@ export {
 export {
   EXTENSION_PREFIX,
   IMPLICIT_SPEC_VERSION,
-  migrateLegacySpec,
   schemaVersion,
   stampSpecVersion,
 } from "./migrate.ts";

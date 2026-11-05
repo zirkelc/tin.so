@@ -1,5 +1,5 @@
 import { cellCount, type MarkStyle, type TextMetrics } from "@tin.so/core";
-import { type CSSProperties, type KeyboardEvent, useState } from "react";
+import { type CSSProperties, type KeyboardEvent, useEffect, useRef, useState } from "react";
 import {
   activeMarks,
   clearMarks,
@@ -25,10 +25,24 @@ export function useStylePanel(
   zoom: number,
 ) {
   const [selection, setSelection] = useState<Range>();
-  const track = (event: { currentTarget: HTMLTextAreaElement }) => {
-    const { selectionStart: start, selectionEnd: end } = event.currentTarget;
+  const field = useRef<HTMLTextAreaElement>(null);
+  const read = (element: HTMLTextAreaElement) => {
+    const { selectionStart: start, selectionEnd: end } = element;
     setSelection(end > start ? { start, end } : undefined);
   };
+  const track = (event: { currentTarget: HTMLTextAreaElement }) => read(event.currentTarget);
+
+  /**
+   * The select event fires only for a new selection. A click or a key that clears the selection
+   * fires only the selectionchange event of the document.
+   */
+  useEffect(() => {
+    const onSelectionChange = () => {
+      if (field.current && document.activeElement === field.current) read(field.current);
+    };
+    document.addEventListener("selectionchange", onSelectionChange);
+    return () => document.removeEventListener("selectionchange", onSelectionChange);
+  }, []);
   const parts = selection ? selectionParts(code, selection.start, selection.end) : [];
 
   // The panel stands above the start of the selection, at its size on the screen
@@ -48,7 +62,7 @@ export function useStylePanel(
     selection: parts.length > 0 ? selection : undefined,
     parts,
     panelStyle,
-    fieldProps: { onSelect: track, onBlur: () => setSelection(undefined) },
+    fieldProps: { ref: field, onSelect: track, onBlur: () => setSelection(undefined) },
     track,
   };
 }

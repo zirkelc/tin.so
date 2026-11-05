@@ -1,6 +1,6 @@
 import { escapeXml } from "./frames/draw.ts";
 import { createLink, DEFAULT_APP_URL, inflate, readLink } from "./link.ts";
-import { migrateLegacySpec, stampSpecVersion } from "./migrate.ts";
+import { stampSpecVersion } from "./migrate.ts";
 
 /**
  * Whether a render writes the metadata when the caller does not say. This is the one place to
@@ -220,7 +220,7 @@ function parseSpecJson(json: string | undefined): unknown {
   if (json === undefined) return undefined;
   try {
     const spec: unknown = JSON.parse(json);
-    return typeof spec === "object" && spec !== null ? migrateLegacySpec(spec) : undefined;
+    return typeof spec === "object" && spec !== null ? spec : undefined;
   } catch {
     return undefined;
   }

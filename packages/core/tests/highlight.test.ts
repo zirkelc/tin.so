@@ -55,30 +55,36 @@ describe("resolveLanguage", () => {
 });
 
 describe("highlight", () => {
-  test("should color tokens with the theme syntax", async () => {
+  test("should color the tokens of an editor theme with its TextMate theme in each mode", async () => {
     // Arrange
-    const theme = getTheme("vercel");
-    const syntax = getSyntax(theme, "dark");
+    const theme = getTheme("solarized");
 
     // Act
-    const lines = await highlight(
-      'import plans from "./plans.toml";',
+    const [dark] = await highlight(
+      "const a = 1;",
       "typescript",
       theme,
       "dark",
-      syntax,
+      getSyntax(theme, "dark"),
+    );
+    const [light] = await highlight(
+      "const a = 1;",
+      "typescript",
+      theme,
+      "light",
+      getSyntax(theme, "light"),
     );
 
     // Assert
-    const keyword = lines[0]!.find((token) => token.content === "import");
-    const string = lines[0]!.find((token) => token.content.includes("plans.toml"));
-    expect(keyword?.color).toBe(syntax.keyword);
-    expect(string?.color).toBe(syntax.string);
+    expect(dark!.find((token) => token.content === "const")?.color).toBe("#93A1A1");
+    const keyword = light!.find((token) => token.content === "const");
+    expect(keyword?.color).toBe("#586E75");
+    expect(keyword?.bold).toBe(true);
   });
 
   test("should color plain text with the foreground", async () => {
     // Arrange
-    const theme = getTheme("candy");
+    const theme = getTheme("github");
     const syntax = getSyntax(theme, "light");
 
     // Act

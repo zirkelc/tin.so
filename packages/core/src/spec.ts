@@ -2,12 +2,9 @@ import * as v from "valibot";
 import { CODE_FONT_IDS } from "./fonts/index.ts";
 import { isKnownLanguage } from "./highlight/index.ts";
 import { AUTO_ICON, ICON_IDS, NO_ICON } from "./icons/index.ts";
-import {
-  IMPLICIT_SPEC_VERSION,
-  migrateLegacySpec,
-  schemaVersion,
-  withoutExtensions,
-} from "./migrate.ts";
+import { IMPLICIT_SPEC_VERSION, schemaVersion, withoutExtensions } from "./migrate.ts";
+import { AMBIENT_ENABLED, isAmbientBackground } from "./ambient.ts";
+import { isCssBackground } from "./gradient.ts";
 import { DEFAULT_THEME, THEME_IDS } from "./themes/index.ts";
 
 const LINE_RANGE = /^\d+(-\d+)?$/;
@@ -165,6 +162,10 @@ const AnnotationSchema = v.strictObject({
     v.optional(list(MarkWithEffectSchema, SPEC_LIMITS.marksPerPane, "marks"), []),
     `Text styles and colors on parts of a line of the popover code, as in a pane. At most ${SPEC_LIMITS.marksPerPane}`,
   ),
+  background: describe(
+    v.optional(hexColor()),
+    'Background of the popover, as a hex color such as "#1e1e2e" (default: the window background, a little lighter in dark mode and darker in light mode)',
+  ),
 });
 
 const PaneSchema = v.strictObject({
@@ -230,6 +231,10 @@ const WindowSchema = v.strictObject({
     v.optional(v.boolean(), false),
     "A tab with an icon and the pane title above each pane, below the title bar",
   ),
+  background: describe(
+    v.optional(hexColor()),
+    'Background of the window in place of the theme color, as a hex color such as "#1e1e2e". The frames of some company themes keep their own window',
+  ),
   controls: describe(
     v.optional(v.picklist(["gray", "color"]), "gray"),
     "Window controls in the title bar: gray, or red, yellow and green as in macOS",
@@ -287,23 +292,32 @@ const SpecV1Schema = v.pipe(
       v.optional(v.literal(1), IMPLICIT_SPEC_VERSION),
       "Version of the spec format. Leave it out or use 1. Without v, the version of the $schema URL counts, and without both, the version is 1",
     ),
-    theme: describe(v.optional(v.picklist(THEME_IDS), DEFAULT_THEME), "Theme from ray.so"),
+    theme: describe(v.optional(v.picklist(THEME_IDS), DEFAULT_THEME), "Theme of a code editor"),
     mode: describe(
       v.optional(v.picklist(["dark", "light"]), "dark"),
       "Color mode. A theme with only one mode ignores it",
     ),
     background: describe(
-      v.optional(v.boolean(), true),
-      "Gradient background. false is transparent",
+      v.optional(
+        v.pipe(
+          v.string(),
+          v.check(
+            (css) => isCssBackground(css) || (AMBIENT_ENABLED && isAmbientBackground(css)),
+            'Use a hex color such as "#1e1e2e", or a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)". Gradients are linear-gradient and radial-gradient, with hex, rgb(), rgba() or transparent colors, several layers separated by commas, and a color as the last layer',
+          ),
+        ),
+      ),
+      'Background of the image: a color such as "#1e1e2e", or a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)" (default: the background of the theme in the mode). A gradient can be linear-gradient or radial-gradient, with layers separated by commas and a color as the last layer, such as "radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), #0b0820". For a transparent image, set backgroundOpacity to 0',
+    ),
+    backgroundOpacity: describe(
+      v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(1)), 1),
+      "Opacity of the image background, from 0 (transparent) to 1",
     ),
     padding: describe(
       v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(256)), 64),
       "Space around the windows in px",
     ),
-    font: describe(
-      v.optional(v.picklist(CODE_FONT_IDS)),
-      "Code font (default: the font of the theme)",
-    ),
+    font: describe(v.optional(v.picklist(CODE_FONT_IDS)), "Code font (default: JetBrains Mono)"),
     lineNumbers: describe(v.optional(v.boolean()), "Show line numbers in all panes"),
     direction: describe(
       v.optional(v.picklist(["column", "row"]), "column"),
@@ -424,14 +438,14 @@ function checkSupported(version: number, path: string): number {
 }
 
 /**
- * Validates a spec and applies the defaults. It first removes the keys of other tools and changes
- * the fields of older specs, then validates the spec with the schema of its version and changes it
- * to the latest version. Throws a SpecError that lists every issue.
+ * Validates a spec and applies the defaults. It first removes the keys of other tools, then
+ * validates the spec with the schema of its version and changes it to the latest version. Throws a
+ * SpecError that lists every issue.
  */
 export function parseSpec(input: unknown): Spec {
-  const migrated = migrateLegacySpec(withoutExtensions(input));
-  const version = readVersion(migrated);
-  const result = v.safeParse(SPEC_SCHEMAS[version]!, migrated);
+  const cleaned = withoutExtensions(input);
+  const version = readVersion(cleaned);
+  const result = v.safeParse(SPEC_SCHEMAS[version]!, cleaned);
   if (!result.success) throw new SpecError(result.issues.map(formatIssue));
   let spec: unknown = result.output;
   for (let from = version; from < LATEST_SPEC_VERSION; from++) spec = MIGRATIONS[from]!(spec);

@@ -1,4 +1,4 @@
-import raysoThemes from "./rayso-themes.json" with { type: "json" };
+import editorThemes from "./editor-themes.json" with { type: "json" };
 
 export type Mode = "light" | "dark";
 
@@ -28,14 +28,23 @@ export type Theme = {
   id: string;
   name: string;
   background: { from: string; to: string };
-  font?: string;
-  partner?: boolean;
-  hidden?: boolean;
-  lineNumbers?: boolean;
+  /** The colors of the window by mode, as in the editor of the theme. The background is opaque. */
+  window?: Partial<Record<Mode, EditorWindow>>;
+  /** The Shiki theme by mode that colors the code, in place of the token colors of the syntax */
+  textmate: Partial<Record<Mode, string>>;
   syntax: { light?: Syntax; dark?: Syntax };
 };
 
-/** Colors of the window around the code, from the ray.so default frame */
+/** The colors of the window of an editor theme */
+export type EditorWindow = {
+  background: string;
+  /** The text of the title bar and the tabs */
+  title?: string;
+  lineNumber?: string;
+  divider?: string;
+};
+
+/** Colors of the window around the code, from the default frame of ray.so */
 export type FrameColors = {
   /** The gradient behind the windows */
   backdrop: { from: string; to: string };
@@ -50,25 +59,20 @@ export type FrameColors = {
   lineNumber: string;
 };
 
-export const THEMES = raysoThemes as Array<Theme>;
+// The themes that a spec can use
+export const THEMES = editorThemes as Array<Theme>;
 
 export const THEME_IDS = THEMES.map((theme) => theme.id);
 
-export const DEFAULT_THEME = "candy";
+export const DEFAULT_THEME = "github";
 
-/**
- * ray.so draws each partner theme with its own frame. What all of them share: an opaque window,
- * and a light backdrop in light mode, because the theme background is dark.
- */
-const PARTNER_FRAME: Record<Mode, Partial<FrameColors>> = {
+// The window of an editor theme has a thin border, because its background is opaque
+const EDITOR_FRAME: Record<Mode, Partial<FrameColors>> = {
   light: {
-    backdrop: { from: "#f5f5f5", to: "#e8e8e8" },
-    background: "#ffffff",
     highlightBorder: "rgba(0, 0, 0, 0.08)",
-    shadowBorder: "rgba(0, 0, 0, 0.04)",
+    shadowBorder: "rgba(0, 0, 0, 0.1)",
   },
   dark: {
-    background: "#0a0a0a",
     highlightBorder: "rgba(255, 255, 255, 0.1)",
   },
 };
@@ -121,7 +125,7 @@ export function getFrameColors(theme: Theme, mode: Mode): FrameColors {
   const frame = {
     backdrop: theme.background,
     ...FRAME_COLORS[resolved],
-    ...(theme.partner && PARTNER_FRAME[resolved]),
+    ...(theme.window?.[resolved] && { ...EDITOR_FRAME[resolved], ...theme.window[resolved] }),
   };
   return {
     ...frame,

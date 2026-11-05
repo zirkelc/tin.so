@@ -75,6 +75,12 @@ export function cssFontFamily(font: Font, face: FontFace): string {
 }
 
 /** Width of a text in the UI font, for title layout. Characters outside of ASCII count as an "M". */
+/** The width of text in a code font, which gives each character the same advance */
+export function measureCodeText(text: string, fontSize: number, font: CodeFont): number {
+  const { advance, unitsPerEm } = font.metrics;
+  return (text.length * advance * fontSize) / unitsPerEm;
+}
+
 export function measureUiText(text: string, fontSize: number): number {
   const { advances, unitsPerEm } = UI_FONT.metrics;
   let width = 0;

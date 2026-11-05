@@ -3,13 +3,10 @@ import {
   bundledLanguagesInfo,
   createHighlighterCore,
   type HighlighterCore,
-  type ThemeRegistration,
 } from "shiki";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
-import tailwindDark from "../themes/tailwind-dark.json" with { type: "json" };
-import tailwindLight from "../themes/tailwind-light.json" with { type: "json" };
+import { EDITOR_TEXTMATE_THEMES } from "../themes/editor-textmate.ts";
 import type { Mode, Syntax, Theme } from "../themes/index.ts";
-import { resolveTokenColor, TOKEN_THEME } from "./token-theme.ts";
 
 export type Token = {
   content: string;
@@ -84,11 +81,6 @@ const EXTENSIONS: Record<string, string> = {
   zs: "zenscript",
 };
 
-const TAILWIND_THEMES: Record<Mode, ThemeRegistration> = {
-  light: { ...(tailwindLight as ThemeRegistration), name: "tailwind-light" },
-  dark: { ...(tailwindDark as ThemeRegistration), name: "tailwind-dark" },
-};
-
 // Shiki font style flags
 const ITALIC = 1;
 const BOLD = 2;
@@ -98,7 +90,7 @@ let highlighter: Promise<HighlighterCore> | undefined;
 
 function getHighlighter(): Promise<HighlighterCore> {
   highlighter ??= createHighlighterCore({
-    themes: [TOKEN_THEME, TAILWIND_THEMES.light, TAILWIND_THEMES.dark],
+    themes: [],
     langs: [],
     engine: createJavaScriptRegexEngine({ forgiving: true }),
   });
@@ -136,6 +128,15 @@ export function inferLanguage(fileName: string | undefined): string {
   return resolveLanguage(extension);
 }
 
+// The TextMate theme of the theme in the mode, which colors the code
+async function loadThemeName(shiki: HighlighterCore, theme: Theme, mode: Mode): Promise<string> {
+  const name = theme.textmate[mode]!;
+  if (!shiki.getLoadedThemes().includes(name)) {
+    await shiki.loadTheme(EDITOR_TEXTMATE_THEMES[name]!());
+  }
+  return name;
+}
+
 /** Splits code into lines of colored tokens with the colors of the theme */
 export async function highlight(
   code: string,
@@ -151,8 +152,7 @@ export async function highlight(
     await shiki.loadLanguage(bundledLanguages[lang as keyof typeof bundledLanguages]);
   }
 
-  // The Tailwind theme of ray.so colors tokens with its own TextMate theme
-  const themeName = theme.id === "tailwind" ? TAILWIND_THEMES[mode].name! : TOKEN_THEME.name!;
+  const themeName = await loadThemeName(shiki, theme, mode);
   const lines = shiki.codeToTokensBase(code, { lang, theme: themeName });
 
   return lines.map((tokens) =>
@@ -160,7 +160,7 @@ export async function highlight(
       const fontStyle = token.fontStyle ?? 0;
       return {
         content: token.content,
-        color: resolveTokenColor(token.color, syntax),
+        color: token.color ?? syntax.foreground,
         bold: (fontStyle & BOLD) !== 0,
         italic: (fontStyle & ITALIC) !== 0,
         underline: (fontStyle & UNDERLINE) !== 0,

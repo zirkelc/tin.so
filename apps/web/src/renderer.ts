@@ -65,6 +65,21 @@ async function registerFont(font: Font): Promise<void> {
   );
 }
 
+/** Loads the regular face of each font, so that a list can show the font names in their fonts */
+export function registerRegularFaces(fonts: Array<Font>): Promise<void> {
+  return Promise.all(
+    fonts.map((font) =>
+      registerFont({
+        ...font,
+        faces: font.faces
+          .filter((face) => !face.italic)
+          .sort((a, b) => Math.abs(a.weight - 400) - Math.abs(b.weight - 400))
+          .slice(0, 1),
+      }),
+    ),
+  ).then(() => {});
+}
+
 // The editor shows a new empty line at the end at once, and the image file is the same as the preview
 const LAYOUT_OPTIONS = { keepTrailingLines: true };
 

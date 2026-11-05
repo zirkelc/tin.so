@@ -18,7 +18,7 @@ This page has the fields that matter most, recipes, and the rules behind the usu
 ```json
 {
   "$schema": "https://tin.so/schema/v1.json",
-  "theme": "candy",
+  "theme": "dracula",
   "windows": [
     {
       "panes": [{ "title": "main.ts", "code": "const a = 1;" }]
@@ -33,18 +33,19 @@ Only `windows`, `panes` and `code` are required, but always add `"$schema"`. Lea
 
 **Image** (top level)
 
-| Field             | Default       | What it does                                                                                                                                                    |
-| ----------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `theme`           | `candy`       | a ray.so theme id; `tin themes` lists them. Partner themes such as `vercel`, `supabase`, `stripe`, `tailwind` and `openai` bring their own frame and background |
-| `mode`            | `dark`        | `dark` or `light`                                                                                                                                               |
-| `background`      | `true`        | `false` makes the background transparent                                                                                                                        |
-| `padding`         | `64`          | px around the windows                                                                                                                                           |
-| `font`            | theme font    | a code font id; `tin fonts` lists them                                                                                                                          |
-| `lineNumbers`     | theme default | line numbers in all panes                                                                                                                                       |
-| `direction`       | `column`      | windows below each other (`column`) or side by side (`row`)                                                                                                     |
-| `gap`             | `24`          | px between the windows                                                                                                                                          |
-| `aspectRatio`     | none          | `"16:9"`, `"1.91:1"`, `"1:1"`, `"4:5"`, `"9:16"` and so on: the image grows in one direction, and the windows stay in the center                                |
-| `width`, `height` | fit           | the image size in px; the image cuts off what is outside                                                                                                        |
+| Field               | Default          | What it does                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `theme`             | `github`         | a theme of a code editor (such as `github`, `vscode`, `dracula`, `nord`, `catppuccin`, `tokyo-night`, `rose-pine`); `tin themes` lists them                                                                                                                                                                                                                     |
+| `mode`              | `dark`           | `dark` or `light`                                                                                                                                                                                                                                                                                                                                               |
+| `background`        | the theme        | a color such as `"#1e1e2e"`, or a CSS gradient such as `"linear-gradient(135deg, #2e1065, #a78bfa)"`. Gradients: `linear-gradient` and `radial-gradient` with hex, `rgb()`, `rgba()` or `transparent` colors, several layers separated by commas, and a color as the last layer, such as `"radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), #0b0820"` |
+| `backgroundOpacity` | `1`              | the opacity of the image background, from `0` (transparent) to `1`                                                                                                                                                                                                                                                                                              |
+| `padding`           | `64`             | px around the windows                                                                                                                                                                                                                                                                                                                                           |
+| `font`              | `jetbrains-mono` | a code font id; `tin fonts` lists them                                                                                                                                                                                                                                                                                                                          |
+| `lineNumbers`       | `false`          | line numbers in all panes                                                                                                                                                                                                                                                                                                                                       |
+| `direction`         | `column`         | windows below each other (`column`) or side by side (`row`)                                                                                                                                                                                                                                                                                                     |
+| `gap`               | `24`             | px between the windows                                                                                                                                                                                                                                                                                                                                          |
+| `aspectRatio`       | none             | `"16:9"`, `"1.91:1"`, `"1:1"`, `"4:5"`, `"9:16"` and so on: the image grows in one direction, and the windows stay in the center                                                                                                                                                                                                                                |
+| `width`, `height`   | fit              | the image size in px; the image cuts off what is outside                                                                                                                                                                                                                                                                                                        |
 
 **Window** (each item of `windows`)
 
@@ -56,6 +57,7 @@ Only `windows`, `panes` and `code` are required, but always add `"$schema"`. Lea
 | `tabs`            | `false`        | a tab with the language icon and the file name above each pane |
 | `frame`           | `true`         | `false` puts the code directly on the background               |
 | `controls`        | `gray`         | `color` gives red, yellow and green window dots                |
+| `background`      | the theme      | a hex color for the window in place of the theme color         |
 | `title`           | the pane title | the title in the title bar                                     |
 | `width`, `height` | fit            | a fixed window size in px                                      |
 | `x`, `y`          | none           | a fixed place in the image (see the rules)                     |
@@ -84,15 +86,16 @@ Use several marks on the same text to combine them, for example one with `"style
 
 **Popover** (each item of `annotations`): it points to the text `match` in line `line`, like the hover card of an editor.
 
-| Field                         | Default               | What it does                                                           |
-| ----------------------------- | --------------------- | ---------------------------------------------------------------------- |
-| `type`                        | `popover`             | the kind of annotation; `popover` is the only kind today               |
-| `line`, `match`, `occurrence` | required, required, 1 | the word that the popover points to                                    |
-| `code`                        | required              | the content, for example a type                                        |
-| `language`                    | the pane language     | the language of the popover code                                       |
-| `offsetX`, `offsetY`          | `0`                   | moves the popover from its place below the word, in px                 |
-| `width`, `height`             | fit                   | a fixed popover size in px                                             |
-| `marks`                       | `[]`                  | marks on the popover code; `line` counts the lines of the popover code |
+| Field                         | Default               | What it does                                                                                                                   |
+| ----------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `type`                        | `popover`             | the kind of annotation; `popover` is the only kind today                                                                       |
+| `line`, `match`, `occurrence` | required, required, 1 | the word that the popover points to                                                                                            |
+| `code`                        | required              | the content, for example a type                                                                                                |
+| `language`                    | the pane language     | the language of the popover code                                                                                               |
+| `offsetX`, `offsetY`          | `0`                   | moves the popover from its place below the word, in px                                                                         |
+| `width`, `height`             | fit                   | a fixed popover size in px                                                                                                     |
+| `marks`                       | `[]`                  | marks on the popover code; `line` counts the lines of the popover code                                                         |
+| `background`                  | raised window color   | a hex color for the popover; without it, the popover is a little lighter than the window in dark mode and darker in light mode |
 
 ## Recipes
 
@@ -149,7 +152,7 @@ Use several marks on the same text to combine them, for example one with `"style
 
 ```json
 {
-  "theme": "midnight",
+  "theme": "tokyo-night",
   "windows": [
     { "panes": [{ "title": "main.ts", "code": "const worker = new Worker(\"./worker.ts\");" }] },
     { "panes": [{ "title": "worker.ts", "code": "self.onmessage = (event) => {};" }] }

@@ -8,7 +8,7 @@ import {
 } from "../src/metadata.ts";
 
 const SPEC = {
-  theme: "vercel",
+  theme: "dracula",
   windows: [{ panes: [{ title: "<a>.ts", code: 'const a = "]]>&";\n// ü 日本 \u001b[0m ￿' }] }],
 };
 
@@ -335,20 +335,5 @@ describe("spec version in images", () => {
 
     // Assert
     expect(metadata.spec).toBe(spec);
-  });
-
-  test("should change the chrome field of an older spec in an image", async () => {
-    // Arrange
-    const old = { windows: [{ chrome: "tabs", panes: [{ code: "x" }] }] };
-    const svg = `<svg>${svgMetadata(await createImageMetadata(old))}</svg>`;
-
-    // Act
-    const spec = await readImageSpec(svg);
-
-    // Assert
-    expect(spec).toEqual({
-      v: 1,
-      windows: [{ titleBar: false, tabs: true, panes: [{ code: "x" }] }],
-    });
   });
 });

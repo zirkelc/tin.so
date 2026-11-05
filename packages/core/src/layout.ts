@@ -2,12 +2,12 @@ import { eastAsianWidth } from "get-east-asian-width";
 import {
   type CodeFont,
   DEFAULT_CODE_FONT,
-  CODE_FONT_IDS,
   getCodeFont,
+  measureCodeText,
   measureUiText,
 } from "./fonts/index.ts";
 import { type Icon, resolveIcon } from "./icons/index.ts";
-import { type Frame, getFrame } from "./frames/index.ts";
+import { DEFAULT_FRAME, type Frame } from "./frames/index.ts";
 import { MAC_HEADER } from "./sizes.ts";
 import {
   highlight,
@@ -16,6 +16,9 @@ import {
   languageName,
   resolveLanguage,
 } from "./highlight/index.ts";
+import { ambientBase, codeAmbientCss, isAmbientBackground, themeAmbientCss } from "./ambient.ts";
+import { themeBackground } from "./backgrounds.ts";
+import { backgroundBaseColor, type CssBackground, parseBackground } from "./gradient.ts";
 import {
   type AnnotationSpec,
   expandLineRanges,
@@ -80,6 +83,8 @@ export type AnnotationBox = {
   lines: Array<HighlightedLine>;
   /** true when the popover is smaller than its code, so that it must cut the code off */
   clipped: boolean;
+  /** The background of the popover from the spec */
+  background?: string;
 };
 
 export type PaneBox = Rect & {
@@ -123,6 +128,8 @@ export type WindowBox = Rect & {
   radius: number;
   title?: string;
   controls: "gray" | "color";
+  /** The background of the window from the spec, in place of the theme color */
+  background?: string;
   /** The size that fits the panes. The layout can make a window larger to fill the image. */
   natural: { width: number; height: number };
   /** The title bar with the window controls, only in a window with a title bar */
@@ -139,7 +146,14 @@ export type Scene = {
   mode: Mode;
   syntax: Syntax;
   frame: FrameColors;
+  /** false for a transparent image */
   background: boolean;
+  /** The opacity of the background, from 0 to 1 */
+  backgroundOpacity: number;
+  /** The color or gradient of the image: the one of the spec, or the background preset of the theme */
+  customBackground: CssBackground | undefined;
+  /** Draw a blurred copy of the code of each window behind it, over the background color */
+  ambientBlur: boolean;
   font: CodeFont;
   text: TextMetrics;
   popoverText: TextMetrics;
@@ -210,12 +224,8 @@ function textMetrics(font: CodeFont, fontSize: number, lineHeight: number): Text
   };
 }
 
-function resolveFont(spec: Spec, theme: Theme): CodeFont {
-  // A theme can name a font that is not bundled (ray.so uses the commercial Söhne Mono)
-  const id =
-    spec.font ??
-    (theme.font && CODE_FONT_IDS.includes(theme.font) ? theme.font : DEFAULT_CODE_FONT);
-  return getCodeFont(id);
+function resolveFont(spec: Spec): CodeFont {
+  return getCodeFont(spec.font ?? DEFAULT_CODE_FONT);
 }
 
 type Size = { width: number; height: number };
@@ -229,6 +239,7 @@ type AnnotationDraft = {
   natural: Size;
   size: Size;
   offset: { x: number; y: number };
+  background?: string;
 };
 
 type PaneDraft = Omit<PaneBox, keyof Rect | "code" | "tab" | "annotations" | "clipped"> & {
@@ -359,6 +370,7 @@ async function draftAnnotation(
     natural,
     size: { width: annotation.width ?? natural.width, height: annotation.height ?? natural.height },
     offset: { x: annotation.offsetX, y: annotation.offsetY },
+    ...(annotation.background && { background: annotation.background }),
   };
 }
 
@@ -383,7 +395,7 @@ async function draftPane(
     pane.marks,
     path,
   );
-  const lineNumbers = pane.lineNumbers ?? spec.lineNumbers ?? scene.theme.lineNumbers ?? false;
+  const lineNumbers = pane.lineNumbers ?? spec.lineNumbers ?? false;
   const gutter = lineNumbers
     ? lines.length >= 100
       ? LINE_NUMBER_GUTTER_LARGE
@@ -453,7 +465,12 @@ function headerHeightOf(frame: Frame, tabs: boolean): number {
   return bar.paddingTop + bar.rowHeight + bar.paddingBottom + (tabs ? bar.tabsGap : 0);
 }
 
-function draftWindow(window: WindowSpec, panes: Array<PaneDraft>, frame: Frame): WindowDraft {
+function draftWindow(
+  window: WindowSpec,
+  panes: Array<PaneDraft>,
+  frame: Frame,
+  font: CodeFont,
+): WindowDraft {
   // A single pane without a tab gives its title to the window, as in ray.so
   const titleBar = window.frame && window.titleBar;
   const title = window.title ?? (panes.length === 1 && !window.tabs ? panes[0]!.title : undefined);
@@ -475,7 +492,10 @@ function draftWindow(window: WindowSpec, panes: Array<PaneDraft>, frame: Frame):
   if (titleBar && title) {
     const bar = frame.titleBar;
     const controls = bar.controls ? CONTROLS_WIDTH : 0;
-    const titleWidth = measureUiText(title, bar.fontSize);
+    const titleWidth =
+      bar.font === "code"
+        ? measureCodeText(title, bar.fontSize, font) + bar.letterSpacing * title.length
+        : measureUiText(title, bar.fontSize);
     const language = bar.language
       ? measureUiText(languageName(panes[0]!.language), bar.languageSize) + TITLE_GAP
       : 0;
@@ -573,6 +593,7 @@ function placePane(pane: PaneDraft, rect: Rect, text: TextMetrics): PaneBox {
           ...annotation.size,
         },
         lines: annotation.lines,
+        ...(annotation.background && { background: annotation.background }),
         clipped:
           annotation.size.width < annotation.natural.width ||
           annotation.size.height < annotation.natural.height,
@@ -641,6 +662,7 @@ function placeWindow(draft: WindowDraft, rect: Rect, text: TextMetrics): WindowB
     radius: spec.frame ? frame.radius : 0,
     title: draft.title,
     controls: spec.controls,
+    ...(spec.background && { background: spec.background }),
     natural: draft.natural,
     ...(header && { header, titleBar: placeTitleBar(header, frame, panes[0]!.language) }),
     panes: boxes,
@@ -775,15 +797,36 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
   const spec = parseSpec(input);
   const theme = getTheme(spec.theme);
   const mode = resolveMode(theme, spec.mode);
-  const font = resolveFont(spec, theme);
-  const frame = getFrame(theme.id);
+  const font = resolveFont(spec);
+  const frame = DEFAULT_FRAME;
+  // Without a background in the spec, the image gets the background preset of the theme for the mode
+  const css = spec.background ?? themeBackground(theme, mode)?.css;
+  const syntax = getSyntax(theme, mode);
+  const windowColor = getFrameColors(theme, mode).background;
+  // An ambient background starts as its base color. The code mesh needs the highlighted code first.
+  const ambient = css !== undefined && isAmbientBackground(css) ? css : undefined;
+  const custom =
+    ambient === "ambient-theme"
+      ? parseBackground(themeAmbientCss(syntax, windowColor, mode))
+      : ambient
+        ? parseBackground(ambientBase(windowColor, mode))
+        : css
+          ? parseBackground(css)
+          : undefined;
+  const baseColor = custom && backgroundBaseColor(custom);
 
   const base: SceneBase = {
     theme,
     mode,
-    syntax: getSyntax(theme, mode),
-    frame: { ...getFrameColors(theme, mode), ...frame.colors[mode] },
-    background: spec.background,
+    syntax,
+    frame: {
+      ...getFrameColors(theme, mode),
+      ...(baseColor && { backdrop: { from: baseColor, to: baseColor } }),
+    },
+    background: spec.backgroundOpacity > 0,
+    backgroundOpacity: spec.backgroundOpacity,
+    customBackground: custom,
+    ambientBlur: ambient === "ambient-blur",
     font,
     text: textMetrics(font, FONT_SIZE, LINE_HEIGHT),
     popoverText: textMetrics(font, POPOVER.fontSize, POPOVER.lineHeight),
@@ -806,6 +849,7 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
           ),
         ),
         frame,
+        font,
       ),
     ),
   );
@@ -867,8 +911,12 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
   const shifted = flow.map((window) => shiftWindow(window, dx, dy));
   const windows = drafts.map((_, index) => fixed.get(index) ?? shifted.shift()!);
 
+  const lines = windows.flatMap((window) => window.panes.flatMap((pane) => pane.lines));
   return {
     ...base,
+    ...(ambient === "ambient-code" && {
+      customBackground: parseBackground(codeAmbientCss(lines, syntax, windowColor, mode)),
+    }),
     width: Math.ceil(width),
     height: Math.ceil(height),
     windows,

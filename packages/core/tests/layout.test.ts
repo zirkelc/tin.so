@@ -166,20 +166,10 @@ describe("layout", () => {
     expect(scene.windows[0]!.panes.map((pane) => pane.language)).toEqual(["toml", "python"]);
   });
 
-  test("should use the font of the theme, or the default for a font that is not bundled", async () => {
-    // Act
-    const vercel = await layout({ theme: "vercel", windows: [{ panes: [{ code: "x" }] }] });
-    const openai = await layout({ theme: "openai", windows: [{ panes: [{ code: "x" }] }] });
-
-    // Assert
-    expect(vercel.font.id).toBe("geist-mono");
-    expect(openai.font.id).toBe("jetbrains-mono");
-  });
-
   test("should force the only mode of a theme", async () => {
     // Act
     const scene = await layout({
-      theme: "stripe",
+      theme: "nord",
       mode: "light",
       windows: [{ panes: [{ code: "x" }] }],
     });
@@ -297,22 +287,6 @@ describe("annotations in split panes", () => {
 });
 
 describe("window parts", () => {
-  test("should put a title at the left after the controls and the title gap of the frame", async () => {
-    // Act
-    const scene = await layout({
-      theme: "auth0",
-      windows: [{ panes: [{ title: "main.ts", language: "typescript", code: "a" }] }],
-    });
-
-    // Assert
-    const window = scene.windows[0]!;
-    const bar = window.titleBar!;
-    expect(bar.align).toBe("left");
-    expect(bar.title.x).toBe(window.header!.x + 16 + 60 + 8);
-    expect(bar.language?.text).toBe("TypeScript");
-    expect(bar.language?.x).toBe(window.header!.x + window.header!.width - 16);
-  });
-
   test("should put the tabs below the title bar", async () => {
     // Act
     const scene = await layout({

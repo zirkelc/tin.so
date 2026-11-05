@@ -133,7 +133,6 @@ export const DEFAULT_FRAME: Frame = {
     language: false,
     languageSize: 12,
   },
-  colors: {},
   base: ({ scene }) => scene.frame.backdrop.from,
   background: (context) => {
     const { scene } = context;

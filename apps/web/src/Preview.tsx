@@ -1,7 +1,9 @@
 import {
   AUTO_ICON,
+  type CodeFont,
   expandLineRanges,
   getFace,
+  measureCodeText,
   measureUiText,
   type PaneBox,
   POPOVER,
@@ -12,7 +14,6 @@ import {
   type WindowBox,
 } from "@tin.so/core";
 import {
-  type ClipboardEvent,
   type CSSProperties,
   type KeyboardEvent,
   type MouseEvent,
@@ -23,7 +24,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { canFormat, formatCode, pasteAndFormat } from "./format.ts";
+import { canFormat, formatCode, formatWidth } from "./format.ts";
 import {
   AlignBottomIcon,
   AlignCenterIcon,
@@ -397,7 +398,7 @@ function CodeEditor(
   const formatPane = (pane: PaneInput) => {
     const language = paneLanguage(pane);
     if (!canFormat(language)) return;
-    formatCode(pane.code, language).then(
+    formatCode(pane.code, language, formatWidth(spec.aspectRatio)).then(
       (code) => setFormatted(pane.code, code),
       () => {},
     );
@@ -405,10 +406,6 @@ function CodeEditor(
 
   const setFormatted = (input: string, formatted: string) =>
     update((pane) => withFormattedCode(pane, input, formatted));
-
-  const onPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
-    if (paneSpec) pasteAndFormat(event, paneLanguage(paneSpec), setCode, setFormatted);
-  };
 
   return (
     <>
@@ -424,7 +421,6 @@ function CodeEditor(
         value={code}
         onChange={(event) => setCode(event.target.value, event.target.selectionStart)}
         onKeyDown={onKeyDown}
-        onPaste={onPaste}
         onMouseDown={onMouseDown}
         onContextMenu={(event) => {
           event.preventDefault();
@@ -463,9 +459,19 @@ function CodeEditor(
 // Space behind the text of a title field for the caret and the next character
 const TITLE_SLACK = 12;
 
-/** A title field is only as wide as its text, so that the rest of the bar moves the window */
-function titleWidth(text: string, fontSize: number, available: number, spacing = 0): number {
-  const width = measureUiText(text, fontSize) + spacing * text.length + TITLE_SLACK;
+/**
+ * A title field is only as wide as its text, so that the rest of the bar moves the window. A code
+ * font measures the text when the title shows in it.
+ */
+function titleWidth(
+  text: string,
+  fontSize: number,
+  available: number,
+  spacing = 0,
+  font?: CodeFont,
+): number {
+  const textWidth = font ? measureCodeText(text, fontSize, font) : measureUiText(text, fontSize);
+  const width = textWidth + spacing * text.length + TITLE_SLACK;
   return Math.max(0, Math.min(available, Math.ceil(width)));
 }
 
@@ -501,6 +507,9 @@ type Annotation = NonNullable<PaneInput["annotations"]>[number];
  * The selected windows, or a popover by the index of the pane and the popover in the spec. A popover
  * is in the only selected window.
  */
+/** A popover by the indexes of its window, its pane and the popover in the pane */
+export type HoveredPopover = { window: number; pane: number; annotation: number };
+
 export type Selection = {
   windows: Array<number>;
   popover?: { pane: number; annotation: number };
@@ -565,6 +574,7 @@ function PopoverEditors(
     window: WindowBox;
     windowIndex: number;
     selected: Selection | undefined;
+    hovered: HoveredPopover | undefined;
     onSelect: (selection: Selection) => void;
     onMenu: (menu: Menu) => void;
   },
@@ -589,6 +599,11 @@ function PopoverEditors(
         selected?.windows[0] === windowIndex &&
         selected.popover?.pane === paneIndex &&
         selected.popover.annotation === index;
+      const { hovered } = props;
+      const isHovered =
+        hovered?.window === windowIndex &&
+        hovered.pane === paneIndex &&
+        hovered.annotation === index;
       const popover = { pane: paneIndex, annotation: index };
       const select = () => props.onSelect({ windows: [windowIndex], popover });
 
@@ -618,7 +633,9 @@ function PopoverEditors(
           className={isSelected ? "hover-group selected" : "hover-group"}
         >
           <div
-            className={isSelected ? "selection selected" : "selection"}
+            className={
+              isSelected ? "selection selected" : isHovered ? "selection hovered" : "selection"
+            }
             style={{ left: box.x, top: box.y, width: box.width, height: box.height }}
           />
           <div
@@ -751,7 +768,13 @@ function WindowEditors(
 
   const bar = window.titleBar;
   const titleField = bar
-    ? titleWidth(title || "Untitled", bar.fontSize, bar.title.width, bar.letterSpacing)
+    ? titleWidth(
+        title || "Untitled",
+        bar.fontSize,
+        bar.title.width,
+        bar.letterSpacing,
+        bar.font === "code" ? rendered.scene.font : undefined,
+      )
     : 0;
 
   const openMenu = (event: MouseEvent<HTMLElement>) => {
@@ -1136,7 +1159,7 @@ export function formatPanes(
     spec.windows[windowIndex]?.panes.forEach((pane, paneIndex) => {
       const language = paneLanguage(pane);
       if (!canFormat(language)) return;
-      formatCode(pane.code, language).then(
+      formatCode(pane.code, language, formatWidth(spec.aspectRatio)).then(
         (code) =>
           onChange((current) =>
             updatePane(current, windowIndex, paneIndex, (next) =>
@@ -1368,7 +1391,7 @@ function codeItems(
       shortcut: "⇧⌥F",
       disabled: !canFormat(language),
       onSelect: () =>
-        void formatCode(pane.code, language).then(
+        void formatCode(pane.code, language, formatWidth(spec.aspectRatio)).then(
           (code) => update((next) => withFormattedCode(next, pane.code, code)),
           () => {},
         ),
@@ -1480,6 +1503,8 @@ export function Preview(props: {
   onCopyImage: (windowIndexes?: Array<number>) => void;
   /** The window that the pointer is on in the list of windows */
   hovered?: number;
+  /** The popover that the pointer is on in the list of popovers */
+  hoveredPopover?: HoveredPopover;
 }) {
   const [stageRef, stage] = useSize<HTMLDivElement>();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -1827,6 +1852,7 @@ export function Preview(props: {
                   window={window}
                   windowIndex={windowIndex}
                   selected={props.selected}
+                  hovered={props.hoveredPopover}
                   onSelect={onSelect}
                   onMenu={setMenu}
                 />

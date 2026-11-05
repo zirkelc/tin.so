@@ -64,7 +64,7 @@ describe("export menu", () => {
     // Assert
     await expect.poll(() => downloads.length, EXPORT_WAIT).toBe(1);
     const [download] = downloads;
-    expect(download!.name).toBe("main.png");
+    expect(download!.name).toBe("counter.png");
     expect(download!.blob.type).toBe("image/png");
     const bytes = new Uint8Array(await download!.blob.arrayBuffer());
     expect(bytes.slice(0, 8)).toEqual(PNG_SIGNATURE);
@@ -98,7 +98,7 @@ describe("export menu", () => {
 
     // Assert
     await expect.poll(() => downloads.length, EXPORT_WAIT).toBe(1);
-    expect(downloads[0]!.name).toBe("main.svg");
+    expect(downloads[0]!.name).toBe("counter.svg");
     expect(downloads[0]!.blob.type).toBe("image/svg+xml");
     await expect.element(page.getByRole("button", { name: "Save SVG", exact: true })).toBeVisible();
   });

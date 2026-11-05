@@ -4,7 +4,7 @@
 
 ## ray.so
 
-The themes, the token colors and the frame styles come from [ray.so](https://github.com/raycast/ray-so).
+The style of the window (its colors, border, shadow and title bar) comes from [ray.so](https://github.com/raycast/ray-so).
 
 ```
 MIT License
@@ -29,6 +29,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## Editor themes
+
+The editor themes come from their own projects, through [tm-themes](https://github.com/shikijs/textmate-grammars-themes) and Shiki. [EDITOR_THEMES_NOTICES.md](EDITOR_THEMES_NOTICES.md) lists each project with its license.
 
 ## Lucide
 

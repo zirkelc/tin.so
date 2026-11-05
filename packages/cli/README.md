@@ -2,7 +2,7 @@
 
 The `tin` CLI makes images of code (code screenshots) on your machine, without a browser and without an account. Give it code files, pipe code to it, or give it a JSON spec for an image with several windows, panes and popovers. It saves a PNG or SVG, or copies the image to the clipboard, and prints a link that opens the same image in the [tin.so](https://tin.so) web editor.
 
-It has all [ray.so](https://ray.so) themes, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media. An [agent skill](https://github.com/zirkelc/tin.so/tree/main/skills/tin) shows coding agents how to use it.
+It has 14 editor themes such as GitHub, Dracula, Nord and Catppuccin, a default background for each theme and mode, gradient backgrounds, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media. An [agent skill](https://github.com/zirkelc/tin.so/tree/main/skills/tin) shows coding agents how to use it.
 
 ## Installation
 
@@ -23,7 +23,7 @@ tin main.ts
 tin main.ts plans.toml --tabs --no-title-bar -o plans.png
 
 # Each file in its own window, with a theme
-tin worker.ts main.ts --windows --theme midnight
+tin worker.ts main.ts --windows --theme tokyo-night
 
 # Code from stdin, copied to the clipboard
 pbpaste | tin --title main.ts --copy
@@ -57,31 +57,32 @@ A file with the name of a command needs a path, such as `./themes`.
 
 ## Options
 
-| Option                                  | What it does                                                         |
-| --------------------------------------- | -------------------------------------------------------------------- |
-| `-o, --output <path>`                   | The output file. A name that ends with `.svg` gives an SVG           |
-| `-f, --format <png\|svg>`               | The image format (default: from the output name, else PNG)           |
-| `-s, --scale <n>`                       | The pixel ratio of a PNG (default: 2)                                |
-| `-c, --copy`                            | Copies the PNG to the clipboard. Writes no file unless you give `-o` |
-| `-t, --theme <id>`                      | The theme (default: `candy`)                                         |
-| `-m, --mode <dark\|light>`              | The color mode (default: dark)                                       |
-| `--font <id>`                           | The code font (default: the font of the theme)                       |
-| `--padding <px>`                        | The space around the windows (default: 64)                           |
-| `--no-background`                       | A transparent background                                             |
-| `--line-numbers`                        | Shows line numbers                                                   |
-| `--aspect-ratio <w:h>`                  | `16:9` for X, `1.91:1` for LinkedIn, `1:1`, `4:5`, `9:16`            |
-| `--tabs`                                | A tab with the file icon and name above each pane                    |
-| `--no-title-bar`                        | Hides the title bar with the window controls                         |
-| `--no-frame`                            | No window. The code goes directly on the background                  |
-| `--controls <gray\|color>`              | The colors of the window controls (default: gray)                    |
-| `--split <row\|column>`                 | Panes side by side or below each other (default: row)                |
-| `--windows`                             | Each file in its own window                                          |
-| `--direction <column\|row>`             | Windows below each other or side by side (default: column)           |
-| `--title <name>`, `-l, --language <id>` | The file name and the language of code from stdin or `--code`        |
-| `--code <text>`                         | Code as text, without stdin                                          |
-| `--spec`, `--no-spec`                   | Reads the input as a spec, or as plain code (default: detect)        |
-| `--no-metadata`                         | Writes no spec and no link into the image                            |
-| `--json`                                | Prints the result as JSON                                            |
+| Option                                  | What it does                                                                                                                                                                           |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-o, --output <path>`                   | The output file. A name that ends with `.svg` gives an SVG                                                                                                                             |
+| `-f, --format <png\|svg>`               | The image format (default: from the output name, else PNG)                                                                                                                             |
+| `-s, --scale <n>`                       | The pixel ratio of a PNG (default: 2)                                                                                                                                                  |
+| `-c, --copy`                            | Copies the PNG to the clipboard. Writes no file unless you give `-o`                                                                                                                   |
+| `-t, --theme <id>`                      | The theme (default: `github`)                                                                                                                                                          |
+| `-m, --mode <dark\|light>`              | The color mode (default: dark)                                                                                                                                                         |
+| `--font <id>`                           | The code font (default: JetBrains Mono)                                                                                                                                                |
+| `--padding <px>`                        | The space around the windows (default: 64)                                                                                                                                             |
+| `--background <css>`, `--no-background` | `theme` (default), `transparent`, a hex color, `#from,#to` for a gradient, or a CSS gradient such as `"linear-gradient(135deg, #2e1065, #a78bfa)"`. `--no-background` is `transparent` |
+| `--background-opacity <0-1>`            | The opacity of the background, from 0 (transparent) to 1 (default)                                                                                                                     |
+| `--line-numbers`                        | Shows line numbers                                                                                                                                                                     |
+| `--aspect-ratio <w:h>`                  | `16:9` for X, `1.91:1` for LinkedIn, `1:1`, `4:5`, `9:16`                                                                                                                              |
+| `--tabs`                                | A tab with the file icon and name above each pane                                                                                                                                      |
+| `--no-title-bar`                        | Hides the title bar with the window controls                                                                                                                                           |
+| `--no-frame`                            | No window. The code goes directly on the background                                                                                                                                    |
+| `--controls <gray\|color>`              | The colors of the window controls (default: gray)                                                                                                                                      |
+| `--split <row\|column>`                 | Panes side by side or below each other (default: row)                                                                                                                                  |
+| `--windows`                             | Each file in its own window                                                                                                                                                            |
+| `--direction <column\|row>`             | Windows below each other or side by side (default: column)                                                                                                                             |
+| `--title <name>`, `-l, --language <id>` | The file name and the language of code from stdin or `--code`                                                                                                                          |
+| `--code <text>`                         | Code as text, without stdin                                                                                                                                                            |
+| `--spec`, `--no-spec`                   | Reads the input as a spec, or as plain code (default: detect)                                                                                                                          |
+| `--no-metadata`                         | Writes no spec and no link into the image                                                                                                                                              |
+| `--json`                                | Prints the result as JSON                                                                                                                                                              |
 
 `tin --help` has the full list. An unknown option is an error that names the closest option.
 

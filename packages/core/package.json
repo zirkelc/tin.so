@@ -21,7 +21,8 @@
   "files": [
     "dist",
     "fonts",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "EDITOR_THEMES_NOTICES.md"
   ],
   "type": "module",
   "exports": {
@@ -37,12 +38,13 @@
     "dev": "vp pack --watch",
     "test": "vp test",
     "check": "vp check",
-    "port-themes": "node scripts/port-rayso-themes.ts",
+    "port-editor-themes": "node scripts/port-editor-themes.ts",
     "download-fonts": "node scripts/download-fonts.ts",
     "generate-icons": "node scripts/generate-icons.ts"
   },
   "dependencies": {
     "@resvg/resvg-wasm": "catalog:",
+    "@shikijs/themes": "catalog:",
     "@valibot/to-json-schema": "catalog:",
     "get-east-asian-width": "catalog:",
     "shiki": "catalog:",
@@ -56,6 +58,7 @@
     "fontkit": "catalog:",
     "simple-icons": "catalog:",
     "typescript": "^7.0.2",
-    "vite-plus": "catalog:"
+    "vite-plus": "catalog:",
+    "yaml": "catalog:"
   }
 }

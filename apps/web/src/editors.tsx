@@ -2,14 +2,20 @@ import {
   AUTO_ICON,
   CODE_FONTS,
   DEFAULT_THEME,
+  getFrameColors,
+  type Mode,
   parseSpec,
   resolveIcon,
+  resolveMode,
   type Scene,
   SpecError,
   type SpecInput,
+  type Theme,
   THEMES,
+  themeBackground,
 } from "@tin.so/core";
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { BackgroundPicker, PreviewWindow, themePreview } from "./background-picker.tsx";
 import { Field, Segmented, Switch } from "./controls.tsx";
 import {
   ChevronIcon,
@@ -23,6 +29,7 @@ import {
   TitleBarIcon,
 } from "./icons.tsx";
 import { jsonTokens } from "./json-tokens.ts";
+import { registerRegularFaces } from "./renderer.ts";
 import { AUTO_LANGUAGE, iconOptions, LANGUAGE_OPTIONS } from "./options.tsx";
 import { insertSpaces } from "./Preview.tsx";
 import { IconSvg, Select, type SelectOption } from "./select.tsx";
@@ -45,71 +52,58 @@ import { DEFAULT_SPEC } from "./state.ts";
 
 const PADDINGS = [16, 32, 64, 128];
 const AUTO = "auto" as const;
-const VISIBLE_THEMES = THEMES.filter((theme) => !theme.hidden);
-// The logos of the partner themes from ray.so, by theme id
-const PARTNER_LOGOS = Object.fromEntries(
-  Object.entries(
-    import.meta.glob<string>("./assets/partners/*.svg", {
-      query: "?raw",
-      import: "default",
-      eager: true,
-    }),
-  ).map(([path, svg]) => [path.split("/").at(-1)!.replace(".svg", ""), svg]),
-);
-
-// The theme list hides the themes of companies for now. A spec or a link can still use them.
-const SHOW_COMPANY_THEMES = false;
-
-const COMPANY_THEME_IDS = new Set(
-  VISIBLE_THEMES.filter((theme) => theme.partner).map((theme) => theme.id),
-);
-
-/**
- * The themes of the list: the classic themes, and the themes of companies when they show or when
- * the image uses one. Without company themes, the list needs no group headings.
- */
-function themeOptions(current: string): Array<SelectOption<string>> {
-  if (SHOW_COMPANY_THEMES) return THEME_OPTIONS;
-  const options = THEME_OPTIONS.filter(
-    (option) => !COMPANY_THEME_IDS.has(option.value) || option.value === current,
+/** The window color and the colors that the theme gives code most, as a row of dots */
+function ThemePalette(props: { theme: Theme; mode: Mode }) {
+  const colors = [
+    getFrameColors(props.theme, props.mode).background.slice(0, 7).toLowerCase(),
+    ...(themePreview(props.theme, props.mode)?.palette ?? []),
+  ];
+  return (
+    <span className="theme-palette" aria-hidden="true">
+      {[...new Set(colors)].map((color) => (
+        <span key={color} style={{ background: color }} />
+      ))}
+    </span>
   );
-  return COMPANY_THEME_IDS.has(current)
-    ? options
-    : options.map(({ group: _group, ...option }) => option);
 }
 
-// The classic themes first, then the themes of companies with their brand colors
-const THEME_OPTIONS: Array<SelectOption<string>> = [
-  ...VISIBLE_THEMES.filter((theme) => !theme.partner),
-  ...VISIBLE_THEMES.filter((theme) => theme.partner),
-].map((theme) => {
-  const logo = PARTNER_LOGOS[theme.id];
-  return {
-    value: theme.id,
-    label: theme.name,
-    group: theme.partner ? "Companies" : "Classic",
-    icon: logo ? (
-      <span
-        className="select-icon theme-logo"
-        aria-hidden="true"
-        // The logos are static SVG files of this app
-        dangerouslySetInnerHTML={{ __html: logo }}
-      />
-    ) : (
-      <span
-        className="select-icon swatch"
-        style={{
-          background: `linear-gradient(140deg, ${theme.background.from}, ${theme.background.to})`,
-        }}
-      />
-    ),
-  };
-});
+// A new theme brings its own background. The opacity of the background stays.
+function withTheme(spec: SpecInput, theme: string): SpecInput {
+  const { background: _background, ...rest } = spec;
+  return { ...rest, theme };
+}
 
+// The themes of code editors, each with a small window on its own background in the mode
+function themeOptions(mode: Mode): Array<SelectOption<string>> {
+  return THEMES.map((theme) => {
+    const resolved = resolveMode(theme, mode);
+    return {
+      value: theme.id,
+      label: theme.name,
+      thumbnail: (
+        <span
+          className="theme-thumbnail"
+          style={{ background: themeBackground(theme, resolved)?.css ?? theme.background.from }}
+        >
+          <PreviewWindow theme={theme} mode={resolved} />
+        </span>
+      ),
+      trailing: <ThemePalette theme={theme} mode={resolved} />,
+    };
+  });
+}
+
+// Each font shows its name in its own font
 const FONT_OPTIONS: Array<SelectOption<string>> = [
   { value: "", label: "Theme default" },
-  ...CODE_FONTS.map((font) => ({ value: font.id, label: font.name })),
+  ...CODE_FONTS.map((font) => ({
+    value: font.id,
+    label: font.name,
+    labelStyle: { fontFamily: `ci-${font.id}, ui-monospace, monospace` },
+  })),
 ];
+
+const loadFontNames = () => void registerRegularFaces(CODE_FONTS).catch(() => {});
 
 // Aspect ratios of the image, with the places that use them
 const FORMAT_OPTIONS: Array<SelectOption<string>> = [
@@ -131,11 +125,15 @@ export function Settings(props: {
   onChange: (spec: SpecInput) => void;
 }) {
   const { spec, onChange } = props;
-  const theme = VISIBLE_THEMES.find((theme) => theme.id === (spec.theme ?? DEFAULT_THEME));
+  const theme = THEMES.find((theme) => theme.id === (spec.theme ?? DEFAULT_THEME));
   const singleMode = theme && (!theme.syntax.light || !theme.syntax.dark);
   const positioned = isPositioned(spec);
 
   const { scene } = props;
+  // The spec before a theme preview, which the preview restores when it ends without a choice
+  const previewBase = useRef<SpecInput | undefined>(undefined);
+  // The spec before a font preview
+  const fontBase = useRef<SpecInput | undefined>(undefined);
 
   // In the free layout the image has its own size: a format or a padding fits it to the windows
   const setFormat = (aspectRatio: string) => {
@@ -154,10 +152,38 @@ export function Settings(props: {
       <Select
         label="Theme"
         searchable
-        preview
-        value={spec.theme ?? DEFAULT_THEME}
-        options={themeOptions(spec.theme ?? DEFAULT_THEME)}
-        onChange={(theme) => onChange({ ...spec, theme })}
+        sticky
+        // The chosen theme keeps the check mark while another one shows as a preview
+        value={(previewBase.current ?? spec).theme ?? DEFAULT_THEME}
+        options={themeOptions(spec.mode ?? "dark")}
+        onPreview={(theme) => {
+          if (theme === undefined) {
+            if (previewBase.current) onChange(previewBase.current);
+            previewBase.current = undefined;
+            return;
+          }
+          previewBase.current ??= spec;
+          onChange(withTheme(previewBase.current, theme));
+        }}
+        onChange={(theme) => {
+          const base = previewBase.current ?? spec;
+          previewBase.current = undefined;
+          onChange(withTheme(base, theme));
+        }}
+      />
+      <BackgroundPicker
+        value={spec.background}
+        opacity={spec.backgroundOpacity ?? 1}
+        theme={theme}
+        mode={spec.mode ?? "dark"}
+        onChange={(background) => {
+          const { background: _background, ...rest } = spec;
+          onChange(background === undefined ? rest : { ...rest, background });
+        }}
+        onOpacityChange={(opacity) => {
+          const { backgroundOpacity: _opacity, ...rest } = spec;
+          onChange(opacity === 1 ? rest : { ...rest, backgroundOpacity: opacity });
+        }}
       />
       <div className="grid">
         <Segmented
@@ -201,19 +227,29 @@ export function Settings(props: {
       )}
       <Select
         label="Font"
-        value={spec.font ?? ""}
+        sticky
+        value={(fontBase.current ?? spec).font ?? ""}
         options={FONT_OPTIONS}
-        onChange={(font) => onChange({ ...spec, font: font || undefined })}
+        onOpen={loadFontNames}
+        onPreview={(font) => {
+          if (font === undefined) {
+            if (fontBase.current) onChange(fontBase.current);
+            fontBase.current = undefined;
+            return;
+          }
+          fontBase.current ??= spec;
+          onChange({ ...fontBase.current, font: font || undefined });
+        }}
+        onChange={(font) => {
+          const base = fontBase.current ?? spec;
+          fontBase.current = undefined;
+          onChange({ ...base, font: font || undefined });
+        }}
       />
       <div className="switches">
         <Switch
-          label="Background"
-          checked={spec.background ?? true}
-          onChange={(background) => onChange({ ...spec, background })}
-        />
-        <Switch
           label="Line numbers"
-          checked={spec.lineNumbers ?? theme?.lineNumbers ?? false}
+          checked={spec.lineNumbers ?? false}
           onChange={(lineNumbers) => onChange(setLineNumbers(spec, lineNumbers))}
         />
       </div>
@@ -292,9 +328,15 @@ function PaneEditor(props: {
   pane: PaneInput;
   index: number;
   tabs: boolean;
+  /** The line numbers of the image, which the pane follows unless it has its own */
+  lineNumbers: boolean;
   canRemove: boolean;
   onChange: (pane: PaneInput) => void;
   onRemove: () => void;
+  /** The selected popover of this pane, by its index in the spec */
+  selectedPopover: number | undefined;
+  onSelectPopover: (index: number | undefined) => void;
+  onHoverPopover: (index: number | undefined) => void;
 }) {
   const { pane, onChange } = props;
   const language = paneLanguage(pane);
@@ -346,6 +388,28 @@ function PaneEditor(props: {
           onChange={(icon) => onChange({ ...pane, icon })}
         />
       </div>
+      <div className="switches">
+        <Switch
+          label="Line numbers"
+          ariaLabel={`Line numbers of pane ${props.index + 1}`}
+          checked={pane.lineNumbers ?? props.lineNumbers}
+          onChange={(lineNumbers) => {
+            // A pane keeps its own value only when it differs from the image
+            const { lineNumbers: _lineNumbers, ...rest } = pane;
+            onChange(lineNumbers === props.lineNumbers ? rest : { ...rest, lineNumbers });
+          }}
+        />
+      </div>
+      {(pane.annotations ?? []).length > 0 && (
+        <PopoverList
+          pane={pane}
+          paneIndex={props.index}
+          selected={props.selectedPopover}
+          onSelect={props.onSelectPopover}
+          onHover={props.onHoverPopover}
+          onChange={onChange}
+        />
+      )}
       {hidden.length > 0 && (
         <div className="notice">
           <span>
@@ -461,7 +525,13 @@ export function WindowList(props: {
  */
 export function WindowEditor(props: {
   window: WindowInput;
+  /** The line numbers of the image, which a pane follows unless it has its own */
+  lineNumbers: boolean;
   onChange: (window: WindowInput) => void;
+  /** The selected popover of this window, by the index of its pane and its index in the pane */
+  selectedPopover?: PopoverRef;
+  onSelectPopover: (popover: PopoverRef | undefined) => void;
+  onHoverPopover: (popover: PopoverRef | undefined) => void;
 }) {
   const { window, onChange } = props;
   const frame = window.frame ?? true;
@@ -567,10 +637,22 @@ export function WindowEditor(props: {
           pane={pane}
           index={index}
           tabs={frame && (window.tabs ?? false)}
+          lineNumbers={props.lineNumbers}
           canRemove={window.panes.length > 1}
           onChange={(pane) => updatePane(index, pane)}
           onRemove={() =>
             onChange({ ...window, panes: window.panes.filter((_, i) => i !== index) })
+          }
+          selectedPopover={
+            props.selectedPopover?.pane === index ? props.selectedPopover.annotation : undefined
+          }
+          onSelectPopover={(annotation) =>
+            props.onSelectPopover(
+              annotation === undefined ? undefined : { pane: index, annotation },
+            )
+          }
+          onHoverPopover={(annotation) =>
+            props.onHoverPopover(annotation === undefined ? undefined : { pane: index, annotation })
           }
         />
       ))}
@@ -580,8 +662,87 @@ export function WindowEditor(props: {
 
 type Annotation = NonNullable<PaneInput["annotations"]>[number];
 
+/** A popover by the index of its pane in the window and its index in the pane */
+export type PopoverRef = { pane: number; annotation: number };
+
+/**
+ * The popovers of a pane, as the list of windows: a click on a row selects the popover and opens its
+ * settings, and the pointer on a row highlights the popover in the image.
+ */
+function PopoverList(props: {
+  pane: PaneInput;
+  paneIndex: number;
+  selected: number | undefined;
+  onSelect: (index: number | undefined) => void;
+  onHover: (index: number | undefined) => void;
+  onChange: (pane: PaneInput) => void;
+}) {
+  const { pane, selected } = props;
+  const annotations = pane.annotations ?? [];
+  const setAnnotation = (index: number, annotation: Annotation | undefined) => {
+    props.onChange({
+      ...pane,
+      annotations: annotations.flatMap((old, i) =>
+        i !== index ? [old] : annotation ? [annotation] : [],
+      ),
+    });
+    // A removed popover is no longer selected, and the indexes of the next popovers change
+    if (!annotation) props.onSelect(undefined);
+    if (!annotation) props.onHover(undefined);
+  };
+  return (
+    <div className="field">
+      <span className="field-label">Popovers</span>
+      <ul
+        className="window-list"
+        aria-label={`Popovers of pane ${props.paneIndex + 1}`}
+        onPointerLeave={() => props.onHover(undefined)}
+      >
+        {annotations.map((annotation, index) => {
+          const isSelected = selected === index;
+          const missing = !hasPart(pane.code, annotation);
+          return (
+            <li key={index} className={isSelected ? "selected" : undefined}>
+              <button
+                type="button"
+                className="window-row"
+                aria-label={`Popover ${annotation.match}, line ${annotation.line}`}
+                aria-pressed={isSelected}
+                aria-expanded={isSelected}
+                title={missing ? "The code does not have this text" : undefined}
+                onPointerEnter={() => props.onHover(index)}
+                onClick={() => props.onSelect(isSelected ? undefined : index)}
+              >
+                <ChevronIcon />
+                <code className="window-row-name">{annotation.match}</code>
+                {missing ? (
+                  <span className="popover-row-missing">not in code</span>
+                ) : (
+                  <span className="window-row-meta">
+                    {(annotation.occurrence ?? 1) > 1 && `${annotation.occurrence}. · `}line{" "}
+                    {annotation.line}
+                  </span>
+                )}
+              </button>
+              {isSelected && (
+                <div className="window-row-body">
+                  <PopoverEditor
+                    annotation={annotation}
+                    pane={pane}
+                    onChange={(annotation) => setAnnotation(index, annotation)}
+                  />
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 /** The settings of the selected popover. Its code, place and size are edited in the image. */
-export function PopoverEditor(props: {
+function PopoverEditor(props: {
   annotation: Annotation;
   pane: PaneInput;
   onChange: (annotation: Annotation | undefined) => void;
@@ -589,14 +750,8 @@ export function PopoverEditor(props: {
   const { annotation, onChange } = props;
   const moved = (annotation.offsetX ?? 0) !== 0 || (annotation.offsetY ?? 0) !== 0;
   const sized = annotation.width !== undefined || annotation.height !== undefined;
-  const occurrence = (annotation.occurrence ?? 1) > 1 ? ` (${annotation.occurrence}.)` : "";
   return (
-    <section className="section">
-      <h2 className="section-title">Popover</h2>
-      <p className="hint">
-        Points to <code>{annotation.match}</code>
-        {occurrence} in line {annotation.line}.
-      </p>
+    <div className="popover-editor" role="group" aria-label="Selected popover">
       <Select
         label="Language"
         searchable
@@ -635,7 +790,7 @@ export function PopoverEditor(props: {
           Remove
         </button>
       </div>
-    </section>
+    </div>
   );
 }
 

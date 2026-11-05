@@ -8,7 +8,9 @@
     "build": "vp build",
     "preview": "vp preview",
     "deploy": "vp build && wrangler deploy",
-    "test": "vp test"
+    "test": "vp test",
+    "generate-theme-previews": "node scripts/generate-theme-previews.ts",
+    "generate-og-image": "node scripts/generate-og-image.ts"
   },
   "dependencies": {
     "@resvg/resvg-wasm": "catalog:",

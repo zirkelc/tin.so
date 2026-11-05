@@ -4,22 +4,11 @@ export const DEFAULT_SPEC: SpecInput = {
   theme: DEFAULT_THEME,
   windows: [
     {
-      titleBar: false,
-      tabs: true,
-      split: "row",
       panes: [
         {
-          title: "main.ts",
-          code: 'import plans from "./plans.toml";',
-          annotations: [
-            {
-              line: 1,
-              match: "plans",
-              code: "const plans: {\n    readonly free: { readonly price: 0 };\n    readonly pro: { readonly price: 12 };\n}",
-            },
-          ],
+          title: "counter.tsx",
+          code: 'import { useState } from "react";\n\n// Count the clicks of a button\nexport function Counter({ step = 1 }: Props) {\n  const [count, setCount] = useState(0);\n  return (\n    <button onClick={() => setCount(count + step)}>\n      Clicked {count} times\n    </button>\n  );\n}',
         },
-        { title: "plans.toml", code: "[free]\nprice = 0\n\n[pro]\nprice = 12" },
       ],
     },
   ],

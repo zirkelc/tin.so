@@ -14,7 +14,7 @@ import {
 } from "./app.tsx";
 
 const SPEC: SpecInput = {
-  theme: "mono",
+  theme: "nord",
   windows: [{ panes: [{ title: "hello.py", code: 'print("hello")' }] }],
 };
 

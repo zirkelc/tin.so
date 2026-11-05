@@ -3,6 +3,10 @@
   --panel: #141417;
   --panel-raised: #1c1c20;
   --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --metal: #6b6b74;
+  --metal-light: #b4b4bc;
+  --metal-shine: #ffffff;
   --text: #ececf1;
   --text-muted: #8b8b94;
   --accent: #7c3aed;
@@ -34,6 +38,10 @@
     --panel: #ffffff;
     --panel-raised: #f4f4f6;
     --border: rgba(0, 0, 0, 0.1);
+    --border-strong: rgba(0, 0, 0, 0.18);
+    --metal: #3f3f46;
+    --metal-light: #71717a;
+    --metal-shine: #d4d4d8;
     --text: #18181b;
     --text-muted: #6b6b75;
     --error: #d92d2d;
@@ -146,27 +154,6 @@ textarea {
   left: 8px;
 }
 
-/* More specific than .tool, which has the fixed width of an icon button */
-.sidebar-header .examples-trigger {
-  width: auto;
-  padding: 0 8px;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.examples-menu {
-  display: flex;
-  max-height: 60vh;
-  flex-direction: column;
-  overflow: auto;
-  font-size: 13px;
-}
-
-.examples-language {
-  min-width: 82px;
-  color: var(--text-muted);
-}
-
 .sidebar-header .tool:first-child {
   margin-left: -8px;
 }
@@ -176,6 +163,75 @@ h1 {
   margin: 0;
   font-size: 15px;
   font-weight: 600;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The pixel logo: 24 px are three device pixels per logo pixel on a screen with twice the density */
+.logo {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+/* The name in brushed metal, with a reflection that moves through it from time to time */
+/* The name in the header uses the bold face of a code font from the renderer */
+@font-face {
+  font-family: "tin.so Brand";
+  src: url("../../../packages/core/fonts/jetbrains-mono/jetbrains-mono-700.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+.brand-name {
+  background:
+    linear-gradient(
+        100deg,
+        transparent 30%,
+        var(--metal-shine) 45%,
+        var(--metal-shine) 55%,
+        transparent 70%
+      )
+      no-repeat,
+    linear-gradient(180deg, var(--metal-light) 0%, var(--metal) 55%, var(--metal-light) 100%);
+  background-position:
+    -150% 0,
+    0 0;
+  background-size:
+    50% 100%,
+    100% 100%;
+  background-clip: text;
+  color: transparent;
+  font-family: "tin.so Brand", monospace;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  animation: brand-shine 5s ease-in-out 0.5s infinite;
+}
+
+@keyframes brand-shine {
+  0% {
+    background-position:
+      -150% 0,
+      0 0;
+  }
+
+  50%,
+  100% {
+    background-position:
+      250% 0,
+      0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-name {
+    animation: none;
+  }
 }
 
 .section {
@@ -1144,11 +1200,6 @@ button.icon {
   height: 14px;
 }
 
-.select-icon.swatch {
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px var(--border);
-}
-
 /* A logo keeps its aspect ratio inside the box of the icon, as in ray.so */
 .select-icon.theme-logo {
   display: inline-flex;
@@ -1175,6 +1226,17 @@ button.icon {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
   font-size: 13px;
   outline: none;
+}
+
+/* The header of a list that stays open after a choice */
+.select-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 6px 6px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .select-popover input.select-search {
@@ -1211,6 +1273,49 @@ button.icon {
 
 .select-option.active {
   background: var(--border);
+}
+
+/* A theme in the list: its background with a small window in its colors */
+.theme-thumbnail {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  aspect-ratio: 16 / 10;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.theme-thumbnail .background-preview-window {
+  gap: 2px;
+  width: 58%;
+  padding: 2px 3px 3px;
+  border-radius: 3px;
+}
+
+.theme-thumbnail .background-preview-controls span {
+  width: 2px;
+  height: 2px;
+}
+
+.theme-thumbnail .background-preview-line span {
+  height: 1.5px;
+}
+
+/* The colors of the selected theme in the closed theme field */
+.theme-palette {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.theme-palette span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--border-strong);
 }
 
 .select-check {
@@ -1652,4 +1757,368 @@ button.compact {
 
 .mark-clear {
   color: var(--text-muted);
+}
+
+/* The popovers of a pane in the window card, as rows of the window list */
+.window-row code.window-row-name {
+  font-size: 12px;
+}
+
+.popover-row-missing {
+  flex-shrink: 0;
+  color: var(--error);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.popover-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 10px;
+}
+
+/* The background field shows the background itself as a bar, and opens a panel of swatches */
+.background-field {
+  position: relative;
+}
+
+.background-trigger {
+  height: 34px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-raised);
+  cursor: pointer;
+}
+
+/* The bar shows the background at its opacity over a checkerboard */
+.background-bar {
+  display: block;
+  overflow: hidden;
+  height: 100%;
+  border-radius: 5px;
+  background: repeating-conic-gradient(#808080 0 25%, #c0c0c0 0 50%) 0 0 / 12px 12px;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.background-bar > span {
+  display: block;
+  height: 100%;
+}
+
+.background-panel {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--panel);
+  /* The panel lies over the sidebar in the same color, so a deep shadow sets it apart */
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.25),
+    0 20px 48px rgba(0, 0, 0, 0.55);
+}
+
+.background-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.background-opacity {
+  display: grid;
+  grid-template-columns: auto 1fr 3.5em;
+  align-items: center;
+  gap: 10px;
+}
+
+.background-opacity output {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.background-css {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12px;
+}
+
+.background-css[aria-invalid="true"] {
+  border-color: var(--error);
+}
+
+.background-swatches {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 8px;
+  max-height: 420px;
+  margin: -4px;
+  padding: 4px;
+  overflow-y: auto;
+}
+
+/* A tile shows the background with a small window of the theme on it, and the name under it */
+.background-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.background-swatch-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.background-swatch[aria-pressed="true"] {
+  color: var(--text);
+}
+
+/* The tile under the mouse or the keyboard focus, which the image shows as a preview */
+.background-swatch:focus-visible {
+  outline: none;
+}
+
+.background-swatch:hover .background-swatch-canvas,
+.background-swatch:focus-visible .background-swatch-canvas {
+  box-shadow:
+    0 0 0 2px var(--panel),
+    0 0 0 4px var(--text-muted);
+}
+
+.background-swatch:hover,
+.background-swatch:focus-visible {
+  color: var(--text);
+}
+
+.background-swatch:hover .background-swatch-canvas {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .background-swatch-canvas {
+    transition:
+      box-shadow 0.12s ease,
+      transform 0.12s ease;
+  }
+}
+
+/* The chosen tile keeps its ring, also under the mouse or the focus */
+.background-swatch[aria-pressed="true"] .background-swatch-canvas {
+  box-shadow:
+    0 0 0 2px var(--panel),
+    0 0 0 4px var(--selection);
+}
+
+.background-swatch-name {
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.background-preview-window {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 52%;
+  padding: 4px 5px 6px;
+  border: 1px solid;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.25);
+}
+
+.background-preview-controls {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 1px;
+}
+
+.background-preview-controls span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+}
+
+.background-preview-line {
+  display: flex;
+}
+
+.background-preview-line span {
+  height: 2px;
+  border-radius: 1px;
+}
+
+/* The ambient backgrounds: the renderer makes them from the image, so each tile has a label */
+.background-ambient {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.background-ambient-option {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.background-ambient-preview {
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.background-ambient-option[aria-pressed="true"] {
+  color: var(--text);
+}
+
+.background-ambient-option[aria-pressed="true"] .background-ambient-preview {
+  box-shadow:
+    0 0 0 2px var(--panel),
+    0 0 0 4px var(--selection);
+}
+
+/* The color picker: saturation from left to right, brightness from bottom to top */
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.color-square {
+  position: relative;
+  height: 150px;
+  border-radius: 8px;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.color-square::before {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(to top, #000000, transparent), linear-gradient(to right, #ffffff, transparent);
+  content: "";
+}
+
+.color-square-thumb {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.color-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-current {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.color-picker .color-hue {
+  flex: 1;
+  min-width: 0;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: linear-gradient(
+    to right,
+    #ff0000,
+    #ffff00,
+    #00ff00,
+    #00ffff,
+    #0000ff,
+    #ff00ff,
+    #ff0000
+  );
+  appearance: none;
+}
+
+.color-hue::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  appearance: none;
+}
+
+.color-hue::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+
+.color-channels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.color-channels label {
+  display: grid;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.color-channels input {
+  min-width: 0;
+  text-align: center;
+}
+
+.sr-only {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

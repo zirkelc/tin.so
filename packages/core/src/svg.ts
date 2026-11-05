@@ -1,9 +1,11 @@
 import { bytesToBase64 } from "./base64.ts";
 import { type Font, UI_FONT } from "./fonts/index.ts";
 import { attrs, blend, escapeXml, round, roundedRect, textAttrs } from "./frames/draw.ts";
-import { type FrameContext, getFrame } from "./frames/index.ts";
+import { DEFAULT_FRAME, type FrameContext } from "./frames/index.ts";
+import { backgroundSvg } from "./gradient.ts";
 import type { HighlightedLine } from "./highlight/index.ts";
 import type { Icon } from "./icons/index.ts";
+import type { Mode } from "./themes/index.ts";
 import {
   type AnnotationBox,
   cellCount,
@@ -202,9 +204,22 @@ function renderIcon(icon: Icon, x: number, y: number, size: number, color: strin
   return `<g ${attrs({ transform, ...paint })}>${icon.body}</g>`;
 }
 
-function renderWindow(context: FrameContext, window: WindowBox, index: number, out: Array<string>) {
+/** The context of a window: a window with its own background replaces the background of the theme */
+function windowContext(context: FrameContext, window: WindowBox): FrameContext {
+  if (!window.background) return context;
+  const frame = { ...context.scene.frame, background: window.background };
+  return { ...context, scene: { ...context.scene, frame } };
+}
+
+// A popover without its own background stands out from the window: lighter in dark mode, darker in light mode
+const POPOVER_RAISE: Record<Mode, string> = {
+  dark: "rgba(255, 255, 255, 0.08)",
+  light: "rgba(0, 0, 0, 0.04)",
+};
+
+function renderWindow(parent: FrameContext, window: WindowBox, index: number, out: Array<string>) {
+  const context = windowContext(parent, window);
   const { scene } = context;
-  const frame = getFrame(scene.theme.id);
 
   // A window-less group shows only the code
   if (!window.frame) {
@@ -212,9 +227,9 @@ function renderWindow(context: FrameContext, window: WindowBox, index: number, o
     return;
   }
 
-  out.push(frame.body(context, window));
+  out.push(DEFAULT_FRAME.body(context, window));
   out.push(`<g clip-path="url(#window-${index})">`);
-  if (window.header) out.push(frame.header(context, window));
+  if (window.header) out.push(DEFAULT_FRAME.header(context, window));
 
   window.panes.forEach((pane, i) => renderPane(scene, pane, `pane-${index}-${i}`, out));
   if (window.header && window.panes.some((pane) => pane.tab)) {
@@ -226,7 +241,7 @@ function renderWindow(context: FrameContext, window: WindowBox, index: number, o
   for (const divider of window.dividers)
     out.push(`<line ${attrs({ ...divider, stroke: scene.frame.divider })}/>`);
   out.push("</g>");
-  out.push(frame.border(context, window));
+  out.push(DEFAULT_FRAME.border(context, window));
 }
 
 function renderPopover(
@@ -243,7 +258,9 @@ function renderPopover(
     ? mode === "dark"
       ? "#000000"
       : "#ffffff"
-    : getFrame(scene.theme.id).base(context);
+    : scene.customBackground !== undefined
+      ? scene.frame.backdrop.from
+      : DEFAULT_FRAME.base(context);
 
   out.push(
     roundedRect({ ...box, y: box.y + 8 }, POPOVER.radius, {
@@ -254,7 +271,7 @@ function renderPopover(
   );
   out.push(
     roundedRect(box, POPOVER.radius, {
-      fill: blend(frame.background, below),
+      fill: annotation.background ?? blend(POPOVER_RAISE[mode], blend(frame.background, below)),
       stroke: frame.divider,
       "stroke-width": 1,
     }),
@@ -274,12 +291,46 @@ function renderPopover(
   if (annotation.clipped) out.push("</g>");
 }
 
+// How much larger the blurred copy of the code is than the window, so that its colors reach out
+const AMBIENT_SCALE = 1.6;
+
+/**
+ * Draws the code of each window again behind it: larger, with thicker glyphs, a strong blur and
+ * more saturation, so that the colors of the code glow around the window.
+ */
+function renderAmbientBlur(scene: Scene, defs: Array<string>, body: Array<string>) {
+  const blur = Math.round(Math.min(scene.width, scene.height) / 12);
+  // In light mode the colors become pastel, as dark text would give muddy spots
+  const pastel =
+    scene.mode === "light"
+      ? `<feComponentTransfer>${["R", "G", "B"].map((c) => `<feFunc${c} type="linear" slope="0.5" intercept="0.5"/>`).join("")}</feComponentTransfer>`
+      : "";
+  defs.push(
+    `<filter id="ambient-blur" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">` +
+      `<feMorphology operator="dilate" radius="4"/>` +
+      `<feGaussianBlur stdDeviation="${blur}"/>` +
+      `<feColorMatrix type="saturate" values="1.8"/>` +
+      pastel +
+      `<feComponentTransfer><feFuncA type="linear" slope="2.5"/></feComponentTransfer>` +
+      `</filter>`,
+  );
+  scene.windows.forEach((window, index) => {
+    const cx = round(window.x + window.width / 2);
+    const cy = round(window.y + window.height / 2);
+    const out: Array<string> = [];
+    window.panes.forEach((pane, i) => renderPane(scene, pane, `ambient-${index}-${i}`, out));
+    body.push(
+      `<g filter="url(#ambient-blur)"><g transform="translate(${cx} ${cy}) scale(${AMBIENT_SCALE}) translate(${-cx} ${-cy})">${out.join("")}</g></g>`,
+    );
+  });
+}
+
 /** Writes the scene as a standalone SVG document */
 export function toSvg(scene: Scene, options: SvgOptions = {}): string {
   const { width, height, windows } = scene;
   const defs: Array<string> = [];
   const body: Array<string> = [];
-  const frame = getFrame(scene.theme.id);
+  const frame = DEFAULT_FRAME;
   const used = new Set<string>();
   const context: FrameContext = {
     scene,
@@ -304,18 +355,34 @@ export function toSvg(scene: Scene, options: SvgOptions = {}): string {
   });
 
   if (scene.background) {
-    body.push(frame.background(context));
+    const background = scene.customBackground
+      ? backgroundSvg(scene.customBackground, { x: 0, y: 0, width, height }, context.id)
+      : frame.background(context);
+    body.push(
+      scene.backgroundOpacity < 1
+        ? `<g opacity="${round(scene.backgroundOpacity)}">${background}</g>`
+        : background,
+    );
+    if (scene.ambientBlur) renderAmbientBlur(scene, defs, body);
     for (const window of windows) body.push(frame.behind(context, window));
   }
 
   windows.forEach((window, index) => renderWindow(context, window, index, body));
 
-  const annotations = windows.flatMap((window) => window.panes.flatMap((pane) => pane.annotations));
+  // Each popover takes the context of its window, for the background of the window
+  const annotations = windows.flatMap((window) =>
+    window.panes.flatMap((pane) =>
+      pane.annotations.map((annotation) => ({
+        annotation,
+        context: windowContext(context, window),
+      })),
+    ),
+  );
   if (annotations.length > 0) {
     defs.push(
       '<filter id="popover-shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="12"/></filter>',
     );
-    annotations.forEach((annotation, index) =>
+    annotations.forEach(({ annotation, context }, index) =>
       renderPopover(context, annotation, `popover-${index}`, body),
     );
   }

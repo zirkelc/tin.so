@@ -4,7 +4,8 @@ import { layout } from "../src/layout.ts";
 import { readImageSpec } from "../src/metadata.ts";
 import { render, renderScene } from "../src/node.ts";
 import { toSvg } from "../src/svg.ts";
-import { THEMES } from "../src/themes/index.ts";
+import { themeBackground } from "../src/backgrounds.ts";
+import { resolveMode, THEMES } from "../src/themes/index.ts";
 
 const FIXTURES = new URL("./fixtures/", import.meta.url);
 const fixtures = (await readdir(FIXTURES))
@@ -99,7 +100,7 @@ describe("render", () => {
 
   test("should render a PNG at the scale", async () => {
     // Arrange
-    const spec = await readFixture("split-toml");
+    const spec = { ...((await readFixture("split-toml")) as object), theme: "github" };
     const scene = await layout(spec);
 
     // Act
@@ -139,7 +140,7 @@ describe("render", () => {
 });
 
 describe("metadata", () => {
-  const spec = { theme: "vercel", windows: [{ panes: [{ title: "a.ts", code: "<b>&</b>" }] }] };
+  const spec = { theme: "github", windows: [{ panes: [{ title: "a.ts", code: "<b>&</b>" }] }] };
 
   test("should round trip the spec in a PNG", async () => {
     // Arrange
@@ -295,57 +296,57 @@ describe("clipped panes", () => {
   });
 });
 
-describe("partner frame without a window", () => {
-  test("should draw the Vercel frame: a black background, grid lines and brackets", async () => {
-    // Arrange
-    const scene = await layout({
-      theme: "vercel",
-      windows: [{ frame: false, panes: [{ code: "x" }] }],
-    });
-
-    // Act
-    const svg = toSvg(scene);
-
-    // Assert
-    expect(svg).toContain(`<rect width="${scene.width}" height="${scene.height}" fill="#000000"/>`);
-    expect([...svg.matchAll(/<line [^>]*stroke="#1a1a1a"/g)].length).toBe(4);
-    expect([...svg.matchAll(/<path [^>]*stroke="#515356"/g)].length).toBe(2);
-  });
-
-  test("should keep the gradient of a theme without a partner frame", async () => {
-    // Arrange
-    const scene = await layout({
-      theme: "candy",
-      windows: [{ frame: false, panes: [{ code: "x" }] }],
-    });
-
-    // Act
-    const svg = toSvg(scene);
-
-    // Assert
-    expect(svg).toContain('fill="url(#frame-background)"');
-    expect(svg).not.toContain("<path ");
-  });
-});
-
 describe("theme frames", () => {
-  test("should draw the outline of the ElevenLabs window also without a frame", async () => {
+  test("should fill the window of an editor theme with the background of its mode", async () => {
     // Arrange
-    const pane = { title: "a.ts", code: "x" };
-    const framed = await layout({ theme: "elevenlabs", windows: [{ panes: [pane] }] });
-    const frameless = await layout({
-      theme: "elevenlabs",
-      windows: [{ frame: false, panes: [pane] }],
-    });
-    const outline = (svg: string) => svg.match(/<rect [^>]*fill="none" stroke="#353535"\/>/g) ?? [];
+    const spec = { theme: "solarized", windows: [{ panes: [{ code: "x" }] }] };
 
     // Act
-    const result = outline(toSvg(frameless));
+    const dark = await layout({ ...spec, mode: "dark" });
+    const light = await layout({ ...spec, mode: "light" });
 
     // Assert
-    expect(result.length).toBe(1);
-    expect(outline(toSvg(framed)).length).toBe(1);
+    expect(dark.frame.background).toBe("#002b36");
+    expect(light.frame.background).toBe("#fdf6e3");
+    expect(light.frame.divider).toBe("#ddd6c1");
+    expect(toSvg(dark)).toContain('fill="#002b36"');
   });
+
+  test("should use the dark window of an editor theme with only a dark mode", async () => {
+    // Act
+    const scene = await layout({
+      theme: "nord",
+      mode: "light",
+      windows: [{ panes: [{ code: "x" }] }],
+    });
+
+    // Assert
+    expect(scene.mode).toBe("dark");
+    expect(scene.frame.background).toBe("#2e3440");
+    expect(scene.frame.lineNumber).toBe("#4c566a");
+    expect(scene.frame.title).toBe("#d8dee9");
+  });
+
+  test.each([
+    { theme: "dracula", background: "#fffbeb", keyword: "#a3144d" },
+    { theme: "tokyo-night", background: "#e6e7ed", keyword: "#65359d" },
+  ])(
+    "should use the official light variant of $theme in light mode",
+    async ({ theme, background, keyword }) => {
+      // Act
+      const scene = await layout({
+        theme,
+        mode: "light",
+        windows: [{ panes: [{ code: "if (x) {}", language: "ts" }] }],
+      });
+      const svg = toSvg(scene);
+
+      // Assert
+      expect(scene.mode).toBe("light");
+      expect(scene.frame.background).toBe(background);
+      expect(svg.toLowerCase()).toContain(`fill="${keyword}"`);
+    },
+  );
 
   test("should draw the shadow of a window without a blur filter", async () => {
     // Arrange
@@ -385,4 +386,295 @@ describe("theme frames", () => {
       expect(new Set(ids).size).toBe(ids.length);
     },
   );
+});
+
+describe("background colors", () => {
+  const popover = { line: 1, match: "a", code: "const a: number" };
+
+  test("should fill a window with its own background color", async () => {
+    // Arrange
+    const scene = await layout({
+      windows: [
+        { background: "#123456", panes: [{ code: "const a = 1;" }] },
+        { panes: [{ code: "b" }] },
+      ],
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect([...svg.matchAll(/fill="#123456"/g)].length).toBe(1);
+  });
+
+  test("should fill a popover with its own background color", async () => {
+    // Arrange
+    const scene = await layout({
+      windows: [
+        { panes: [{ code: "const a = 1;", annotations: [{ ...popover, background: "#334455" }] }] },
+      ],
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toContain('fill="#334455" stroke=');
+  });
+
+  test("should give a popover the background of its window, raised", async () => {
+    // Arrange
+    const scene = await layout({
+      windows: [
+        { background: "#000000", panes: [{ code: "const a = 1;", annotations: [popover] }] },
+      ],
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toContain('fill="rgb(20, 20, 20)" stroke=');
+  });
+
+  test("should make a popover lighter than the window in dark mode and darker in light mode", async () => {
+    // Arrange
+    const spec = {
+      theme: "solarized",
+      windows: [{ panes: [{ code: "const a = 1;", annotations: [popover] }] }],
+    };
+
+    // Act
+    const dark = toSvg(await layout({ ...spec, mode: "dark" }));
+    const light = toSvg(await layout({ ...spec, mode: "light" }));
+
+    // Assert
+    expect(dark).toContain('fill="rgb(20, 60, 70)" stroke=');
+    expect(light).toContain('fill="rgb(243, 236, 218)" stroke=');
+  });
+});
+
+describe("image background", () => {
+  const windows = [
+    { panes: [{ code: "const a = 1;", annotations: [{ line: 1, match: "a", code: "number" }] }] },
+  ];
+
+  test("should fill the image with a solid color in place of the theme gradient", async () => {
+    // Arrange
+    const scene = await layout({ background: "#123456", windows });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(scene.frame.backdrop).toEqual({ from: "#123456", to: "#123456" });
+    expect(svg).toContain(
+      `<rect x="0" y="0" width="${scene.width}" height="${scene.height}" fill="#123456"/>`,
+    );
+  });
+
+  test("should draw a linear gradient along the line of its CSS angle", async () => {
+    // Arrange
+    const scene = await layout({
+      background: "linear-gradient(90deg, #112233 25%, #445566)",
+      width: 400,
+      height: 200,
+      windows,
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toContain(
+      '<linearGradient id="frame-background-linear" gradientUnits="userSpaceOnUse" x1="0" y1="100" x2="400" y2="100"><stop offset="0.25" stop-color="#112233"/><stop offset="1" stop-color="#445566"/></linearGradient>',
+    );
+  });
+
+  test("should spread the stops without a position between their neighbors", async () => {
+    // Arrange
+    const scene = await layout({
+      background: "linear-gradient(90deg, #111111, #222222, #333333 80%, #444444)",
+      windows,
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    const offsets = [...svg.matchAll(/<stop offset="([\d.]+)" stop-color="#[1-4]{6}"/g)].map(
+      (match) => Number(match[1]),
+    );
+    expect(offsets).toEqual([0, 0.4, 0.8, 1]);
+  });
+
+  test("should point a gradient to a corner so that its middle goes through the other corners", async () => {
+    // Arrange
+    const scene = await layout({
+      background: "linear-gradient(to right top, #112233, #445566)",
+      width: 400,
+      height: 200,
+      windows,
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toContain('x1="120" y1="260" x2="280" y2="-60"');
+  });
+
+  test("should fade to transparent in the color of the next stop, as a browser does", async () => {
+    // Arrange
+    const scene = await layout({
+      background: "radial-gradient(at 0% 0%, #7c3aed 0px, transparent 50%), #0b0820",
+      width: 400,
+      height: 200,
+      windows,
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toContain(
+      '<radialGradient id="frame-background-radial" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="565.69" gradientTransform="translate(0 0) scale(1 0.5)"><stop offset="0" stop-color="#7c3aed"/><stop offset="0.5" stop-color="#7c3aed" stop-opacity="0"/></radialGradient>',
+    );
+    expect(svg.indexOf('fill="#0b0820"')).toBeLessThan(
+      svg.indexOf('fill="url(#frame-background-radial)"'),
+    );
+  });
+
+  test("should draw the background with its opacity", async () => {
+    // Arrange
+    const scene = await layout({ background: "#123456", backgroundOpacity: 0.4, windows });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toContain(
+      `<g opacity="0.4"><rect x="0" y="0" width="${scene.width}" height="${scene.height}" fill="#123456"/></g>`,
+    );
+  });
+
+  test.each(
+    THEMES.flatMap((theme) =>
+      (["dark", "light"] as const)
+        .filter((mode) => resolveMode(theme, mode) === mode)
+        .map((mode) => [theme.id, mode] as const),
+    ),
+  )("should have a background preset for the theme %s in the mode %s", (id, mode) => {
+    // Arrange
+    const theme = THEMES.find((theme) => theme.id === id)!;
+
+    // Act
+    const preset = themeBackground(theme, mode);
+
+    // Assert
+    expect(preset).toBeDefined();
+  });
+
+  test.each([
+    { mode: "dark", base: "#0d1117", glow: "#1f6feb" },
+    { mode: "light", base: "#fdfcfb", glow: "#ffd6a5" },
+  ] as const)(
+    "should draw the background preset of the theme in the mode $mode by default",
+    async ({ mode, base, glow }) => {
+      // Arrange
+      const scene = await layout({ theme: "vscode", mode, windows });
+
+      // Act
+      const svg = toSvg(scene);
+
+      // Assert
+      expect(scene.frame.backdrop).toEqual({ from: base, to: base });
+      expect(svg).toContain(`stop-color="${glow}"`);
+    },
+  );
+
+  test("should draw the background preset of the only mode of a theme", async () => {
+    // Arrange
+    const scene = await layout({ theme: "synthwave-84", mode: "light", windows });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toContain('stop-color="#ff6ec7"');
+  });
+
+  test("should leave the image transparent at the opacity 0", async () => {
+    // Act
+    const scene = await layout({ backgroundOpacity: 0, windows });
+
+    // Assert
+    expect(scene.background).toBe(false);
+  });
+});
+
+// The ambient backgrounds are not enabled yet
+describe.skip("ambient backgrounds", () => {
+  const windows = [
+    { panes: [{ language: "typescript", code: 'const greeting = "hello world";' }] },
+  ];
+
+  test.each([
+    {
+      mode: "dark",
+      css: "radial-gradient(at 0% 0%, #d96961 0px, transparent 55%), radial-gradient(at 100% 100%, #8cb6d9 0px, transparent 50%), radial-gradient(at 100% 0%, #b38fd9 0px, transparent 45%), #080b0f",
+    },
+    {
+      mode: "light",
+      css: "radial-gradient(at 0% 0%, #e5858c 0px, transparent 55%), radial-gradient(at 100% 100%, #788dad 0px, transparent 50%), radial-gradient(at 100% 0%, #ba9fed 0px, transparent 45%), #f5f5f5",
+    },
+  ] as const)("should make a mesh of the theme colors in the mode $mode", async ({ mode, css }) => {
+    // Arrange
+    const expected = await layout({ theme: "github", mode, background: css, windows });
+
+    // Act
+    const scene = await layout({ theme: "github", mode, background: "ambient-theme", windows });
+
+    // Assert
+    expect(scene.customBackground).toEqual(expected.customBackground);
+  });
+
+  test("should put the color that the code uses most in the first corner", async () => {
+    // Arrange
+    const code = 'const a = "a long string with many characters";';
+
+    // Act
+    const scene = await layout({
+      theme: "github",
+      background: "ambient-code",
+      windows: [{ panes: [{ language: "typescript", code }] }],
+    });
+    const svg = toSvg(scene);
+
+    // Assert
+    // The string color #a5d6ff of the theme, 15 % darker
+    expect(svg).toContain('stop-color="#8cb6d9"');
+    expect(scene.frame.backdrop).toEqual({ from: "#080b0f", to: "#080b0f" });
+  });
+
+  test("should draw a blurred copy of the code behind the window", async () => {
+    // Act
+    const scene = await layout({ theme: "github", background: "ambient-blur", windows });
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(scene.ambientBlur).toBe(true);
+    expect(svg).toContain('<g filter="url(#ambient-blur)">');
+    expect(svg.indexOf("ambient-blur)")).toBeLessThan(svg.indexOf("greeting"));
+  });
+
+  test("should draw no blurred copy for the other backgrounds", async () => {
+    // Act
+    const scene = await layout({ theme: "github", windows });
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(scene.ambientBlur).toBe(false);
+    expect(svg).not.toContain("ambient-blur");
+  });
 });

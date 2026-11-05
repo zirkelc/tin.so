@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 export function Switch(props: {
   label: string;
+  /** A name for screen readers when the visible label is not unique on the page */
+  ariaLabel?: string;
   checked: boolean;
   disabled?: boolean;
   onChange: (checked: boolean) => void;
@@ -13,7 +15,7 @@ export function Switch(props: {
         type="button"
         role="switch"
         aria-checked={props.checked}
-        aria-label={props.label}
+        aria-label={props.ariaLabel ?? props.label}
         disabled={props.disabled}
         className="switch"
         onClick={() => props.onChange(!props.checked)}
