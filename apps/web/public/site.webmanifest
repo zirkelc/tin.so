@@ -1,7 +1,7 @@
 {
   "name": "tin.so",
   "short_name": "tin.so",
-  "description": "Life's too short for ugly code. Create images of code with several snippets in one image.",
+  "description": "Beautiful code images for humans and agents, with several snippets in one image.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d1117",

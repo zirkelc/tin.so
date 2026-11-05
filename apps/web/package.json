@@ -10,7 +10,8 @@
     "deploy": "vp build && wrangler deploy",
     "test": "vp test",
     "generate-theme-previews": "node scripts/generate-theme-previews.ts",
-    "generate-og-image": "node scripts/generate-og-image.ts"
+    "generate-og-image": "node scripts/generate-og-image.ts",
+    "generate-readme-images": "node scripts/generate-readme-images.ts"
   },
   "dependencies": {
     "@resvg/resvg-wasm": "catalog:",
