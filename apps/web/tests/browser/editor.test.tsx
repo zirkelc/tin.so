@@ -1101,6 +1101,43 @@ describe("examples", () => {
     // Assert
     await expect.poll(async () => (await specInUrl())?.windows[0]?.panes[0]?.title).toBe("main.py");
   });
+
+  test("should find a language by its alias", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "main.ts", code: "" }] }] });
+    languageTrigger(1).click();
+
+    // Act
+    await userEvent.fill(page.getByRole("textbox", { name: "Search Language" }), "bash");
+    await userEvent.keyboard("{Enter}");
+
+    // Assert
+    await expect
+      .poll(async () => (await specInUrl())?.windows[0]?.panes[0]?.title)
+      .toBe("deploy.sh");
+  });
+
+  test("should list the popular languages first, by name and without icons", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "main.ts", code: "" }] }] });
+
+    // Act
+    languageTrigger(1).click();
+
+    // Assert
+    const list = page.getByRole("listbox");
+    await expect.element(list).toBeVisible();
+    const options = [...list.element().querySelectorAll('[role="option"]')];
+    const labels = options
+      .slice(0, 3)
+      .map((option) => option.querySelector(".select-value")?.textContent);
+    const groups = [...list.element().querySelectorAll(".select-group")].map((g) => g.textContent);
+    expect(labels).toEqual(["Auto (TypeScript)", "Plain Text", "TypeScript"]);
+    expect(groups).toEqual(["Popular", "All languages"]);
+    expect(list.element().querySelectorAll(".select-icon").length).toBe(0);
+  });
 });
 
 describe("style panel", () => {

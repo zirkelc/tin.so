@@ -27,6 +27,8 @@ export type SelectOption<VALUE extends string> = {
   group?: string;
   /** A shorter text for the closed select, when the label is long */
   shortLabel?: string;
+  /** Other names that the search also finds, such as "bash" for the shell */
+  keywords?: Array<string>;
 };
 
 const POPOVER_MIN_WIDTH = 220;
@@ -116,7 +118,9 @@ export function Select<VALUE extends string>(props: {
     const words = query.toLowerCase().split(/\s+/).filter(Boolean);
     if (words.length === 0) return options;
     return options.filter((option) => {
-      const text = `${option.label} ${option.value} ${option.group ?? ""}`.toLowerCase();
+      const text = [option.label, option.value, option.group, ...(option.keywords ?? [])]
+        .join(" ")
+        .toLowerCase();
       return words.every((word) => text.includes(word));
     });
   }, [options, query]);

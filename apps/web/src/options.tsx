@@ -1,23 +1,67 @@
 import {
   AUTO_ICON,
-  FILE_ICON,
   getIcon,
   ICON_IDS,
-  LANGUAGE_IDS,
+  type LanguageInfo,
+  LANGUAGES,
   NO_ICON,
+  PLAIN_TEXT,
   resolveIcon,
 } from "@tin.so/core";
 import { IconSvg, type SelectOption } from "./select.tsx";
 
 export const AUTO_LANGUAGE = "auto";
 
+// The languages that most code images show, at the top of the list
+const POPULAR_LANGUAGES = [
+  "typescript",
+  "tsx",
+  "javascript",
+  "jsx",
+  "python",
+  "go",
+  "rust",
+  "shellscript",
+  "shellsession",
+  "json",
+  "yaml",
+  "toml",
+  "sql",
+  "html",
+  "css",
+  "java",
+  "csharp",
+  "cpp",
+  "c",
+  "swift",
+  "kotlin",
+  "php",
+  "ruby",
+  "markdown",
+  "docker",
+  "diff",
+];
+
+const languageOption = (language: LanguageInfo, group: string): SelectOption<string> => ({
+  value: language.id,
+  label: language.name,
+  group,
+  keywords: language.aliases,
+});
+
+/** The languages by name: auto and plain text first, then the popular ones, then all others */
 export const LANGUAGE_OPTIONS: Array<SelectOption<string>> = [
-  { value: AUTO_LANGUAGE, label: "auto", icon: <IconSvg icon={getIcon(FILE_ICON)} /> },
-  ...LANGUAGE_IDS.map((language) => ({
-    value: language,
-    label: language,
-    icon: <IconSvg icon={resolveIcon(AUTO_ICON, language)} />,
-  })),
+  { value: AUTO_LANGUAGE, label: "Auto" },
+  { value: PLAIN_TEXT, label: "Plain Text" },
+  ...POPULAR_LANGUAGES.map((id) =>
+    languageOption(
+      LANGUAGES.find((l) => l.id === id)!,
+      "Popular",
+    ),
+  ),
+  ...LANGUAGES.filter(({ id }) => id !== PLAIN_TEXT && !POPULAR_LANGUAGES.includes(id))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((language) => languageOption(language, "All languages")),
 ];
 
 const ICON_OPTIONS: Array<SelectOption<string>> = [

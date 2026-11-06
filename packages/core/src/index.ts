@@ -31,9 +31,12 @@ export {
   inferLanguage,
   isKnownLanguage,
   LANGUAGE_IDS,
+  LANGUAGES,
+  languageName,
   PLAIN_TEXT,
   resolveLanguage,
   type HighlightedLine,
+  type LanguageInfo,
   type Token,
 } from "./highlight/index.ts";
 export {

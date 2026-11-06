@@ -3,9 +3,9 @@ import {
   CODE_FONTS,
   DEFAULT_THEME,
   getFrameColors,
+  languageName,
   type Mode,
   parseSpec,
-  resolveIcon,
   resolveMode,
   type Scene,
   SpecError,
@@ -32,7 +32,7 @@ import { jsonTokens } from "./json-tokens.ts";
 import { registerRegularFaces } from "./renderer.ts";
 import { AUTO_LANGUAGE, iconOptions, LANGUAGE_OPTIONS } from "./options.tsx";
 import { insertSpaces } from "./Preview.tsx";
-import { IconSvg, Select, type SelectOption } from "./select.tsx";
+import { Select, type SelectOption } from "./select.tsx";
 import {
   fitToPadding,
   fitToRatio,
@@ -288,13 +288,7 @@ export function Settings(props: {
 /** The languages, with the auto option named after the language that it gives */
 function languageOptions(auto: string): Array<SelectOption<string>> {
   return LANGUAGE_OPTIONS.map((option) =>
-    option.value === AUTO_LANGUAGE
-      ? {
-          ...option,
-          label: `Auto (${auto})`,
-          icon: <IconSvg icon={resolveIcon(AUTO_ICON, auto)} />,
-        }
-      : option,
+    option.value === AUTO_LANGUAGE ? { ...option, label: `Auto (${languageName(auto)})` } : option,
   );
 }
 

@@ -25,6 +25,14 @@ export const PLAIN_TEXT = "text";
 
 export const LANGUAGE_IDS = [PLAIN_TEXT, ...bundledLanguagesInfo.map((language) => language.id)];
 
+/** A language with its display name and its other names, such as "bash" for the shell */
+export type LanguageInfo = { id: string; name: string; aliases: Array<string> };
+
+export const LANGUAGES: Array<LanguageInfo> = [
+  { id: PLAIN_TEXT, name: "Plain Text", aliases: [] },
+  ...bundledLanguagesInfo.map(({ id, name, aliases }) => ({ id, name, aliases: aliases ?? [] })),
+];
+
 /** The display name of a language, such as "TypeScript" for "typescript" */
 export function languageName(language: string): string {
   if (language === PLAIN_TEXT) return "Plain Text";

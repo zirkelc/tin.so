@@ -132,7 +132,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 </p>
 
 - Type the code directly in the image.
-- Syntax highlighting with Shiki for all its languages. The language comes from the file name, or you select it.
+- Syntax highlighting with Shiki for all its languages. The language comes from the file name, or you select it: the popular languages are at the top, and the search also finds other names, such as "bash" for Shell.
 - An example for each of the 242 languages.
 - Format the code with Prettier, for JavaScript, TypeScript, JSON, CSS, HTML, Markdown, YAML and more.
 - Edit the full spec as JSON, with each problem shown while you type.
