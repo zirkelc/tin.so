@@ -9,9 +9,9 @@ on:
     types: [published]
   workflow_dispatch:
 
-# A release of several packages publishes several GitHub releases at the same time
+# Each release has its own group: a shared group keeps only one waiting run and cancels the others
 concurrency:
-  group: release
+  group: release-${{ github.event.release.tag_name || github.run_id }}
   cancel-in-progress: false
 
 permissions:
@@ -35,12 +35,33 @@ jobs:
           cache: "pnpm"
       - run: pnpm install
       - run: pnpm exec vp run -r build
-      # Publishes each public package whose version is not on npm yet, core before the CLI. A run
-      # for the second release of the same version finds nothing to publish.
-      - run: pnpm -r publish --provenance --no-git-checks
-      # Deploys the web editor, which uses the new core. A release of several packages deploys more
-      # than once, and a deploy without changes uploads nothing.
+      # Release Please makes one GitHub release for each package, and each one starts this
+      # workflow. A run publishes or deploys only the package of its own tag, because a second
+      # publish of the same version fails. A manual run publishes every version that is not on npm.
+      - name: Publish all
+        if: github.event_name == 'workflow_dispatch'
+        run: pnpm -r publish --provenance --no-git-checks
+      - name: Publish core
+        if: startsWith(github.event.release.tag_name, 'core-v')
+        run: pnpm --filter @tin.so/core publish --provenance --no-git-checks
+      # The CLI needs the core of the same version, which the run of the core release publishes
+      - name: Publish CLI
+        if: startsWith(github.event.release.tag_name, 'cli-v')
+        timeout-minutes: 15
+        run: |
+          version=$(node -p "require('./packages/core/package.json').version")
+          until npm view "@tin.so/core@$version" version --prefer-online | grep -q .; do
+            echo "Waiting for @tin.so/core@$version on npm"
+            sleep 15
+          done
+          pnpm --filter tin.so publish --provenance --no-git-checks
+      # Deploys the web editor. A release of the core also deploys it, because the editor uses the
+      # core and gets no release of its own for a change that is only in the core.
       - name: Deploy
+        if: >-
+          github.event_name == 'workflow_dispatch' ||
+          startsWith(github.event.release.tag_name, 'web-v') ||
+          startsWith(github.event.release.tag_name, 'core-v')
         run: pnpm --filter @tin.so/web exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
