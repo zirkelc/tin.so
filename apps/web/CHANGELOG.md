@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.0](https://github.com/zirkelc/tin.so/compare/web-v0.3.0...web-v0.4.0) (2026-11-06)
+
+
+### Features
+
+* **web:** list the popular languages first and find languages by alias ([bdf293d](https://github.com/zirkelc/tin.so/commit/bdf293dce795df12371d5589445486ce99b7ab93))
+
+
+### Bug Fixes
+
+* **core:** give highlighted lines a clear contrast in every theme ([018c32a](https://github.com/zirkelc/tin.so/commit/018c32a4c8a96a3256a82a3f7678f623023ae75a))
+* **web:** give the opacity slider the accent color ([bb6e919](https://github.com/zirkelc/tin.so/commit/bb6e9191cdfe29162498a0b3d576c9ed767e242b))
+
+
+### Documentation
+
+* show a window without a title bar in the windows example ([ea0d440](https://github.com/zirkelc/tin.so/commit/ea0d440d2dbb2b5caed3fa957a00226ecdd4fb0d))
+
 ## [0.3.0](https://github.com/zirkelc/tin.so/compare/web-v0.2.0...web-v0.3.0) (2026-11-06)
 
 

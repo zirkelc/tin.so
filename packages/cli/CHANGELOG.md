@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.0](https://github.com/zirkelc/tin.so/compare/cli-v0.3.0...cli-v0.4.0) (2026-11-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** tin skill has no --print option. Run tin skill to print the skill, and read the references from the paths at its end.
+
+### Features
+
+* **cli:** print the skill with tin skill ([4578b4a](https://github.com/zirkelc/tin.so/commit/4578b4a03bff173cb06b25a7622b929bb01a7462))
+
+
+### Documentation
+
+* shorten the READMEs and move the development notes to docs ([828b4a0](https://github.com/zirkelc/tin.so/commit/828b4a0ca278c780f6a21ff630bcdab6181b14b0))
+
 ## [0.3.0](https://github.com/zirkelc/tin.so/compare/cli-v0.2.0...cli-v0.3.0) (2026-11-06)
 
 
