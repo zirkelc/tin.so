@@ -7,7 +7,7 @@ import type { Rect } from "./layout.ts";
  * transparent.
  */
 
-type Rgba = { r: number; g: number; b: number; a: number };
+export type Rgba = { r: number; g: number; b: number; a: number };
 
 type Length = { value: number; unit: "%" | "px" };
 
@@ -104,7 +104,7 @@ function parseChannel(text: string, max: number): number {
   return Math.min(max, Math.max(0, scaled));
 }
 
-function parseColor(text: string): Rgba | undefined {
+export function parseColor(text: string): Rgba | undefined {
   const color = text.trim().toLowerCase();
   if (color === "transparent") return { r: 0, g: 0, b: 0, a: 0 };
   if (HEX.test(color)) return parseHex(color);

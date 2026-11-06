@@ -1,3 +1,4 @@
+import { withContrast } from "../color.ts";
 import editorThemes from "./editor-themes.json" with { type: "json" };
 
 export type Mode = "light" | "dark";
@@ -119,6 +120,12 @@ export function getSyntax(theme: Theme, mode: Mode): Syntax {
   return (theme.syntax[resolveMode(theme, mode)] ?? theme.syntax.light ?? theme.syntax.dark)!;
 }
 
+/**
+ * The least OKLab lightness difference between a highlighted line and the window. The themes made
+ * their line highlight for the cursor line of an editor, so many are too faint for a code image.
+ */
+const HIGHLIGHT_CONTRAST = 0.06;
+
 export function getFrameColors(theme: Theme, mode: Mode): FrameColors {
   const resolved = resolveMode(theme, mode);
   const syntax = getSyntax(theme, resolved);
@@ -129,7 +136,11 @@ export function getFrameColors(theme: Theme, mode: Mode): FrameColors {
   };
   return {
     ...frame,
-    highlight: syntax.highlight ?? frame.highlight,
+    highlight: withContrast(
+      syntax.highlight ?? frame.highlight,
+      frame.background,
+      HIGHLIGHT_CONTRAST,
+    ),
     highlightBorderLine: syntax.highlightBorder ?? frame.highlightBorderLine,
   };
 }
