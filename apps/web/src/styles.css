@@ -1841,6 +1841,11 @@ button.compact {
   gap: 10px;
 }
 
+/* The filled part and the thumb get the color of a switch that is on, not the blue of the browser */
+.background-opacity input[type="range"] {
+  accent-color: var(--accent);
+}
+
 .background-opacity output {
   color: var(--text-muted);
   font-size: 12px;
