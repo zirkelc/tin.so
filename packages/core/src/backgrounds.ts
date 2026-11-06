@@ -32,18 +32,13 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     css: "linear-gradient(to right top, #0d1117, #6e40c9, #f78166)",
   },
   {
-    id: "garnet",
-    name: "Garnet",
+    id: "merlot",
+    name: "Merlot",
     kind: "gradient",
-    css: "linear-gradient(160deg, #450a0a 0%, #b91c1c 55%, #f87171 100%)",
-  },
-  {
-    id: "mesh-dawn",
-    name: "Dawn",
-    kind: "mesh",
-    css: "radial-gradient(at 0% 0%, #fda4af 0px, transparent 50%), radial-gradient(at 100% 0%, #fde68a 0px, transparent 50%), radial-gradient(at 100% 100%, #c4b5fd 0px, transparent 55%), radial-gradient(at 0% 100%, #a5f3fc 0px, transparent 55%), #fff7ed",
+    css: "linear-gradient(160deg, #1c0a12 0%, #4c0519 55%, #be123c 100%)",
   },
   { id: "blush", name: "Blush", kind: "color", css: "#fecdd3" },
+  { id: "red", name: "Red", kind: "color", css: "#dc2626" },
   {
     id: "ember",
     name: "Ember",
@@ -51,6 +46,9 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     css: "linear-gradient(160deg, #1c1917 0%, #9a3412 55%, #f97316 100%)",
   },
   { id: "orange", name: "Orange", kind: "color", css: "#ea580c" },
+  { id: "amber", name: "Amber", kind: "color", css: "#f59e0b" },
+  { id: "forest", name: "Forest", kind: "color", css: "#14532d" },
+  { id: "green", name: "Green", kind: "color", css: "#16a34a" },
   {
     id: "synthwave",
     name: "Synthwave",
@@ -68,12 +66,6 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     name: "Dune",
     kind: "mesh",
     css: "radial-gradient(at 20% 80%, #d6a46b 0px, transparent 55%), radial-gradient(at 80% 20%, #f2d4b0 0px, transparent 50%), #f7ede0",
-  },
-  {
-    id: "linen",
-    name: "Linen",
-    kind: "gradient",
-    css: "linear-gradient(135deg, #d6c7a8 0%, #e7dcc6 50%, #f5f0e6 100%)",
   },
   {
     id: "daybreak",
@@ -94,16 +86,16 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     css: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fef3c7 100%)",
   },
   {
+    id: "lemon",
+    name: "Lemon",
+    kind: "gradient",
+    css: "linear-gradient(135deg, #facc15 0%, #fde68a 50%, #fefce8 100%)",
+  },
+  {
     id: "sage",
     name: "Sage",
     kind: "gradient",
     css: "linear-gradient(135deg, #84a98c 0%, #b7c9a8 50%, #e9edc9 100%)",
-  },
-  {
-    id: "mesh-moss",
-    name: "Moss",
-    kind: "mesh",
-    css: "radial-gradient(at 30% 20%, #4d7c0f 0px, transparent 55%), radial-gradient(at 80% 80%, #0f766e 0px, transparent 55%), #0c1a0e",
   },
   {
     id: "evergreen",
@@ -112,22 +104,16 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     css: "linear-gradient(160deg, #0d1117 0%, #033a16 55%, #2ea043 100%)",
   },
   {
-    id: "octo",
-    name: "Octo",
+    id: "emerald",
+    name: "Emerald",
     kind: "gradient",
-    css: "linear-gradient(135deg, #0d1117 0%, #0d419d 55%, #2ea043 100%)",
+    css: "linear-gradient(135deg, #047857 0%, #10b981 50%, #6ee7b7 100%)",
   },
   {
     id: "jade",
     name: "Jade",
     kind: "gradient",
     css: "linear-gradient(160deg, #0b1410 0%, #1f4d3a 55%, #4d9375 100%)",
-  },
-  {
-    id: "fresh",
-    name: "Fresh",
-    kind: "gradient",
-    css: "linear-gradient(160deg, #ffffff 0%, #dafbe1 55%, #6fdd8b 100%)",
   },
   { id: "pine", name: "Pine", kind: "color", css: "#052e2b" },
   {
@@ -161,13 +147,11 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     kind: "gradient",
     css: "linear-gradient(135deg, #a3e635 0%, #4ade80 50%, #2dd4bf 100%)",
   },
-  { id: "seafoam", name: "Seafoam", kind: "color", css: "#ccfbf1" },
-  { id: "night", name: "Night", kind: "color", css: "#0f172a" },
   {
-    id: "night-sky",
-    name: "Night Sky",
+    id: "aqua",
+    name: "Aqua",
     kind: "gradient",
-    css: "linear-gradient(180deg, #010409 0%, #0d1117 50%, #1f6feb 100%)",
+    css: "linear-gradient(135deg, #22d3ee 0%, #a5f3fc 55%, #ecfeff 100%)",
   },
   {
     id: "primer",
@@ -195,22 +179,10 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
   },
   { id: "blue", name: "Blue", kind: "color", css: "#2563eb" },
   {
-    id: "primer-light",
-    name: "Primer Light",
-    kind: "gradient",
-    css: "linear-gradient(160deg, #ffffff 0%, #ddf4ff 55%, #54aeff 100%)",
-  },
-  {
     id: "ice",
     name: "Ice",
     kind: "gradient",
     css: "linear-gradient(135deg, #bae6fd 0%, #e0f2fe 55%, #f8fafc 100%)",
-  },
-  {
-    id: "sky",
-    name: "Sky",
-    kind: "mesh",
-    css: "radial-gradient(at 0% 0%, #ddf4ff 0px, transparent 55%), radial-gradient(at 100% 100%, #dafbe1 0px, transparent 55%), #ffffff",
   },
   { id: "navy", name: "Navy", kind: "color", css: "#172554" },
   {
@@ -218,14 +190,6 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     name: "Periwinkle",
     kind: "gradient",
     css: "linear-gradient(135deg, #818cf8 0%, #a5b4fc 50%, #c7d2fe 100%)",
-  },
-  { id: "lilac", name: "Lilac", kind: "color", css: "#ddd6fe" },
-  { id: "aubergine", name: "Aubergine", kind: "color", css: "#2e1065" },
-  {
-    id: "copilot",
-    name: "Copilot",
-    kind: "gradient",
-    css: "linear-gradient(135deg, #0d1117 0%, #3c1e70 50%, #8957e5 100%)",
   },
   {
     id: "mesh-nebula",
@@ -240,17 +204,12 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     css: "linear-gradient(to right top, #064e3b, #059669, #22d3ee, #a78bfa)",
   },
   { id: "violet", name: "Violet", kind: "color", css: "#7c3aed" },
+  { id: "fuchsia", name: "Fuchsia", kind: "color", css: "#c026d3" },
   {
     id: "ocean",
     name: "Ocean",
     kind: "gradient",
     css: "linear-gradient(135deg, #54aeff 0%, #8250df 100%)",
-  },
-  {
-    id: "violet-wash",
-    name: "Violet Wash",
-    kind: "gradient",
-    css: "linear-gradient(135deg, #8250df 0%, #a371f7 50%, #e9d8fd 100%)",
   },
   {
     id: "sunrise",
@@ -275,12 +234,6 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     name: "Lavender",
     kind: "gradient",
     css: "linear-gradient(135deg, #a78bfa 0%, #c4b5fd 50%, #f5d0fe 100%)",
-  },
-  {
-    id: "magenta",
-    name: "Magenta",
-    kind: "gradient",
-    css: "linear-gradient(to right top, #701a75, #c026d3, #f472b6)",
   },
   { id: "pink", name: "Pink", kind: "color", css: "#db2777" },
   {
