@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/zirkelc/tin.so/compare/cli-v0.2.0...cli-v0.3.0) (2026-11-06)
+
+
+### Features
+
+* add a Claude Code plugin with the /tin command ([259c578](https://github.com/zirkelc/tin.so/commit/259c5785edc58e317984b3ef9b19ee0758f0e79f))
+* list only the classic themes in the CLI, errors and docs ([e73f06d](https://github.com/zirkelc/tin.so/commit/e73f06da699c72e6495536cc026c549603dcc860))
+* use editor themes, gradient backgrounds and a new brand ([74d8d6a](https://github.com/zirkelc/tin.so/commit/74d8d6afcdb93bf2d13167f66c657be6d385b402))
+
+
+### Bug Fixes
+
+* **cli:** name the current default theme in the help ([604b575](https://github.com/zirkelc/tin.so/commit/604b575278939f6d4b7a8265c56211e2c6d4c254))
+
 ## [0.2.0](https://github.com/zirkelc/tin.so/compare/cli-v0.1.0...cli-v0.2.0) (2026-10-29)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "tin.so",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Renders code images from the command line, without a browser",
   "keywords": [
     "cli",

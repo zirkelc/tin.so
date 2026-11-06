@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0](https://github.com/zirkelc/tin.so/compare/web-v0.2.0...web-v0.3.0) (2026-11-06)
+
+
+### Features
+
+* add a Claude Code plugin with the /tin command ([259c578](https://github.com/zirkelc/tin.so/commit/259c5785edc58e317984b3ef9b19ee0758f0e79f))
+* hide the company themes in the theme list of the editor ([55bb31c](https://github.com/zirkelc/tin.so/commit/55bb31c864cfbe6b1d4043d74817478ae731a1d0))
+* use editor themes, gradient backgrounds and a new brand ([74d8d6a](https://github.com/zirkelc/tin.so/commit/74d8d6afcdb93bf2d13167f66c657be6d385b402))
+
+
+### Documentation
+
+* rewrite the README with example images and the new slogan ([935ad4d](https://github.com/zirkelc/tin.so/commit/935ad4dc57b88b4756d7770068e0910b81a41803))
+* tighten the README and draw the logo in the brand font ([3b4ef76](https://github.com/zirkelc/tin.so/commit/3b4ef762ba570f8cbf3ac95652019a54f0705391))
+* use the office address in the legal notice ([0d4ea44](https://github.com/zirkelc/tin.so/commit/0d4ea44c2d1e019ab9bb3ac46c9aca95b7e5c111))
+
 ## [0.2.0](https://github.com/zirkelc/tin.so/compare/web-v0.1.0...web-v0.2.0) (2026-10-29)
 
 
