@@ -1048,6 +1048,9 @@ describe("about dialog", () => {
       .element(dialog.getByRole("link", { name: "Legal", exact: true }))
       .toHaveAttribute("href", "/legal");
     await expect.element(dialog.getByText("npx skills add zirkelc/tin.so")).toBeVisible();
+    await expect
+      .element(dialog.getByText("/plugin install tin --marketplace zirkelc/tin.so"))
+      .toBeVisible();
     expect(document.activeElement?.getAttribute("aria-label")).toBe("Close");
   });
 

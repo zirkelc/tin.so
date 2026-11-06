@@ -1,6 +1,8 @@
 ---
 name: tin
 description: Make images of code (code screenshots) with the tin.so CLI, locally and without a browser. Use it whenever the user wants a picture of code to share or show, such as a code image, a code screenshot, a snippet image for X, LinkedIn, a blog post, docs or slides, a "ray.so" or "carbon" style image, or several files side by side in one image, even if they do not name a tool. It covers quick snapshots of piped code or files, and composed images with several windows or panes, popovers that point to a word (for example a type), line highlights, text colors and highlighter fills, tabs with file icons, editor themes such as GitHub, Dracula, Nord and Catppuccin, gradient backgrounds, and social media sizes. Saves a PNG or SVG (or copies it to the clipboard) and returns a link that opens the image in the tin.so web editor.
+user-invocable: true
+argument-hint: "[files, or what the image shows]"
 ---
 
 # Code images with tin.so

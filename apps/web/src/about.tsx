@@ -89,6 +89,8 @@ export function AboutDialog(props: { open: boolean; onClose: () => void }) {
             to use it:
           </p>
           <pre>npx skills add zirkelc/tin.so</pre>
+          <p>In Claude Code, you can install the skill as a plugin:</p>
+          <pre>/plugin install tin --marketplace zirkelc/tin.so</pre>
           <h2>Contribute</h2>
           <p>
             The project is open source and{" "}

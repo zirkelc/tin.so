@@ -273,6 +273,12 @@ The [tin skill](skills/tin/SKILL.md) shows coding agents such as Claude Code, Co
 npx skills add zirkelc/tin.so
 ```
 
+In Claude Code, you can install the skill as a plugin:
+
+```
+/plugin install tin --marketplace zirkelc/tin.so
+```
+
 ### Agents in a browser
 
 The web editor has a versioned API on `window.tin` for agents that drive a browser instead of the CLI: read and set a spec, wait until the first image is ready, and export an image, with or without the spec in the file.
