@@ -2,7 +2,7 @@
 
 The `tin` CLI makes images of code (code screenshots) on your machine, without a browser and without an account. Give it code files, pipe code to it, or give it a JSON spec for an image with several windows, panes and popovers. It saves a PNG or SVG, or copies the image to the clipboard, and prints a link that opens the same image in the [tin.so](https://tin.so) web editor.
 
-It has 14 editor themes such as GitHub, Dracula, Nord and Catppuccin, a default background for each theme and mode, gradient backgrounds, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media. An [agent skill](https://github.com/zirkelc/tin.so/tree/main/skills/tin) shows coding agents how to use it.
+It has 14 editor themes such as GitHub, Dracula, Nord and Catppuccin, gradient backgrounds, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media. An [agent skill](https://github.com/zirkelc/tin.so/tree/main/skills/tin) shows coding agents how to use it.
 
 ## Installation
 
@@ -42,16 +42,16 @@ Each run prints the file and an `Edit:` link. The image file also contains the s
 
 ## Commands
 
-| Command                | What it does                                                                                                               |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `tin [render] <input>` | Renders code files, code from stdin or a spec to a PNG or SVG. `render` is the default command                             |
-| `tin link <input>`     | Prints the editor link without an image. `--copy` copies it, `--open` opens it in the browser                              |
-| `tin themes`           | Lists the themes                                                                                                           |
-| `tin languages`        | Lists the languages                                                                                                        |
-| `tin fonts`            | Lists the fonts                                                                                                            |
-| `tin schema`           | Prints the JSON Schema of the spec                                                                                         |
-| `tin skill`            | Shows how to add the tin skill to a coding agent. `--print` prints the skill itself, and `--print spec` its spec reference |
-| `tin help [command]`   | Shows the help of tin, or of a command. `tin <command> --help` is the same                                                 |
+| Command                | What it does                                                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| `tin [render] <input>` | Renders code files, code from stdin or a spec to a PNG or SVG. `render` is the default command |
+| `tin link <input>`     | Prints the editor link without an image. `--copy` copies it, `--open` opens it in the browser  |
+| `tin themes`           | Lists the themes                                                                               |
+| `tin languages`        | Lists the languages                                                                            |
+| `tin fonts`            | Lists the fonts                                                                                |
+| `tin schema`           | Prints the JSON Schema of the spec                                                             |
+| `tin skill`            | Prints the tin skill and how to add it to a coding agent                                       |
+| `tin help [command]`   | Shows the help of tin, or of a command. `tin <command> --help` is the same                     |
 
 A file with the name of a command needs a path, such as `./themes`.
 

@@ -8,4 +8,4 @@
 
 The setup needs a `RELEASE_PLEASE_TOKEN` secret (a fine-grained PAT with read and write access to `Contents` and `Pull requests`), and a Trusted Publisher for `zirkelc/tin.so` and `release.yml` on the npm access page of each package.
 
-The web editor is not part of a release. Deploy it with `pnpm run deploy`.
+The release workflow also deploys the web editor. To deploy it without a release, run `pnpm run deploy`.
