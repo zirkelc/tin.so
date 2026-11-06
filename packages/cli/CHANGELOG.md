@@ -6,7 +6,6 @@
 ### Features
 
 * add a Claude Code plugin with the /tin command ([259c578](https://github.com/zirkelc/tin.so/commit/259c5785edc58e317984b3ef9b19ee0758f0e79f))
-* list only the classic themes in the CLI, errors and docs ([e73f06d](https://github.com/zirkelc/tin.so/commit/e73f06da699c72e6495536cc026c549603dcc860))
 * use editor themes, gradient backgrounds and a new brand ([74d8d6a](https://github.com/zirkelc/tin.so/commit/74d8d6afcdb93bf2d13167f66c657be6d385b402))
 
 
