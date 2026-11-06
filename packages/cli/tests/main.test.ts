@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import { readFileSync } from "node:fs";
 import { mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 import { DEFAULT_THEME, readImageSpec, readLink, SPEC_SCHEMA_URL, THEME_IDS } from "@tin.so/core";
 import { beforeEach, describe, expect, test, vi } from "vite-plus/test";
 import { type Io, main } from "../src/main.ts";
@@ -880,7 +880,7 @@ describe("schema", () => {
 });
 
 describe("skill", () => {
-  test("should print the command that adds the skill and the link to its folder", async () => {
+  test("should print the skill, then the commands that add it", async () => {
     // Arrange
     const io = createIo();
 
@@ -889,6 +889,7 @@ describe("skill", () => {
 
     // Assert
     const output = io.output();
+    expect(output.startsWith("---\nname: tin\n")).toBe(true);
     expect(output).toContain("  npx skills add zirkelc/tin.so\n");
     expect(output).toContain("  /plugin install tin --marketplace zirkelc/tin.so\n");
     expect(output).toContain("https://github.com/zirkelc/tin.so/tree/main/skills/tin");
@@ -896,40 +897,29 @@ describe("skill", () => {
     expect(output).toContain("~/.agents/skills/tin");
   });
 
-  test("should print the skill with a note on its references", async () => {
+  test("should name each reference of the skill with the absolute path of its file", async () => {
     // Arrange
     const io = createIo();
 
     // Act
-    await main(["skill", "--print"], io);
+    await main(["skill"], io);
 
     // Assert
-    const output = io.output();
-    expect(output.startsWith("---\nname: tin\n")).toBe(true);
-    expect(output).toContain("- references/spec.md: tin skill --print spec");
+    const [, path] = io.output().match(/^- references\/spec\.md: (.+)$/m) ?? [];
+    expect(isAbsolute(path!)).toBe(true);
+    expect(path!.endsWith("/references/spec.md")).toBe(true);
+    expect((await readFile(path!, "utf8")).startsWith("# The tin.so spec\n")).toBe(true);
   });
 
-  test("should print a reference of the skill", async () => {
+  test("should reject the removed print option", async () => {
     // Arrange
     const io = createIo();
 
     // Act
-    await main(["skill", "--print", "spec"], io);
-
-    // Assert
-    expect(io.output().startsWith("# The tin.so spec\n")).toBe(true);
-  });
-
-  test("should name the references for an unknown reference", async () => {
-    // Arrange
-    const io = createIo();
-
-    // Act
-    const code = await main(["skill", "--print", "nope"], io);
+    const code = await main(["skill", "--print"], io);
 
     // Assert
     expect(code).toBe(1);
-    expect(io.errors()).toBe('Unknown reference "nope". The references are: spec\n');
   });
 
   test("should list the skill command in the help", async () => {
@@ -940,7 +930,7 @@ describe("skill", () => {
     await main(["--help"], io);
 
     // Assert
-    expect(io.output()).toContain("Show how to add the tin skill to a coding agent");
+    expect(io.output()).toContain("Print the tin skill for coding agents and how to add it");
   });
 });
 

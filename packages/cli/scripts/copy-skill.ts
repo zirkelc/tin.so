@@ -1,5 +1,5 @@
 /**
- * Copies the agent skill into the package, so that `tin skill --print` can print it. The package
+ * Copies the agent skill into the package, so that `tin skill` can print it. The package
  * gets SKILL.md and the references, without the test cases of the skill.
  */
 import { cp, mkdir, readdir } from "node:fs/promises";

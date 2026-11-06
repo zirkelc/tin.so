@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { basename, extname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   CODE_FONT_IDS,
   CODE_FONTS,
@@ -569,47 +570,20 @@ const SKILL_DIRS = [
   new URL("../../../skills/tin/", import.meta.url),
 ];
 
-const SKILL_ARGS = {
-  print: {
-    type: "boolean",
-    description: "Print the skill itself, for an agent that cannot add skills",
-  },
-  reference: {
-    type: "positional",
-    required: false,
-    description: "With --print: a reference of the skill to print, such as spec",
-  },
-} as const satisfies ArgsDef;
-
-async function skillCommand(values: Partial<ParsedArgs<typeof SKILL_ARGS>>, io: Io) {
-  if (!values.print) {
-    if (values.reference) throw new UsageError("A reference needs --print: tin skill --print spec");
-    io.stdout(SKILL_TEXT);
-    return;
-  }
+async function skillCommand(io: Io) {
   const dir = SKILL_DIRS.find((candidate) => existsSync(new URL("SKILL.md", candidate)));
   if (!dir) throw new UsageError(`The skill is not in this package. Get it from ${SKILL_URL}`);
+  const skill = await readFile(new URL("SKILL.md", dir), "utf8");
+  // The links in the skill are relative, so the note gives the absolute path of each file
   const references = (await readdir(new URL("references/", dir)))
     .filter((file) => file.endsWith(".md"))
-    .map((file) => file.slice(0, -".md".length));
-  if (values.reference) {
-    if (!references.includes(values.reference)) {
-      throw new UsageError(
-        `Unknown reference "${values.reference}". The references are: ${references.join(", ")}`,
-      );
-    }
-    io.stdout(await readFile(new URL(`references/${values.reference}.md`, dir), "utf8"));
-    return;
-  }
-  const skill = await readFile(new URL("SKILL.md", dir), "utf8");
-  // The links in the skill point to files, so the note says how to print them
-  const note = references.map((name) => `- references/${name}.md: tin skill --print ${name}`);
-  io.stdout(`${skill}\n---\n\nPrint the references of this skill with:\n\n${note.join("\n")}\n`);
+    .map((file) => `- references/${file}: ${fileURLToPath(new URL(`references/${file}`, dir))}`);
+  io.stdout(
+    `${skill}\n---\n\nThe references of this skill are in these files:\n\n${references.join("\n")}\n\n---\n\n${SKILL_TEXT}`,
+  );
 }
 
-const SKILL_TEXT = `The tin skill shows coding agents how to make code images with this CLI.
-
-Add it with the skills CLI, for Claude Code, Codex, Cursor and other agents:
+const SKILL_TEXT = `Add this skill to your agent with the skills CLI, for Claude Code, Codex, Cursor and other agents:
 
   npx skills add zirkelc/tin.so
 
@@ -621,8 +595,6 @@ Or copy the folder ${SKILL_URL}
 into the skills folder of your agent: ~/.claude/skills/tin for Claude Code, or
 ~/.agents/skills/tin for the agents that read .agents/skills.
 Use .claude/skills or .agents/skills in a project to add it only there.
-
-An agent without skills can read the skill from this CLI: tin skill --print
 `;
 
 // The context data of each command is the Io of the run
@@ -671,13 +643,8 @@ const COMMANDS = {
     run: ({ data }) => data.stdout(`${JSON.stringify(specJsonSchema(), null, 2)}\n`),
   }),
   skill: defineCommand({
-    meta: {
-      name: "skill",
-      description:
-        "Show how to add the tin skill to a coding agent, or print the skill with --print",
-    },
-    args: SKILL_ARGS,
-    run: ({ args, data }) => skillCommand(args, data),
+    meta: { name: "skill", description: "Print the tin skill for coding agents and how to add it" },
+    run: ({ data }) => skillCommand(data),
   }),
   // The router in main shows the help, so this command only gives the entry in the list
   help: defineCommand({
