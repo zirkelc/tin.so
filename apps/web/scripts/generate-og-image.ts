@@ -133,4 +133,67 @@ for (const [file, size] of ICONS) {
   await writeFile(new URL(file, PUBLIC), await svgToPng(icon(size), [], { scale: 1 }));
 }
 
-console.log(`Wrote og.png (${WIDTH} × ${HEIGHT}) and ${ICONS.map(([file]) => file).join(", ")}`);
+/**
+ * The logo with the name for the README, as in the header of the editor: the name in metal, with
+ * the colors of each mode. GitHub shows an SVG as an image without its fonts, so the letters are
+ * paths.
+ */
+const fontkit: typeof import("fontkit") = createRequire(
+  createRequire(import.meta.url).resolve("@tin.so/core/package.json"),
+)("fontkit");
+const brandFont = fontkit.create(
+  Buffer.from(await loadFont(NAME_FONT.file)),
+) as import("fontkit").Font;
+const LOCKUP = { logo: 96, gap: 40, size: 84, tracking: -0.04 };
+const unit = LOCKUP.size / brandFont.unitsPerEm;
+const run = brandFont.layout("tin.so");
+let cursor = LOCKUP.logo + LOCKUP.gap;
+const glyphs = run.glyphs.map((glyph, index) => {
+  const x = cursor;
+  cursor += run.positions[index]!.xAdvance * unit + LOCKUP.tracking * LOCKUP.size;
+  return { x, glyph };
+});
+const lockupWidth = Math.ceil(cursor - LOCKUP.tracking * LOCKUP.size);
+const bbox = run.bbox;
+// The letters sit in the middle of the logo. The paths get the size in their points, because a
+// transform on a path would also scale the gradients of the fill.
+const baseline = LOCKUP.logo / 2 + ((bbox.maxY + bbox.minY) / 2) * unit;
+const letters = glyphs
+  .map(
+    ({ x, glyph }) =>
+      `<path d="${glyph.path
+        .scale(unit, -unit)
+        .translate(x, baseline)
+        .toSVG()
+        .replace(/\d+\.\d{3,}/g, (n) => String(Number(Number(n).toFixed(2))))}"/>`,
+  )
+  .join("");
+const nameStart = LOCKUP.logo + LOCKUP.gap;
+const lockup = (metal: { base: string; light: string; shine: string }) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${lockupWidth}" height="${LOCKUP.logo}" viewBox="0 0 ${lockupWidth} ${LOCKUP.logo}">
+<defs>
+<linearGradient id="metal" x1="0" y1="${baseline - bbox.maxY * unit}" x2="0" y2="${baseline - bbox.minY * unit}" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="${metal.light}"/><stop offset="0.55" stop-color="${metal.base}"/><stop offset="1" stop-color="${metal.light}"/>
+</linearGradient>
+<linearGradient id="shine" x1="${nameStart}" y1="${LOCKUP.logo}" x2="${nameStart + (lockupWidth - nameStart) / 2}" y2="0" gradientUnits="userSpaceOnUse">
+<stop offset="0.3" stop-color="${metal.shine}" stop-opacity="0"/><stop offset="0.5" stop-color="${metal.shine}" stop-opacity="0.9"/><stop offset="0.7" stop-color="${metal.shine}" stop-opacity="0"/>
+</linearGradient>
+</defs>
+${nested(logo, 0, 0, LOCKUP.logo, LOCKUP.logo)}
+<g fill="url(#metal)">${letters}</g>
+<g fill="url(#shine)">${letters}</g>
+</svg>
+`;
+// The colors of the name in the header of the editor
+await writeFile(
+  new URL("logo-dark.svg", PUBLIC),
+  lockup({ base: "#6b6b74", light: "#b4b4bc", shine: "#ffffff" }),
+);
+await writeFile(
+  new URL("logo-light.svg", PUBLIC),
+  lockup({ base: "#3f3f46", light: "#71717a", shine: "#d4d4d8" }),
+);
+
+console.log(
+  `Wrote og.png (${WIDTH} × ${HEIGHT}), ${ICONS.map(([file]) => file).join(", ")}, logo-dark.svg and logo-light.svg`,
+);

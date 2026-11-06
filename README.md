@@ -23,7 +23,7 @@
   <img alt="Two files in one window, with a popover that shows the type of a variable and a highlighted line" src="docs/images/hero.png" width="860">
 </p>
 
-tin.so makes images of code with several snippets in one image: split panes, stacked windows, popovers that point to a token, line highlights, text styles and colors, 14 editor themes and gradient backgrounds. People use the [web editor](https://tin.so). Agents use the [CLI](#cli) and the [agent skill](#agent-skill). Both use the same renderer, so they make the same image, and neither needs a server or a browser to render.
+tin.so makes images of code that show more than one snippet: split panes, stacked windows and popovers that point to a word. Highlight lines, give any part of the code a style or a color, and pick one of 14 editor themes and a background. People use the [web editor](https://tin.so), and agents use the [CLI](#cli) and the [agent skill](#agent-skill). Both use the same renderer, so they make the same image without a server or a browser.
 
 ## Web editor
 
@@ -46,12 +46,22 @@ An image can show more than one file. Split a window into panes, put several win
 - Split a window into panes, side by side or below each other.
 - Stack several windows in one image, below each other or side by side.
 - Put windows anywhere in a free layout, and let them overlap. The image grows when a window gets larger. Reset the layout to go back to padding and direction.
-- Resize windows and panes in the image. In a spec, set the size of each pane, each window, the image and the gap between the windows in px.
 - Add panes to the right or below, and remove a pane with its × button in the image.
 - Add, duplicate (⌘D) and remove windows.
-- Copy and paste windows with ⌘C and ⌘V, also from one browser tab to another. The clipboard gets the windows as spec JSON, and a paste of any spec JSON with windows adds them. In the free layout, a pasted window moves a little down and to the right.
 - Resize the whole image at its right edge, its bottom edge or its corner. With an aspect ratio, the image keeps the ratio. Double-click a handle to fit the image to the windows again.
-- Center a window horizontally or vertically in the image.
+
+### Arrange windows
+
+- Move windows with the mouse. Drag one of the selected windows to move all of them. A moved or resized window snaps, and guide lines show, when it aligns with the center of the image or with the edges and centers of other windows.
+- Resize a window at its edges and corners, panes at the divider between them, and a popover at its corner. Double-click to fit them to the code again.
+- Select several windows with a box, with Shift-click or with ⌘A. Align them in 6 ways, distribute them (3 or more), copy their image or remove them, from the toolbar above them or their right-click menu.
+- The toolbar above one selected window adds a pane to the right or below, centers, formats or removes the window. In the free layout with 2 or more windows, it also brings the window to the front or sends it to the back.
+- Right-click a window to duplicate it, fit it to the code, reset its position, center it, change its layer, format its code, copy its image or remove it. Right-click the background to add a window, select all windows, reset the layout or copy the image.
+- In the free layout, change the order of overlapping windows as in Figma: bring forward (⌘]), bring to front (⌘⇧]), send backward (⌘[) and send to back (⌘⇧[).
+- Copy and paste windows with ⌘C and ⌘V, also from one browser tab to another. The clipboard gets the windows as spec JSON, and a paste of any spec JSON with windows adds them.
+- The window list in the sidebar outlines a window in the image when you point to it. Shift-click or ⌘-click selects several windows.
+- Sidebar notices have a one-click fix: the free layout has a Reset button, and a window or pane with a fixed size has a Fit button.
+- Zoom in and out, fit the image to the screen, or show it at 100%. The image size shows below the image.
 
 ### Popovers
 
@@ -61,7 +71,7 @@ An image can show more than one file. Split a window into panes, put several win
 
 A popover points to a word in the code and looks like the hover card of an editor. Use it to show a type, a signature or a value next to the code that uses it.
 
-- A popover has its own code and language. It is a little lighter than its window in dark mode and darker in light mode, so it stands out from the code below it. A spec can give a popover or a window its own background color in place of the theme color.
+- A popover has its own code and language. It is a little lighter than its window in dark mode and darker in light mode, so it stands out from the code below it.
 - Select a word in one line, right-click and choose "Add popover". The popover starts with the selected word as its code.
 - The window card in the sidebar lists the popovers of each pane, with their word and line. A click on a row selects the popover and shows its settings below the row, the pointer on a row highlights the popover in the image, and a row marks a popover whose word is no longer in the code.
 - Click a popover to select it. Its right-click menu and the sidebar reset, fit or remove it, the sidebar sets its language, and ⌫ removes it.
@@ -76,7 +86,7 @@ A popover points to a word in the code and looks like the hover card of an edito
 
 Show the reader where to look. Highlight full lines, or give any part of a line a style, a text color or a fill.
 
-- Highlight lines and ranges of lines. Option-click a line to highlight it, as in ray.so.
+- Highlight lines and ranges of lines. Option-click a line to highlight it, as in ray.so, or right-click the code.
 - Bold, italic, underline and strikethrough on any part of a line, in the code and in popovers. Select code and right-click "Clear styles" to remove its styles, colors and fills.
 - A text color and a fill on any part of a line, in the code and in popovers, from a palette of 16 colors in the editor, or any hex color with or without alpha in a spec. The fill is translucent, as a highlighter, so the code stays readable.
 - Select code or popover code in the image to open a panel above the selection with the text colors, the fills and the styles. "None" removes a text color or a fill, "Clear" removes all styles and colors of the selection, and the panel shows the current colors and styles.
@@ -89,12 +99,9 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
   <img alt="The same function in all 14 themes, each on its default background" src="docs/images/themes.png" width="860">
 </p>
 
-- 14 themes of code editors from Shiki: Ayu, Catppuccin, Dracula, GitHub, Material, Night Owl, Nord, One Dark, Rosé Pine, Solarized, SynthWave '84, Tokyo Night, Vitesse and VS Code. The code has the exact colors of the original theme, and the window has its background. The default theme is GitHub.
-- A theme with a dark and a light variant, such as Catppuccin Mocha and Latte, follows the mode switch. Dracula and Tokyo Night also have their official light variants (Alucard and Tokyo Night Light), which Shiki does not have. A theme with only one mode turns off the mode switch.
-- The theme list shows each theme name with a small preview (its own background with a window that shows real lines of the start example in the theme colors, in the current mode), and it has a search field. The closed Theme field shows the colors of the theme as dots after its name.
-- Move the mouse over a theme, a background tile or a font, or use the arrow keys, to see it on the image at once. When the mouse leaves the list, or with Escape, the image goes back to what you had before. A click or Enter keeps it.
-- The theme list and the font list stay open after a choice and close with their X button, Escape or a click outside.
-- 9 code fonts: JetBrains Mono, Geist Mono, IBM Plex Mono, Fira Code, Roboto Mono, Commit Mono, Space Mono, Source Code Pro and Google Sans Code. The font list shows each name in its own font.
+- 14 themes of code editors: Ayu, Catppuccin, Dracula, GitHub, Material, Night Owl, Nord, One Dark, Rosé Pine, Solarized, SynthWave '84, Tokyo Night, Vitesse and VS Code. The code has the exact colors of the original theme, and the window has its background. Most themes have a dark and a light variant (for example Catppuccin Mocha and Latte), and the mode switch selects one.
+- The theme list shows a small preview of each theme and has a search field. Move the mouse over a theme, a background or a font, or use the arrow keys, to see it on the image at once. A click or Enter keeps it, and Escape goes back.
+- 9 code fonts: JetBrains Mono, Geist Mono, IBM Plex Mono, Fira Code, Roboto Mono, Commit Mono, Space Mono, Source Code Pro and Google Sans Code.
 
 ### Backgrounds
 
@@ -109,7 +116,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
   - **Color:** tiles of solid color presets.
   - **Custom:** a color picker with a saturation and brightness square, a hue slider, an eyedropper where the browser has one, and R, G and B fields.
 - Each tile shows the preset with a small window of the theme on it and its name under it. The 62 presets are in order of color: grays first, then by hue, and from dark to light within a hue.
-- A spec or the CLI can use any color or CSS gradient: `linear-gradient` and `radial-gradient`, in several layers with a color as the last layer. The spec field `backgroundOpacity` (0 to 1) sets the opacity.
+- A spec or the CLI can use any color or CSS gradient: `linear-gradient` and `radial-gradient`, in several layers with a color as the last layer.
 - Padding around the windows: 16, 32, 64 or 128 px in the editor (Auto in the free layout), from 0 to 256 px in a spec.
 
 ### Sizes for social media
@@ -118,10 +125,14 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
   <img alt="A Python window in the Catppuccin theme on a violet gradient, in the 16:9 format" src="docs/images/social.png" width="560">
 </p>
 
+- Aspect ratio presets in the editor: 16:9 (X post, YouTube), 1.91:1 (Open Graph, LinkedIn), 1:1, 4:5 (Instagram), 9:16 (Story, Reels, TikTok), 4:3 (slides), 3:2 and 2:1.
 - Any aspect ratio from 1:10 to 10:1 in a spec, alone or with a width or a height. The windows stay in the center.
-- Aspect ratio presets in the editor: 16:9 (X post, YouTube), 1.91:1 (Open Graph, LinkedIn), 1:1, 4:5 (Instagram), 9:16 (Story, Reels, TikTok), 4:3 (slides), 3:2 and 2:1. The Format field shows only the aspect ratio, and its list also names the places that use it.
 
 ### Windows
+
+<p align="center">
+  <img alt="Three windows side by side in the Dracula theme: a terminal with gray controls, a window with color controls and a tab, and a window with only a tab" src="docs/images/windows.png" width="860">
+</p>
 
 - A title bar with the window controls and a title, or no title bar.
 - Gray window controls, or red, yellow and green as in macOS. Click the controls in the image to switch.
@@ -133,12 +144,18 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 
 ### Code
 
+<p align="center">
+  <img alt="One window with Rust, Python and SQL side by side in the One Dark theme, each tab with the icon of its language" src="docs/images/code.png" width="860">
+</p>
+
+- Type the code directly in the image.
 - Syntax highlighting with Shiki, for all Shiki languages.
 - The language comes from the file name ("Auto (TypeScript)"), also for extensions such as `.ex`, `.sol`, `.ml` and `.service`, or you select it.
 - A short example for each of the 242 languages. When you pick a language for a pane that has no code or still has an example, the pane gets the example of that language with a typical file name, such as `main.py` or `Dockerfile`. Code that you wrote stays.
 - A new page opens with a React counter in the GitHub theme.
-- Format the code with Prettier: JavaScript, JSX, TypeScript, TSX, JSON, JSONC, JSON5, CSS, SCSS, Less, HTML, Vue, Markdown, YAML and GraphQL. The format keeps the code on few lines: an object that fits goes on one line, and the line width follows the aspect ratio (100 characters for an image without an aspect ratio or one of 1.5:1 or wider such as 16:9, 88 for 4:3, 72 for 1:1 and 4:5, and 60 for 9:16).
+- Format the code with Prettier, for JavaScript, TypeScript, JSON, CSS, HTML, Markdown, YAML and more. The line width follows the aspect ratio of the image.
 - Tab inserts two spaces in the code, in a popover and in the JSON editor.
+- Edit the full spec as JSON, with syntax colors and each problem shown while you type.
 
 ### Export
 
@@ -156,24 +173,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 - Copy a link that opens the same image in the editor.
 - The link contains the full image in the URL fragment, so it never goes to a server.
 - The address bar always holds the current image, so a reload or a bookmark keeps it.
-
-### Editing in the web editor
-
-- Type the code directly in the image.
-- Right-click code to highlight lines, clear styles, add or remove popovers and format the code.
-- Right-click a window to duplicate it, fit it to the code, reset its position, center it, change its layer, format its code, copy its image or remove it.
-- Right-click the background to add a window, select all windows, reset the layout or copy the image.
-- Move windows with the mouse. Drag one of the selected windows to move all of them. A moved or resized window snaps, and guide lines show, when it aligns with the center of the image or with the edges and centers of other windows.
-- Resize a window at its edges and corners, panes at the divider between them, and a popover at its corner. Double-click to fit them to the code again.
-- Select several windows with a box, with Shift-click or with ⌘A. Align or distribute them (distribute needs 3 or more), copy their image, copy them as spec with ⌘C, or remove them.
-- A toolbar above the selected window: add a pane to the right or below, center, format and remove, and in the free layout with 2 or more windows also bring to front and send to back.
-- A toolbar above several selected windows: align in 6 ways, distribute, copy their image and remove. Right-click the selected windows for the same actions.
-- Sidebar notices have a one-click fix. The free layout has a Reset button, and a window or pane with a fixed size has a Fit button.
-- In the free layout, change the order of overlapping windows as in Figma: bring forward (⌘]), bring to front (⌘⇧]), send backward (⌘[) and send to back (⌘⇧[).
-- The window list in the sidebar outlines a window in the image when you point to it. Shift-click or ⌘-click selects several windows.
-- Zoom in and out, fit the image to the screen, or show it at 100%. The image size shows below the image.
-- Edit the full spec as JSON, with syntax colors and each problem shown while you type.
-- Short messages confirm a copied image, window or link, and tell you when a copy or an export fails. A dropped file gives "Opened main.png", "has no tin.so spec" or "has an invalid spec". A link with an invalid spec opens the default image with a message. Problems in the spec show above the image.
+- Short messages confirm a copied image, window or link, and tell you when a copy, an export or a dropped file fails. A link with an invalid spec opens the default image with a message.
 
 ### Keyboard shortcuts
 
@@ -273,10 +273,6 @@ The [tin skill](skills/tin/SKILL.md) shows coding agents such as Claude Code, Co
 npx skills add zirkelc/tin.so
 ```
 
-- `tin skill` prints this command and the other ways to add the skill.
-- `tin skill --print` prints the skill itself for agents without skills, so the skill always matches the installed CLI. `tin skill --print spec` prints its spec reference.
-- The skill picks the simple way first: plain code with options for a quick image, and a spec only when the image needs popovers, highlights, styles or several windows with their own settings.
-
 ### Agents in a browser
 
 The web editor has a versioned API on `window.tin` for agents that drive a browser instead of the CLI: read and set a spec, wait until the first image is ready, and export an image, with or without the spec in the file.
@@ -312,7 +308,7 @@ A spec is JSON that describes the whole image: its windows, the panes of each wi
 }
 ```
 
-- `packages/core/src/spec.ts` defines the spec with valibot. Its JSON Schema is on the site at `https://tin.so/schema/v1.json`, and `tin schema` prints it. A spec file with `"$schema"` gets checks and completion in editors such as VS Code.
+- [`packages/core/src/spec.ts`](packages/core/src/spec.ts) defines the spec with valibot. Its JSON Schema is on the site at `https://tin.so/schema/v1.json`, and `tin schema` prints it. A spec file with `"$schema"` gets checks and completion in editors such as VS Code.
 - The spec is versioned (`"v": 1`, or the version in the `$schema` URL, such as `/schema/v1.json`). Links and image files carry the version, so they keep working when the spec changes. Old links and images without a version still open, and a spec from a newer version gives the error "Update tin.so". A `v` that does not agree with the `$schema` URL is an error.
 - A link carries the spec in the URL fragment (`#spec=<deflate + base64url>`), so it never goes to a server.
 - Keys that start with `x-` hold data of other tools in any object of a spec. The renderer ignores them, so they never make a spec invalid.
@@ -338,25 +334,16 @@ The [spec reference of the skill](skills/tin/references/spec.md) explains every 
 pnpm install
 pnpm dev        # builds the packages, then starts the web editor on http://localhost:5173
 pnpm ready      # check, build and test everything
+pnpm run deploy # deploy the web editor to Cloudflare
 ```
 
 The browser tests of the web editor run in headless Chromium with Vitest browser mode. A new machine needs the browser once: `pnpm --filter @tin.so/web exec playwright install chromium`.
 
 The links of the CLI open the hosted editor. To open the local editor instead, set `TIN_APP_URL=http://localhost:5173/`. The GitHub links of the site come from `VITE_GITHUB_URL` (see `apps/web/.env.example`).
 
-The example images of this README are specs in `apps/web/scripts/generate-readme-images.ts`. Run `pnpm --filter @tin.so/web generate-readme-images` after a change to the renderer, the themes or the backgrounds. The social image and the app icons come from `generate-og-image`, and the theme previews of the theme list from `generate-theme-previews`. The screenshot of the editor (`docs/images/editor.png`) is a manual screenshot at 1440 × 860 px with a pixel ratio of 2.
+The example images of this README are specs in `apps/web/scripts/generate-readme-images.ts`. Run `pnpm --filter @tin.so/web generate-readme-images` after a change to the renderer, the themes or the backgrounds. The social image, the app icons and the logo of this README come from `generate-og-image`, and the theme previews of the theme list from `generate-theme-previews`. The screenshot of the editor (`docs/images/editor.png`) is a manual screenshot at 1440 × 860 px with a pixel ratio of 2.
 
 The site loads no analytics script. The visitor counts come from the analytics of the tin.so zone in Cloudflare, which count the requests on the server. The privacy notice is `apps/web/privacy.html`. Change it when the site starts to send data to a new service.
-
-### Releases
-
-[Release Please](https://github.com/googleapis/release-please-action) makes the releases from conventional commits (`feat:`, `fix:` and so on). `@tin.so/core` and `tin.so` always get the same version.
-
-1. A push to `main` runs the `release` job in `.github/workflows/ci.yml`. It opens or updates a release PR with the new versions and the changelogs.
-2. When you merge the release PR, Release Please makes the tags (`core-v…`, `cli-v…`) and the GitHub releases.
-3. A published GitHub release runs `.github/workflows/release.yml`. It publishes each package whose version is not on npm yet, with npm Trusted Publishing and provenance. Do not rename this file, because npm checks its name.
-
-The setup needs a `RELEASE_PLEASE_TOKEN` secret (a fine-grained PAT with read and write access to `Contents` and `Pull requests`), and a Trusted Publisher for `zirkelc/tin.so` and `release.yml` on the npm access page of each package. The web editor is not part of a release: deploy it with `pnpm run deploy`.
 
 ## License
 

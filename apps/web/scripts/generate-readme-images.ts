@@ -162,6 +162,60 @@ const SPECS: Record<string, object> = {
       },
     ],
   },
+  // Three window styles side by side: a title bar, a title bar with tabs, and tabs only
+  windows: {
+    theme: "dracula",
+    direction: "row",
+    windows: [
+      {
+        title: "Terminal",
+        panes: [{ language: "shellsession", code: `$ npx tin.so main.rs\nSaved main.png` }],
+      },
+      {
+        title: "api",
+        controls: "color",
+        tabs: true,
+        panes: [
+          {
+            title: "health.go",
+            code: `func health(w http.ResponseWriter) {\n\tw.WriteHeader(200)\n}`,
+          },
+        ],
+      },
+      {
+        tabs: true,
+        titleBar: false,
+        panes: [
+          { title: "Dockerfile", code: `FROM node:22-alpine\nCOPY . .\nCMD ["node", "main.js"]` },
+        ],
+      },
+    ],
+  },
+  // One window with three languages, each pane with the icon of its language
+  code: {
+    theme: "one-dark",
+    windows: [
+      {
+        tabs: true,
+        titleBar: false,
+        split: "row",
+        panes: [
+          {
+            title: "main.rs",
+            code: `fn main() {\n    let names = ["tin", "so"];\n    for name in names {\n        println!("{name}");\n    }\n}`,
+          },
+          {
+            title: "app.py",
+            code: `from dataclasses import dataclass\n\n@dataclass\nclass User:\n    name: str\n    admin: bool = False`,
+          },
+          {
+            title: "query.sql",
+            code: `SELECT name, email\nFROM users\nWHERE admin\nORDER BY name;`,
+          },
+        ],
+      },
+    ],
+  },
   // An image for a post on X, with a gradient background
   social: {
     theme: "catppuccin",
