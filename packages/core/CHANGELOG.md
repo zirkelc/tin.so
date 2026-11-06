@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/zirkelc/tin.so/compare/core-v0.2.0...core-v0.3.0) (2026-11-06)
+
+
+### Features
+
+* use editor themes, gradient backgrounds and a new brand ([74d8d6a](https://github.com/zirkelc/tin.so/commit/74d8d6afcdb93bf2d13167f66c657be6d385b402))
+
 ## [0.2.0](https://github.com/zirkelc/tin.so/compare/core-v0.1.0...core-v0.2.0) (2026-10-29)
 
 
