@@ -162,7 +162,7 @@ const SPECS: Record<string, object> = {
       },
     ],
   },
-  // Three window styles side by side: a title bar, a title bar with tabs, and tabs only
+  // Four window styles side by side: a title bar, a title bar with tabs, only tabs, and no title bar
   windows: {
     theme: "dracula",
     direction: "row",
@@ -184,6 +184,10 @@ const SPECS: Record<string, object> = {
       },
       {
         tabs: true,
+        titleBar: false,
+        panes: [{ title: "config.yaml", code: `port: 8080\nlog: debug` }],
+      },
+      {
         titleBar: false,
         panes: [
           { title: "Dockerfile", code: `FROM node:22-alpine\nCOPY . .\nCMD ["node", "main.js"]` },

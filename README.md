@@ -116,7 +116,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 ### Windows
 
 <p align="center">
-  <img alt="Three windows side by side in the Dracula theme: a terminal with gray controls, a window with color controls and a tab, and a window with only a tab" src="docs/images/windows.png" width="860">
+  <img alt="Four windows side by side in the Dracula theme: a terminal with gray controls, a window with color controls and a tab, a window with only a tab, and a window without a title bar" src="docs/images/windows.png" width="860">
 </p>
 
 - A title bar with a title, or no title bar.
