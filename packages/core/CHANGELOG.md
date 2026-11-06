@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.0](https://github.com/zirkelc/tin.so/compare/core-v0.3.0...core-v0.4.0) (2026-11-06)
+
+
+### Features
+
+* **core:** fill the color gaps of the background presets ([7396c68](https://github.com/zirkelc/tin.so/commit/7396c68e2451cc468a145ed51a0c9be04de835f6))
+* **web:** list the popular languages first and find languages by alias ([bdf293d](https://github.com/zirkelc/tin.so/commit/bdf293dce795df12371d5589445486ce99b7ab93))
+
+
+### Bug Fixes
+
+* **core:** give highlighted lines a clear contrast in every theme ([018c32a](https://github.com/zirkelc/tin.so/commit/018c32a4c8a96a3256a82a3f7678f623023ae75a))
+
+
+### Documentation
+
+* shorten the READMEs and move the development notes to docs ([828b4a0](https://github.com/zirkelc/tin.so/commit/828b4a0ca278c780f6a21ff630bcdab6181b14b0))
+
 ## [0.3.0](https://github.com/zirkelc/tin.so/compare/core-v0.2.0...core-v0.3.0) (2026-11-06)
 
 
