@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/zirkelc/tin.so/compare/core-v0.4.0...core-v0.5.0) (2026-11-09)
+
+
+### Miscellaneous Chores
+
+* **core:** Synchronize tin.so versions
+
 ## [0.4.0](https://github.com/zirkelc/tin.so/compare/core-v0.3.0...core-v0.4.0) (2026-11-06)
 
 
