@@ -108,10 +108,10 @@ Use the code exactly as the user gave it. Do not reformat it or add lines. For a
 
 ## Report and stop
 
-Tell the user:
+Tell the user, in a few short lines:
 
-1. Where the image is: the file path, or that it is on the clipboard.
-2. The `Edit:` link from the output. It opens the image in the web editor.
+1. Where the image is: the file path (relative to the current directory when the file is in it), or that it is on the clipboard.
+2. That you can open the image in the web editor. Do not print the `Edit:` link: it holds the whole spec and fills many lines of the terminal. When the user wants it, run `tin link <same input> --open`, or give the link if they ask for it.
 3. The main settings you chose, and that they can ask for changes or change them in the editor.
 
 Then stop. Do not open or check the image again unless the user asks. For a change, edit the options or the spec and render again.
