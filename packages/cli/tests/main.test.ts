@@ -347,6 +347,63 @@ describe("render metadata", () => {
     const spec = await readImageSpec(await readFile(result.file));
     expect(spec).toBe(undefined);
   });
+
+  test.each(["png", "svg"])("should render a %s of tin again with the options", async (format) => {
+    // Arrange
+    await main(["render", "main.ts", "--theme", "nord", "-o", `old.${format}`], createIo());
+    const io = createIo();
+
+    // Act
+    const code = await main(
+      ["render", `old.${format}`, "--theme", "dracula", "-o", "new.png", "--json"],
+      io,
+    );
+
+    // Assert
+    expect(code).toBe(0);
+    const spec = (await readImageSpec(await readFile(join(cwd, "new.png")))) as any;
+    expect(spec.theme).toBe("dracula");
+    expect(spec.windows[0].panes[0].title).toBe("main.ts");
+  });
+
+  test("should name the output after an image input", async () => {
+    // Arrange
+    await main(["render", "main.ts", "-o", "old.png"], createIo());
+    const io = createIo();
+
+    // Act
+    const code = await main(["old.png", "--format", "svg", "--json"], io);
+
+    // Assert
+    expect(code).toBe(0);
+    expect(JSON.parse(io.output()).file).toBe(join(cwd, "old.svg"));
+  });
+
+  test("should reject a PNG together with other inputs", async () => {
+    // Arrange
+    await main(["render", "main.ts", "-o", "old.png"], createIo());
+    const io = createIo();
+
+    // Act
+    const code = await main(["render", "old.png", "plans.toml", "-o", "new.png"], io);
+
+    // Assert
+    expect(code).toBe(1);
+    expect(io.errors()).toContain("old.png");
+  });
+
+  test("should reject a PNG without a spec", async () => {
+    // Arrange
+    await main(["render", "main.ts", "--no-metadata", "-o", "plain.png"], createIo());
+    const io = createIo();
+
+    // Act
+    const code = await main(["render", "plain.png", "-o", "new.png"], io);
+
+    // Assert
+    expect(code).toBe(1);
+    expect(io.errors()).toContain("plain.png");
+  });
 });
 
 describe("render --code", () => {

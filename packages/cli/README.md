@@ -34,11 +34,14 @@ tin main.ts --aspect-ratio 16:9
 # A JSON spec, for popovers, highlights and styles
 tin spec.json
 
+# An image that tin made, again with another theme
+tin auth.png --theme dracula -o auth-dark.png
+
 # Only the editor link, opened in the browser
 tin link main.ts --open
 ```
 
-Each run prints the file and an `Edit:` link. The image file also contains the spec and the link, so you can drop it into the editor later and change it. `--no-metadata` turns this off.
+Each run prints the file and an `Edit:` link. The image file also contains the spec and the link, so you can drop it into the editor later and change it, or give it to `tin` again with other options. `--no-metadata` turns this off.
 
 ## Commands
 

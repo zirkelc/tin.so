@@ -142,7 +142,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 - Save a PNG (1x, 2x or 4x) or an SVG, or copy the image to the clipboard.
 - Copy an image of only one window or of the selected windows.
 - The SVG contains the fonts, so it looks the same everywhere.
-- The image file holds its spec. Drop it into the editor to edit the image again.
+- The image file holds its spec. Drop it into the editor to edit the image again, or render it again with the CLI and other options, such as `tin auth.png --theme dracula -o auth-dark.png`.
 - The image renders on your computer, with no server and no browser screenshot.
 
 ### Share
@@ -194,6 +194,9 @@ tin main.ts --aspect-ratio 16:9 --background "linear-gradient(135deg, #1e1b4b, #
 
 # A spec, for popovers, highlights and styles
 tin spec.json
+
+# An image that tin made, again with another theme
+tin auth.png --theme dracula -o auth-dark.png
 
 # Only the editor link, opened in the browser
 tin link main.ts --open

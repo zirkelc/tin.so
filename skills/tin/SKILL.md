@@ -102,6 +102,7 @@ Use the code exactly as the user gave it. Do not reformat it or add lines. For a
 - A name that ends with `.svg` gives an SVG with the fonts inside it. `--scale 3` makes a larger PNG.
 - `--copy` puts the PNG on the clipboard, for a paste into a chat or a post. Without `-o`, it writes no file.
 - The image file contains the spec and an editor link, so the user can drop the file into the editor later and change it. The spec holds the full code, also code that a fixed size cuts off. Use `--no-metadata` when the code must not travel with the image.
+- To change an image that tin made, give the image as the input with the new options, for example `tin auth.png --theme dracula -o auth-dark.png`. tin reads the spec from the PNG or SVG, so you do not need the code again. Give `-o` with a new name: without `-o`, the output would replace the input, so tin stops.
 - `tin link <files>` takes the same input and options as rendering and prints only the editor link, without an image. When the user wants to open the code in the editor, use `tin link <files> --open`: it opens the link in the default browser. `tin link --copy` puts the link on the clipboard. Both still print the link.
 - `--json` prints `{ file, format, width, height, copied, link }` for further steps. With `tin link`, it prints `{ link, copied, opened }`.
 

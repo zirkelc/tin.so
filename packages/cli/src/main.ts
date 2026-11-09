@@ -12,6 +12,7 @@ import {
   isSpecSchemaUrl,
   LANGUAGE_IDS,
   layout,
+  readImageSpec,
   renderScene,
   SPEC_SCHEMA_URL,
   SpecError,
@@ -212,7 +213,7 @@ const INPUT_ARG = defineArgs({
     required: false,
     valueHint: "file... | -",
     description:
-      'Code files (one pane per file), a spec file, or "-" for stdin. Without input, tin reads stdin. A file with the name of a command needs a path, such as ./themes.',
+      'Code files (one pane per file), a spec file, an image that tin made, or "-" for stdin. Without input, tin reads stdin. A file with the name of a command needs a path, such as ./themes.',
   },
 });
 
@@ -237,6 +238,7 @@ const EXAMPLES = `Examples:
   cat query.sql | tin --language sql -o query.png
   tin --code 'x = 1' --language python
   echo '${EXAMPLE_SPEC}' | tin -o a.png
+  tin auth.png --mode light -o auth-light.png
   tin link main.ts --open
 `;
 
@@ -250,7 +252,8 @@ const DETECTION_NOTE = `Input:
   Text on stdin is a spec only when it is a JSON object whose "$schema" is the URL of the
   spec schema ("$id" in tin schema: ${SPEC_SCHEMA_URL}).
   Other text, also other JSON, is plain code. A .json file is a spec when it has this
-  "$schema" or a "windows" array, else it is code. --spec and --no-spec skip the detection.
+  "$schema" or a "windows" array, else it is code. A PNG or SVG that tin made gives
+  its spec, and the options change it. --spec and --no-spec skip the detection.
 `;
 
 const APP_URL_NOTE = `Set TIN_APP_URL to change the web editor of the links (default: ${DEFAULT_APP_URL}).\n`;
@@ -381,6 +384,12 @@ function windowFromOptions(values: SourceValues, panes: Array<unknown>): Record<
 type Source = { spec: unknown; name: string };
 
 async function specFromFiles(files: Array<string>, values: SourceValues, io: Io): Promise<Source> {
+  // A PNG is never code, and only one input can give the spec of the image
+  const png = files.find((file) => extname(file).toLowerCase() === ".png");
+  if (png)
+    throw new UsageError(
+      `${png} is an image. To render an image that tin made again, give it as the only input.`,
+    );
   const panes = await Promise.all(
     files.map(async (file) => ({
       title: basename(file),
@@ -428,12 +437,29 @@ async function specFromStdin(values: SourceValues, io: Io): Promise<Source> {
   return specFromCode(text, values);
 }
 
-/** Reads one file as a spec when --spec says so, or when it is JSON that looks like a spec */
+/**
+ * Reads the spec that tin wrote into a PNG or an SVG. A PNG without a spec is an error, but an SVG
+ * without a spec is code, such as a logo.
+ */
+async function specFromImage(file: string, name: string, io: Io): Promise<Source | null> {
+  const spec = await readImageSpec(await readFile(resolve(io.cwd, file)));
+  if (spec !== undefined) return { spec, name };
+  if (extname(file).toLowerCase() === ".svg") return null;
+  throw new UsageError(
+    `${file} has no tin spec. tin renders only a PNG that it made with metadata again.`,
+  );
+}
+
+/**
+ * Reads one file as a spec when --spec says so, when it is JSON that looks like a spec, or when it
+ * is an image with a spec
+ */
 async function specFromFile(file: string, values: SourceValues, io: Io): Promise<Source | null> {
   if (values.spec === false) return null;
+  const name = basename(file, extname(file));
+  if ([".png", ".svg"].includes(extname(file).toLowerCase())) return specFromImage(file, name, io);
   if (values.spec === undefined && extname(file) !== ".json") return null;
   const text = await readFile(resolve(io.cwd, file), "utf8");
-  const name = basename(file, extname(file));
   if (values.spec === true) return { spec: parseSpecText(text, file), name };
   const json = parseJson(text);
   // A spec from before the "$schema" field has a windows array
