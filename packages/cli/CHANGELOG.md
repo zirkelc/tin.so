@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/zirkelc/tin.so/compare/cli-v0.4.0...cli-v0.5.0) (2026-11-09)
+
+
+### Features
+
+* **cli:** render an image that tin made again with new options ([34835e6](https://github.com/zirkelc/tin.so/commit/34835e6a204c895f818df60572859efab91ef5c6))
+
 ## [0.4.0](https://github.com/zirkelc/tin.so/compare/cli-v0.3.0...cli-v0.4.0) (2026-11-06)
 
 
