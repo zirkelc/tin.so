@@ -50,7 +50,8 @@ jobs:
         timeout-minutes: 15
         run: |
           version=$(node -p "require('./packages/core/package.json').version")
-          until npm view "@tin.so/core@$version" version --prefer-online | grep -q .; do
+          # npm refuses to run in the repo, which asks for pnpm, so it runs in another directory
+          until (cd "$RUNNER_TEMP" && npm view "@tin.so/core@$version" version --prefer-online) | grep -q .; do
             echo "Waiting for @tin.so/core@$version on npm"
             sleep 15
           done
