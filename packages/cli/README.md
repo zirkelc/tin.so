@@ -55,6 +55,7 @@ Each run prints the file and an `Edit:` link. The image file also contains the s
 | `tin schema`           | Prints the JSON Schema of the spec                                                             |
 | `tin skill`            | Prints the tin skill and how to add it to a coding agent                                       |
 | `tin help [command]`   | Shows the help of tin, or of a command. `tin <command> --help` is the same                     |
+| `tin --version`        | Prints the version of tin. `tin -v` is the same                                                |
 
 A file with the name of a command needs a path, such as `./themes`.
 

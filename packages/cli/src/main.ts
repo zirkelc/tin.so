@@ -37,6 +37,7 @@ import {
   UsageError,
   wantsHelp,
 } from "./args.ts";
+import packageJson from "../package.json" with { type: "json" };
 import { BrowserError, openUrl } from "./browser.ts";
 import { ClipboardError, copyImage, copyText } from "./clipboard.ts";
 
@@ -701,7 +702,7 @@ function commandList(): string {
     ([name, command]) =>
       `  ${name.padEnd(width)}${(command.meta as { description: string }).description}`,
   );
-  return `COMMANDS\n\n${lines.join("\n")}\n\nUse tin <command> --help for more information about a command.\n`;
+  return `COMMANDS\n\n${lines.join("\n")}\n\nUse tin <command> --help for more information about a command.\nUse tin --version (or -v) to print the version of tin.\n`;
 }
 
 async function help(name: CommandName | undefined): Promise<string> {
@@ -744,6 +745,10 @@ export async function main(args: Array<string>, systemIo: Io): Promise<number> {
   const name: CommandName = explicit ? first : "render";
   const rest = explicit ? args.slice(1) : args;
   try {
+    if (args.length === 1 && (first === "--version" || first === "-v")) {
+      io.stdout(`${packageJson.version}\n`);
+      return 0;
+    }
     if (name === "help") {
       const topic = rest[0];
       io.stdout(plain(await help(isCommand(topic) ? topic : undefined)));

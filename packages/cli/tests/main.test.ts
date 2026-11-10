@@ -1140,6 +1140,45 @@ describe("help", () => {
   });
 });
 
+describe("version", () => {
+  const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+
+  test("should print the version of the package for --version", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    const code = await main(["--version"], io);
+
+    // Assert
+    expect(code).toBe(0);
+    expect(io.output()).toBe(`${version}\n`);
+  });
+
+  test("should print the version for -v", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    const code = await main(["-v"], io);
+
+    // Assert
+    expect(code).toBe(0);
+    expect(io.output()).toBe(`${version}\n`);
+  });
+
+  test("should name the version option in the help", async () => {
+    // Arrange
+    const io = createIo();
+
+    // Act
+    await main(["--help"], io);
+
+    // Assert
+    expect(io.output()).toContain("tin --version");
+  });
+});
+
 describe("arguments", () => {
   test("should suggest the closest option for an unknown option", async () => {
     // Arrange

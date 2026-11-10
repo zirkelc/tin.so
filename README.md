@@ -211,6 +211,8 @@ tin link main.ts --open
 | `tin fonts`            | Lists the fonts                                                                                |
 | `tin schema`           | Prints the JSON Schema of the spec                                                             |
 | `tin skill`            | Prints the agent skill and how to add it                                                       |
+| `tin help [command]`   | Shows the help of tin, or of a command. `tin <command> --help` is the same                     |
+| `tin --version`        | Prints the version of tin. `tin -v` is the same                                                |
 
 - Render several files in one image: one pane per file, or one window per file with `--windows`.
 - Pipe code from the clipboard or another command, and copy the image back with `--copy`.
