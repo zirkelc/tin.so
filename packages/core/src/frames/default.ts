@@ -1,18 +1,9 @@
 import { UI_FONT } from "../fonts/index.ts";
 import type { WindowBox } from "../layout.ts";
-import { MAC_HEADER } from "../sizes.ts";
+import type { Mode } from "../themes/index.ts";
+import { MAC_HEADER, WINDOW_RADIUS } from "../sizes.ts";
 import { attrs, blurredRect, inflate, linearGradient, roundedRect, text } from "./draw.ts";
 import type { Frame, FrameContext } from "./types.ts";
-
-// The shadow layers of the ray.so window: offset y, blur radius and opacity of black
-const SHADOW_LAYERS: Array<[number, number, number]> = [
-  [2.8, 2.2, 0.034],
-  [6.7, 5.3, 0.048],
-  [12.5, 10, 0.06],
-  [22.3, 17.9, 0.072],
-  [41.8, 33.4, 0.086],
-  [100, 80, 0.12],
-];
 
 export type ShadowLayer = {
   y: number;
@@ -22,12 +13,17 @@ export type ShadowLayer = {
   spread?: number;
 };
 
-export const RAYSO_SHADOW: Array<ShadowLayer> = SHADOW_LAYERS.map(([y, blur, opacity]) => ({
-  y,
-  blur,
-  color: "black",
-  opacity,
-}));
+/**
+ * A soft shadow below the window, in 5 layers. Each layer is about twice as far down and as blurred
+ * as the one before it, and a little darker, so the shadow is dense near the window and long below it.
+ */
+export const WINDOW_SHADOW: Array<ShadowLayer> = [
+  [3, 3, 0.045],
+  [8, 8, 0.055],
+  [18, 16, 0.07],
+  [40, 34, 0.085],
+  [90, 76, 0.125],
+].map(([y, blur, opacity]) => ({ y: y!, blur: blur!, color: "black", opacity: opacity! }));
 
 /**
  * Draws CSS box shadows of a window. A CSS box shadow is not painted below its box, which matters
@@ -58,8 +54,10 @@ export function boxShadow(
   return out.join("");
 }
 
-// The close, minimize and zoom buttons of macOS
+// The close, minimize and zoom buttons of macOS, each with a darker ring
 const CONTROL_COLORS = ["#ff5f57", "#febc2e", "#28c840"];
+const CONTROL_RINGS = ["#e2463f", "#e1a116", "#12ac28"];
+const CONTROL_RING_WIDTH = 0.5;
 
 /** The three window controls, in the gray of the frame or in the colors of macOS */
 export function windowControls(window: WindowBox, gray: string): string {
@@ -70,8 +68,16 @@ export function windowControls(window: WindowBox, gray: string): string {
   return [0, 1, 2]
     .map((i) => {
       const cx = controls.x + radius + i * (MAC_HEADER.control + MAC_HEADER.controlGap);
-      const fill = window.controls === "color" ? CONTROL_COLORS[i]! : gray;
-      return `<circle ${attrs({ cx, cy, r: radius, fill })}/>`;
+      if (window.controls !== "color")
+        return `<circle ${attrs({ cx, cy, r: radius, fill: gray })}/>`;
+      return `<circle ${attrs({
+        cx,
+        cy,
+        r: radius - CONTROL_RING_WIDTH / 2,
+        fill: CONTROL_COLORS[i]!,
+        stroke: CONTROL_RINGS[i]!,
+        "stroke-width": CONTROL_RING_WIDTH,
+      })}/>`;
     })
     .join("");
 }
@@ -113,9 +119,15 @@ export function titleBarText(
   return out.join("");
 }
 
-/** The default frame of ray.so: a gradient, and a translucent window with a soft shadow */
+// The edges of a macOS window: a light inner edge in dark mode, and a thin dark outer edge
+const EDGES: Record<Mode, { inner: string; outer: string }> = {
+  light: { inner: "transparent", outer: "rgba(0, 0, 0, 0.23)" },
+  dark: { inner: "rgba(255, 255, 255, 0.16)", outer: "rgba(0, 0, 0, 0.85)" },
+};
+
+/** The default frame: a gradient, and a window like the one of macOS, in the colors of the theme */
 export const DEFAULT_FRAME: Frame = {
-  radius: 18,
+  radius: WINDOW_RADIUS,
   inset: 0,
   titleBar: {
     paddingTop: MAC_HEADER.paddingTop,
@@ -129,7 +141,7 @@ export const DEFAULT_FRAME: Frame = {
     font: "ui",
     fontSize: MAC_HEADER.titleSize,
     fontWeight: 500,
-    letterSpacing: 0.32,
+    letterSpacing: 0,
     language: false,
     languageSize: 12,
   },
@@ -143,21 +155,20 @@ export const DEFAULT_FRAME: Frame = {
       [1, scene.frame.backdrop.to],
     ])}</defs><rect width="${scene.width}" height="${scene.height}" fill="url(#${id})"/>`;
   },
-  behind: (context, window) => (window.frame ? boxShadow(context, window, RAYSO_SHADOW) : ""),
+  behind: (context, window) => (window.frame ? boxShadow(context, window, WINDOW_SHADOW) : ""),
   body: ({ scene }, window) => roundedRect(window, window.radius, { fill: scene.frame.background }),
   header: (context, window) =>
     windowControls(window, context.scene.frame.control) +
     titleBarText(context, window, { title: context.scene.frame.title }),
-  border: ({ scene }, window) =>
-    // Box shadow rings of the ray.so window: 1px highlight border, and a shadow border 0.5px outside of it
-    roundedRect(inflate(window, 0.5), window.radius + 0.5, {
+  border: ({ mode }, window) =>
+    roundedRect(inflate(window, -0.5), window.radius - 0.5, {
       fill: "none",
-      stroke: scene.frame.highlightBorder,
+      stroke: EDGES[mode].inner,
       "stroke-width": 1,
     }) +
-    roundedRect(inflate(window, 1.25), window.radius + 1.25, {
+    roundedRect(inflate(window, 0.25), window.radius + 0.25, {
       fill: "none",
-      stroke: scene.frame.shadowBorder,
+      stroke: EDGES[mode].outer,
       "stroke-width": 0.5,
     }),
 };

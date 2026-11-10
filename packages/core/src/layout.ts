@@ -8,7 +8,7 @@ import {
 } from "./fonts/index.ts";
 import { type Icon, resolveIcon } from "./icons/index.ts";
 import { DEFAULT_FRAME, type Frame } from "./frames/index.ts";
-import { MAC_HEADER } from "./sizes.ts";
+import { MAC_HEADER, WINDOW_RADIUS } from "./sizes.ts";
 import {
   highlight,
   type HighlightedLine,
@@ -41,9 +41,9 @@ import {
   type Theme,
 } from "./themes/index.ts";
 
-// Sizes in CSS pixels, taken from the ray.so editor and default frame
-export const FONT_SIZE = 15;
-export const LINE_HEIGHT = 22.5;
+// Sizes in CSS pixels
+export const FONT_SIZE = 14;
+export const LINE_HEIGHT = 21;
 const LETTER_SPACING = 0.1;
 const TAB_SIZE = 2;
 const EDITOR_PADDING = 16;
@@ -51,8 +51,7 @@ const LINE_NUMBER_GUTTER = 48;
 const LINE_NUMBER_GUTTER_LARGE = 56;
 const MIN_FRAME_WIDTH = 520;
 
-export const WINDOW_RADIUS = 18;
-export { MAC_HEADER };
+export { MAC_HEADER, WINDOW_RADIUS };
 export const TAB_HEADER = { height: 40, paddingX: 16, icon: 14, iconGap: 8, titleSize: 13 };
 const DIVIDER = 1;
 

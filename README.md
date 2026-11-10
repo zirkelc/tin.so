@@ -287,7 +287,7 @@ pnpm ready   # check, build and test everything
 
 ## License
 
-[MIT](LICENSE). The window style comes from [ray.so](https://github.com/raycast/ray-so) (MIT), the editor themes from their projects, most of them through Shiki (MIT or Apache 2.0), the file icon from Lucide (ISC), the language icons from Simple Icons (CC0), and the fonts are under the SIL Open Font License, except Commit Mono (MIT). See [`packages/core/THIRD_PARTY_NOTICES.md`](packages/core/THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE). The editor themes come from their projects, most of them through Shiki (MIT or Apache 2.0), the file icon from Lucide (ISC), the language icons from Simple Icons (CC0), and the fonts are under the SIL Open Font License, except Commit Mono (MIT). See [`packages/core/THIRD_PARTY_NOTICES.md`](packages/core/THIRD_PARTY_NOTICES.md).
 
 <!--
 TODO (not shown on GitHub)

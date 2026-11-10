@@ -120,4 +120,4 @@ const png = await svgToPng(toSvg(scene), fonts.values());
 
 ## License
 
-MIT. The window style comes from ray.so (MIT), and the editor themes are under MIT or Apache 2.0 (see [EDITOR_THEMES_NOTICES.md](EDITOR_THEMES_NOTICES.md)), the file icon from Lucide (ISC), the language icons from Simple Icons (CC0), and the fonts are under the SIL Open Font License, except Commit Mono (MIT). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+MIT. The editor themes are under MIT or Apache 2.0 (see [EDITOR_THEMES_NOTICES.md](EDITOR_THEMES_NOTICES.md)), the file icon from Lucide (ISC), the language icons from Simple Icons (CC0), and the fonts are under the SIL Open Font License, except Commit Mono (MIT). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

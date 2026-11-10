@@ -60,7 +60,7 @@ describe("layout", () => {
     const [window] = scene.windows;
     const width = 16 + 80 * scene.text.cellWidth + 16;
     expect(window!.width).toBeCloseTo(width);
-    expect(window!.height).toBe(16 + 2 * 22.5 + 16);
+    expect(window!.height).toBe(16 + 2 * 21 + 16);
     expect(scene.width).toBe(Math.ceil(width + 64));
   });
 
@@ -87,7 +87,7 @@ describe("layout", () => {
     expect(window.x).toBe(16);
     expect(window.y).toBe(16);
     expect(scene.width).toBe(Math.ceil(width + 32));
-    expect(scene.height).toBe(Math.ceil(16 + 22.5 + 16 + 32));
+    expect(scene.height).toBe(Math.ceil(16 + 21 + 16 + 32));
   });
 
   test("should not stretch a stacked window without a frame", async () => {
@@ -111,7 +111,7 @@ describe("layout", () => {
     });
 
     // Assert
-    expect(scene.windows[0]!.height).toBe(16 + 22.5 + 16);
+    expect(scene.windows[0]!.height).toBe(16 + 21 + 16);
   });
 
   test("should give stacked windows the same width", async () => {
@@ -206,7 +206,7 @@ describe("annotations", () => {
     const cell = scene.text.cellWidth;
     expect(annotation!.anchor.x).toBeCloseTo(pane.code.x + 16 + 10 * cell);
     expect(annotation!.anchor.width).toBeCloseTo(cell);
-    expect(annotation!.anchor.y).toBe(pane.code.y + 16 + 2 * 22.5);
+    expect(annotation!.anchor.y).toBe(pane.code.y + 16 + 2 * 21);
     expect(annotation!.box.y).toBe(annotation!.anchor.y + 6);
     expect(annotation!.lines.length).toBe(1);
   });
@@ -333,7 +333,7 @@ describe("window parts", () => {
     expect(window.frame).toBe(false);
     expect(window.header).toBeUndefined();
     expect(window.panes[0]!.tab).toBeUndefined();
-    expect(window.height).toBe(16 + 22.5 + 16);
+    expect(window.height).toBe(16 + 21 + 16);
   });
 });
 

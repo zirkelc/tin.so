@@ -45,7 +45,7 @@ export type EditorWindow = {
   divider?: string;
 };
 
-/** Colors of the window around the code, from the default frame of ray.so */
+/** Colors of the window around the code */
 export type FrameColors = {
   /** The gradient behind the windows */
   backdrop: { from: string; to: string };
