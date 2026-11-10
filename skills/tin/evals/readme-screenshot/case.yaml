@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: readme-screenshot
+expected_outcome: |
+  A PNG code image of the function, made with tin, with the code unchanged, and an answer that gives the path.

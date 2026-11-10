@@ -1,0 +1,14 @@
+{
+  "name": "tin",
+  "description": "Make beautiful code images with the tin.so CLI: several files in one image, popovers, highlights, 14 editor themes and gradient backgrounds. Type /tin or ask for a code image.",
+  "author": {
+    "name": "Chris Cook",
+    "url": "https://github.com/zirkelc"
+  },
+  "homepage": "https://tin.so",
+  "repository": "https://github.com/zirkelc/tin.so",
+  "license": "MIT",
+  "keywords": ["code image", "code screenshot", "carbon", "shiki"],
+  "skills": ["./skills/"],
+  "icon": "./apps/web/public/icon-512.png"
+}

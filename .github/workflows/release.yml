@@ -1,0 +1,68 @@
+# IMPORTANT: DO NOT RENAME THIS FILE
+# It uses npm Trusted Publishing to deploy without a token.
+# The workflow name and filename must match what is configured on npmjs.com.
+
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+# Each release has its own group: a shared group keeps only one waiting run and cancels the others
+concurrency:
+  group: release-${{ github.event.release.tag_name || github.run_id }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # needed for npm publish with provenance
+  contents: read
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/actions/checkout
+      - uses: actions/checkout@v6
+      # https://github.com/pnpm/action-setup
+      - uses: pnpm/action-setup@v6
+      # https://github.com/actions/setup-node
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          cache: "pnpm"
+      - run: pnpm install
+      - run: pnpm exec vp run -r build
+      # Release Please makes one GitHub release for each package, and each one starts this
+      # workflow. A run publishes or deploys only the package of its own tag, because a second
+      # publish of the same version fails. A manual run publishes every version that is not on npm.
+      - name: Publish all
+        if: github.event_name == 'workflow_dispatch'
+        run: pnpm -r publish --provenance --no-git-checks
+      - name: Publish core
+        if: startsWith(github.event.release.tag_name, 'core-v')
+        run: pnpm --filter @tin.so/core publish --provenance --no-git-checks
+      # The CLI needs the core of the same version, which the run of the core release publishes
+      - name: Publish CLI
+        if: startsWith(github.event.release.tag_name, 'cli-v')
+        timeout-minutes: 15
+        run: |
+          version=$(node -p "require('./packages/core/package.json').version")
+          # npm refuses to run in the repo, which asks for pnpm, so it runs in another directory
+          until (cd "$RUNNER_TEMP" && npm view "@tin.so/core@$version" version --prefer-online) | grep -q .; do
+            echo "Waiting for @tin.so/core@$version on npm"
+            sleep 15
+          done
+          pnpm --filter tin.so publish --provenance --no-git-checks
+      # Deploys the web editor. A release of the core also deploys it, because the editor uses the
+      # core and gets no release of its own for a change that is only in the core.
+      - name: Deploy
+        if: >-
+          github.event_name == 'workflow_dispatch' ||
+          startsWith(github.event.release.tag_name, 'web-v') ||
+          startsWith(github.event.release.tag_name, 'core-v')
+        run: pnpm --filter @tin.so/web exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

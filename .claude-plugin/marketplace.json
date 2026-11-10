@@ -1,0 +1,15 @@
+{
+  "name": "tin.so",
+  "description": "The tin.so plugin for Claude Code: beautiful code images for humans and agents.",
+  "owner": {
+    "name": "Chris Cook",
+    "url": "https://github.com/zirkelc"
+  },
+  "plugins": [
+    {
+      "name": "tin",
+      "source": "./",
+      "description": "Make beautiful code images with the tin.so CLI: several files in one image, popovers, highlights, 14 editor themes and gradient backgrounds."
+    }
+  ]
+}

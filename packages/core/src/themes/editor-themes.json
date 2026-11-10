@@ -1,0 +1,576 @@
+[
+  {
+    "id": "ayu",
+    "name": "Ayu",
+    "background": {
+      "from": "#ff8f40",
+      "to": "#ffb454"
+    },
+    "textmate": {
+      "dark": "ayu-dark",
+      "light": "ayu-light"
+    },
+    "window": {
+      "dark": {
+        "background": "#10141c",
+        "title": "#5a6378",
+        "lineNumber": "#5a6378a6",
+        "divider": "#1b1f29"
+      },
+      "light": {
+        "background": "#fcfcfc",
+        "title": "#828e9f",
+        "lineNumber": "#828e9f66",
+        "divider": "#6b7d8f1f"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#bfbdb6",
+        "keyword": "#ff8f40",
+        "string": "#aad94c",
+        "function": "#ffb454",
+        "comment": "#5a6673",
+        "highlight": "#161a24"
+      },
+      "light": {
+        "foreground": "#5c6166",
+        "keyword": "#fa8532",
+        "string": "#86b300",
+        "function": "#eba400",
+        "comment": "#adaeb1",
+        "highlight": "#828e9f1a"
+      }
+    }
+  },
+  {
+    "id": "catppuccin",
+    "name": "Catppuccin",
+    "background": {
+      "from": "#cba6f7",
+      "to": "#f5c2e7"
+    },
+    "textmate": {
+      "dark": "catppuccin-mocha",
+      "light": "catppuccin-latte"
+    },
+    "window": {
+      "dark": {
+        "background": "#1e1e2e",
+        "title": "#cdd6f4",
+        "lineNumber": "#7f849c",
+        "divider": "#181825"
+      },
+      "light": {
+        "background": "#eff1f5",
+        "title": "#4c4f69",
+        "lineNumber": "#8c8fa1",
+        "divider": "#e6e9ef"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#cdd6f4",
+        "keyword": "#cba6f7",
+        "string": "#a6e3a1",
+        "function": "#89b4fa",
+        "comment": "#9399b2",
+        "highlight": "#cdd6f412"
+      },
+      "light": {
+        "foreground": "#4c4f69",
+        "keyword": "#8839ef",
+        "string": "#40a02b",
+        "function": "#1e66f5",
+        "comment": "#7c7f93",
+        "highlight": "#4c4f6912"
+      }
+    }
+  },
+  {
+    "id": "vscode",
+    "name": "VS Code",
+    "background": {
+      "from": "#c586c0",
+      "to": "#dcdcaa"
+    },
+    "textmate": {
+      "dark": "dark-plus",
+      "light": "light-plus"
+    },
+    "window": {
+      "dark": {
+        "background": "#1e1e1e"
+      },
+      "light": {
+        "background": "#ffffff"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#d4d4d4",
+        "keyword": "#c586c0",
+        "string": "#ce9178",
+        "function": "#dcdcaa",
+        "comment": "#6a9955"
+      },
+      "light": {
+        "foreground": "#000000",
+        "keyword": "#af00db",
+        "string": "#a31515",
+        "function": "#795e26",
+        "comment": "#008000"
+      }
+    }
+  },
+  {
+    "id": "dracula",
+    "name": "Dracula",
+    "background": {
+      "from": "#bd93f9",
+      "to": "#ff79c6"
+    },
+    "textmate": {
+      "dark": "dracula",
+      "light": "dracula-alucard"
+    },
+    "window": {
+      "dark": {
+        "background": "#282a36",
+        "title": "#f8f8f2",
+        "lineNumber": "#6272a4",
+        "divider": "#191a21"
+      },
+      "light": {
+        "background": "#fffbeb",
+        "title": "#1f1f1f",
+        "lineNumber": "#6c664b",
+        "divider": "#ceccc0"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#f8f8f2",
+        "keyword": "#ff79c6",
+        "string": "#f1fa8c",
+        "function": "#50fa7b",
+        "comment": "#6272a4",
+        "highlight": "#44475a"
+      },
+      "light": {
+        "foreground": "#1f1f1f",
+        "keyword": "#a3144d",
+        "string": "#846e15",
+        "function": "#14710a",
+        "comment": "#6c664b",
+        "highlight": "#e2deca95"
+      }
+    }
+  },
+  {
+    "id": "github",
+    "name": "GitHub",
+    "background": {
+      "from": "#ff7b72",
+      "to": "#d2a8ff"
+    },
+    "textmate": {
+      "dark": "github-dark-default",
+      "light": "github-light-default"
+    },
+    "window": {
+      "dark": {
+        "background": "#0d1117",
+        "title": "#7d8590",
+        "lineNumber": "#6e7681",
+        "divider": "#30363d"
+      },
+      "light": {
+        "background": "#ffffff",
+        "title": "#656d76",
+        "lineNumber": "#8c959f",
+        "divider": "#d0d7de"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#e6edf3",
+        "keyword": "#ff7b72",
+        "string": "#a5d6ff",
+        "function": "#d2a8ff",
+        "comment": "#8b949e",
+        "highlight": "#6e76811a"
+      },
+      "light": {
+        "foreground": "#1f2328",
+        "keyword": "#cf222e",
+        "string": "#0a3069",
+        "function": "#8250df",
+        "comment": "#6e7781",
+        "highlight": "#eaeef280"
+      }
+    }
+  },
+  {
+    "id": "material",
+    "name": "Material",
+    "background": {
+      "from": "#89ddff",
+      "to": "#82aaff"
+    },
+    "textmate": {
+      "dark": "material-theme",
+      "light": "material-theme-lighter"
+    },
+    "window": {
+      "dark": {
+        "background": "#263238",
+        "title": "#eeffff",
+        "lineNumber": "#465a64",
+        "divider": "#263238"
+      },
+      "light": {
+        "background": "#fafafa",
+        "title": "#90a4ae",
+        "lineNumber": "#cfd8dc",
+        "divider": "#fafafa"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#eeffff",
+        "keyword": "#89ddff",
+        "string": "#c3e88d",
+        "function": "#82aaff",
+        "comment": "#546e7a",
+        "highlight": "#00000050"
+      },
+      "light": {
+        "foreground": "#90a4ae",
+        "keyword": "#39adb5",
+        "string": "#91b859",
+        "function": "#6182b8",
+        "comment": "#90a4ae",
+        "highlight": "#ccd7da50"
+      }
+    }
+  },
+  {
+    "id": "night-owl",
+    "name": "Night Owl",
+    "background": {
+      "from": "#c792ea",
+      "to": "#82aaff"
+    },
+    "textmate": {
+      "dark": "night-owl",
+      "light": "night-owl-light"
+    },
+    "window": {
+      "dark": {
+        "background": "#011627",
+        "title": "#eeefff",
+        "lineNumber": "#4b6479",
+        "divider": "#262a39"
+      },
+      "light": {
+        "background": "#fbfbfb",
+        "title": "#403f53",
+        "lineNumber": "#90a7b2",
+        "divider": "#f0f0f0"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#d6deeb",
+        "keyword": "#c792ea",
+        "string": "#ecc48d",
+        "function": "#82aaff",
+        "comment": "#637777",
+        "highlight": "#28707d29"
+      },
+      "light": {
+        "foreground": "#403f53",
+        "keyword": "#994cc3",
+        "string": "#c96765",
+        "function": "#4876d6",
+        "comment": "#989fb1",
+        "highlight": "#f0f0f0"
+      }
+    }
+  },
+  {
+    "id": "nord",
+    "name": "Nord",
+    "background": {
+      "from": "#5e81ac",
+      "to": "#8fbcbb"
+    },
+    "textmate": {
+      "dark": "nord"
+    },
+    "window": {
+      "dark": {
+        "background": "#2e3440",
+        "title": "#d8dee9",
+        "lineNumber": "#4c566a",
+        "divider": "#3b425200"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#d8dee9",
+        "keyword": "#81a1c1",
+        "string": "#a3be8c",
+        "function": "#88c0d0",
+        "comment": "#616e88",
+        "highlight": "#3b4252"
+      }
+    }
+  },
+  {
+    "id": "one-dark",
+    "name": "One Dark",
+    "background": {
+      "from": "#61afef",
+      "to": "#c678dd"
+    },
+    "textmate": {
+      "dark": "one-dark-pro",
+      "light": "one-light"
+    },
+    "window": {
+      "dark": {
+        "background": "#282c34",
+        "title": "#9da5b4",
+        "lineNumber": "#495162",
+        "divider": "#181a1f"
+      },
+      "light": {
+        "background": "#fafafa",
+        "title": "#424243",
+        "lineNumber": "#9d9d9f",
+        "divider": "#dbdbdc"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#abb2bf",
+        "keyword": "#c678dd",
+        "string": "#98c379",
+        "function": "#61afef",
+        "comment": "#7f848e",
+        "highlight": "#2c313c"
+      },
+      "light": {
+        "foreground": "#383a42",
+        "keyword": "#a626a4",
+        "string": "#50a14f",
+        "function": "#4078f2",
+        "comment": "#a0a1a7",
+        "highlight": "#383a420c"
+      }
+    }
+  },
+  {
+    "id": "rose-pine",
+    "name": "Rosé Pine",
+    "background": {
+      "from": "#31748f",
+      "to": "#ebbcba"
+    },
+    "textmate": {
+      "dark": "rose-pine",
+      "light": "rose-pine-dawn"
+    },
+    "window": {
+      "dark": {
+        "background": "#191724",
+        "title": "#908caa",
+        "lineNumber": "#908caa",
+        "divider": "#00000000"
+      },
+      "light": {
+        "background": "#faf4ed",
+        "title": "#797593",
+        "lineNumber": "#797593",
+        "divider": "#00000000"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#e0def4",
+        "keyword": "#31748f",
+        "string": "#f6c177",
+        "function": "#ebbcba",
+        "comment": "#6e6a86",
+        "highlight": "#6e6a861a"
+      },
+      "light": {
+        "foreground": "#575279",
+        "keyword": "#286983",
+        "string": "#ea9d34",
+        "function": "#d7827e",
+        "comment": "#9893a5",
+        "highlight": "#6e6a860d"
+      }
+    }
+  },
+  {
+    "id": "solarized",
+    "name": "Solarized",
+    "background": {
+      "from": "#b58900",
+      "to": "#cb4b16"
+    },
+    "textmate": {
+      "dark": "solarized-dark",
+      "light": "solarized-light"
+    },
+    "window": {
+      "dark": {
+        "background": "#002b36",
+        "title": "#d6dbdb",
+        "divider": "#003847"
+      },
+      "light": {
+        "background": "#fdf6e3",
+        "divider": "#ddd6c1"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#839496",
+        "keyword": "#859900",
+        "string": "#2aa198",
+        "function": "#268bd2",
+        "comment": "#586e75",
+        "highlight": "#073642"
+      },
+      "light": {
+        "foreground": "#657b83",
+        "keyword": "#859900",
+        "string": "#2aa198",
+        "function": "#268bd2",
+        "comment": "#93a1a1",
+        "highlight": "#eee8d5"
+      }
+    }
+  },
+  {
+    "id": "synthwave-84",
+    "name": "SynthWave '84",
+    "background": {
+      "from": "#fede5d",
+      "to": "#36f9f6"
+    },
+    "textmate": {
+      "dark": "synthwave-84"
+    },
+    "window": {
+      "dark": {
+        "background": "#262335",
+        "lineNumber": "#ffffff73",
+        "divider": "#241b2f00"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#ffffff",
+        "keyword": "#fede5d",
+        "string": "#ff8b39",
+        "function": "#36f9f6",
+        "comment": "#848bbd",
+        "highlight": "#ffffff20"
+      }
+    }
+  },
+  {
+    "id": "tokyo-night",
+    "name": "Tokyo Night",
+    "background": {
+      "from": "#7aa2f7",
+      "to": "#bb9af7"
+    },
+    "textmate": {
+      "dark": "tokyo-night",
+      "light": "tokyo-night-light"
+    },
+    "window": {
+      "dark": {
+        "background": "#1a1b26",
+        "title": "#787c99",
+        "lineNumber": "#363b54",
+        "divider": "#101014"
+      },
+      "light": {
+        "background": "#e6e7ed",
+        "title": "#363c4d",
+        "lineNumber": "#9da0ab",
+        "divider": "#c1c2c7"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#a9b1d6",
+        "keyword": "#bb9af7",
+        "string": "#9ece6a",
+        "function": "#7aa2f7",
+        "comment": "#51597d",
+        "highlight": "#1e202e"
+      },
+      "light": {
+        "foreground": "#343b59",
+        "keyword": "#65359d",
+        "string": "#385f0d",
+        "function": "#2959aa",
+        "comment": "#888b94",
+        "highlight": "#dcdee3"
+      }
+    }
+  },
+  {
+    "id": "vitesse",
+    "name": "Vitesse",
+    "background": {
+      "from": "#4d9375",
+      "to": "#80a665"
+    },
+    "textmate": {
+      "dark": "vitesse-dark",
+      "light": "vitesse-light"
+    },
+    "window": {
+      "dark": {
+        "background": "#121212",
+        "title": "#bfbaaa",
+        "lineNumber": "#dedcd550",
+        "divider": "#191919"
+      },
+      "light": {
+        "background": "#ffffff",
+        "title": "#4e4f47",
+        "lineNumber": "#393a3450",
+        "divider": "#f0f0f0"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#dbd7caee",
+        "keyword": "#4d9375",
+        "string": "#c98a7d",
+        "function": "#80a665",
+        "comment": "#758575dd",
+        "highlight": "#181818"
+      },
+      "light": {
+        "foreground": "#393a34",
+        "keyword": "#1e754f",
+        "string": "#b56959",
+        "function": "#59873a",
+        "comment": "#a0ada0",
+        "highlight": "#f7f7f7"
+      }
+    }
+  }
+]

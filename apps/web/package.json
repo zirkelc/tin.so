@@ -1,0 +1,35 @@
+{
+  "name": "@tin.so/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build",
+    "preview": "vp preview",
+    "deploy": "vp build && wrangler deploy",
+    "test": "vp test",
+    "generate-theme-previews": "node scripts/generate-theme-previews.ts",
+    "generate-og-image": "node scripts/generate-og-image.ts",
+    "generate-readme-images": "node scripts/generate-readme-images.ts"
+  },
+  "dependencies": {
+    "@resvg/resvg-wasm": "catalog:",
+    "@tin.so/core": "workspace:*",
+    "prettier": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/fontkit": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/browser-playwright": "catalog:",
+    "playwright": "catalog:",
+    "typescript": "^7.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "wrangler": "catalog:"
+  }
+}

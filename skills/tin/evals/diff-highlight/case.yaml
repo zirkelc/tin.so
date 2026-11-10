@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: diff-highlight
+expected_outcome: |
+  A PNG image of the config code, unchanged, with line 3 (timeout) highlighted and the value 60_000
+  bold and in a green text color. The answer gives the file path and the editor link.

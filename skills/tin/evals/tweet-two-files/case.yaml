@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: tweet-two-files
+expected_outcome: |
+  A PNG code image made with tin with before.js and after.js side by side, in a size that fits X.

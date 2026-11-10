@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: popover-mark
+expected_outcome: |
+  A PNG with a popover on session in line 1, whose code is the type, and a strong mark on expiresAt inside the popover code (line counted in the popover code).
