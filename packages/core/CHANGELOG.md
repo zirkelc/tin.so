@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/zirkelc/tin.so/compare/core-v0.5.0...core-v0.6.0) (2026-11-10)
+
+
+### Features
+
+* **core:** draw the window like macOS instead of ray.so ([158c2e3](https://github.com/zirkelc/tin.so/commit/158c2e39d7e81c27be297e7f0e471a52d859ef1d))
+
 ## [0.5.0](https://github.com/zirkelc/tin.so/compare/core-v0.4.0...core-v0.5.0) (2026-11-09)
 
 
