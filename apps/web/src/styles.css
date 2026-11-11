@@ -615,6 +615,7 @@ button.icon {
 }
 
 .stage {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -632,10 +633,48 @@ button.icon {
   border-bottom: 1px solid var(--border);
 }
 
-.status {
-  margin-right: 8px;
-  color: var(--text-muted);
+.toast-region {
+  position: absolute;
+  top: 72px;
+  left: 50%;
+  z-index: 20;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--panel-raised);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  color: var(--text);
   font-size: 13px;
+  white-space: nowrap;
+}
+
+.toast-region[data-kind="error"] .toast {
+  border-color: var(--error);
+}
+
+.toast-region[data-kind="error"] .toast svg {
+  color: var(--error);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast {
+    animation: toast-in 160ms ease-out;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
 
 .issues {

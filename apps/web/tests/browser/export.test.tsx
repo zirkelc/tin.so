@@ -147,3 +147,47 @@ describe("export menu", () => {
     expect(without).toBe(undefined);
   });
 });
+
+describe("export toast", () => {
+  function toast() {
+    return page.getByRole("status", { name: "Notification" });
+  }
+
+  test("should show the file name after a save", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await page.getByRole("button", { name: "Save PNG", exact: true }).click();
+
+    // Assert
+    await expect.element(toast(), EXPORT_WAIT).toHaveTextContent("Saved counter.png");
+  });
+
+  test("should show that the PNG is in the clipboard after a copy", async () => {
+    // Arrange
+    await mountApp();
+    vi.spyOn(navigator.clipboard, "write").mockResolvedValue();
+    await exportOptions().click();
+
+    // Act
+    await exportAction("Copy image").click();
+
+    // Assert
+    await expect.element(toast(), EXPORT_WAIT).toHaveTextContent("PNG copied to clipboard");
+  });
+
+  test("should show an error when the copy fails", async () => {
+    // Arrange
+    await mountApp();
+    vi.spyOn(navigator.clipboard, "write").mockRejectedValue(new Error("denied"));
+    await exportOptions().click();
+
+    // Act
+    await exportAction("Copy image").click();
+
+    // Assert
+    await expect.element(toast(), EXPORT_WAIT).toHaveTextContent("Could not copy the image");
+    await expect.element(toast()).toHaveAttribute("data-kind", "error");
+  });
+});

@@ -7,17 +7,21 @@ import {
   SpecError,
   type SpecInput,
 } from "@tin.so/core";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type ComponentType, useCallback, useEffect, useRef, useState } from "react";
 import { AboutDialog, isTyping } from "./about.tsx";
 import { installApi, markApiReady } from "./api.ts";
 import { JsonEditor, Settings, WindowEditor, WindowList } from "./editors.tsx";
 import {
   BackIcon,
+  CheckIcon,
   ChevronIcon,
+  CopyIcon,
+  DownloadIcon,
   FormatIcon,
   GitHubIcon,
   LinkIcon,
   QuestionIcon,
+  WarningIcon,
   XIcon,
 } from "./icons.tsx";
 import { Dropdown } from "./menu.tsx";
@@ -35,8 +39,20 @@ import {
 import { DEFAULT_SPEC, readSpecFromUrl, writeSpecToUrl } from "./state.ts";
 
 const SCALES = [1, 2, 4];
-// How long the message about an invalid link shows, in ms
+// How long a toast shows, and the message about an invalid link, in ms
+const TOAST_TIME = 2_000;
 const LINK_ERROR_TIME = 6_000;
+
+type ToastKind = "copy" | "save" | "link" | "done" | "error";
+type Toast = { message: string; kind: ToastKind; id: number };
+
+const TOAST_ICONS: Record<ToastKind, ComponentType> = {
+  copy: CopyIcon,
+  save: DownloadIcon,
+  link: LinkIcon,
+  done: CheckIcon,
+  error: WarningIcon,
+};
 
 type ExportAction = "png" | "svg" | "copy";
 
@@ -90,7 +106,15 @@ export function App() {
   const [selected, setSelected] = useState<Selection | undefined>({ windows: [0] });
   const [exportChoice, setExportChoice] = useState(readExportChoice);
   const { action: lastAction, scale, metadata } = exportChoice;
-  const [status, setStatus] = useState<string>();
+  const [toast, setToast] = useState<Toast>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // A new toast replaces the one that shows, and gets its full time
+  const flash = useCallback((message: string, kind: ToastKind = "done", time = TOAST_TIME) => {
+    clearTimeout(toastTimer.current);
+    setToast((current) => ({ message, kind, id: (current?.id ?? 0) + 1 }));
+    toastTimer.current = setTimeout(() => setToast(undefined), time);
+  }, []);
   // The window that the pointer is on in the list of windows
   const [hovered, setHovered] = useState<number>();
   // The popover that the pointer is on in the list of popovers
@@ -149,14 +173,13 @@ export function App() {
       showSpec(fromUrl ?? DEFAULT_SPEC).catch(() => {
         if (!fromUrl) return;
         void showSpec(DEFAULT_SPEC).catch(() => {});
-        setStatus("The link has an invalid spec, so the default image shows");
-        setTimeout(() => setStatus(undefined), LINK_ERROR_TIME);
+        flash("The link has an invalid spec, so the default image shows", "error", LINK_ERROR_TIME);
       }),
     );
     const onHashChange = () => void readSpecFromUrl().then((fromUrl) => fromUrl && update(fromUrl));
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
-  }, [showSpec, update]);
+  }, [showSpec, update, flash]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -165,11 +188,6 @@ export function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  const flash = (message: string) => {
-    setStatus(message);
-    setTimeout(() => setStatus(undefined), 2_000);
-  };
 
   // An image file that this app made carries its spec, so a drop opens it again
   useEffect(() => {
@@ -182,13 +200,13 @@ export function App() {
       if (!file) return;
       event.preventDefault();
       void readImageSpec(file).then((fromImage) => {
-        if (!fromImage) return flash(`${file.name} has no tin.so spec`);
+        if (!fromImage) return flash(`${file.name} has no tin.so spec`, "error");
         showSpec(fromImage as SpecInput).then(
           () => {
             setSelected({ windows: [0] });
             flash(`Opened ${file.name}`);
           },
-          () => flash(`${file.name} has an invalid spec`),
+          () => flash(`${file.name} has an invalid spec`, "error"),
         );
       });
     };
@@ -198,7 +216,7 @@ export function App() {
       window.removeEventListener("dragover", onDragOver);
       window.removeEventListener("drop", onDrop);
     };
-  }, [showSpec]);
+  }, [showSpec, flash]);
 
   const exportImage = async (format: ImageFormat) => {
     const spec = withoutMissingParts(specRef.current);
@@ -206,8 +224,9 @@ export function App() {
     try {
       const { blob } = await renderImage(spec, format, scale, metadata);
       download(blob, `${name}.${format}`);
+      flash(`Saved ${name}.${format}`, "save");
     } catch {
-      flash("Could not export the image");
+      flash("Could not export the image", "error");
     }
   };
 
@@ -221,11 +240,10 @@ export function App() {
     try {
       await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
       const count = windowIndexes?.length ?? 0;
-      flash(
-        count === 0 ? "Image copied" : count === 1 ? "Window copied" : `${count} windows copied`,
-      );
+      const what = count === 0 ? "PNG" : count === 1 ? "Window" : `${count} windows`;
+      flash(`${what} copied to clipboard`, "copy");
     } catch {
-      flash("Could not copy the image");
+      flash("Could not copy the image", "error");
     }
   };
 
@@ -246,9 +264,9 @@ export function App() {
       await navigator.clipboard.writeText(
         await createLink(withoutMissingParts(specRef.current), base),
       );
-      flash("Link copied");
+      flash("Link copied to clipboard", "link");
     } catch {
-      flash("Could not copy the link");
+      flash("Could not copy the link", "error");
     }
   };
 
@@ -347,8 +365,8 @@ export function App() {
         )}
       </aside>
       <main className="stage">
+        <ToastMessage toast={toast} />
         <div className="toolbar">
-          {status && <span className="status">{status}</span>}
           <a
             className="tool bordered"
             href="https://x.com/zirkelc"
@@ -458,6 +476,22 @@ export function App() {
           hoveredPopover={hoveredPopover}
         />
       </main>
+    </div>
+  );
+}
+
+// The live region stays on the page, so a screen reader reads each new message
+function ToastMessage(props: { toast: Toast | undefined }) {
+  const { toast } = props;
+  const Icon = toast && TOAST_ICONS[toast.kind];
+  return (
+    <div className="toast-region" role="status" aria-label="Notification" data-kind={toast?.kind}>
+      {toast && Icon && (
+        <div className="toast" key={toast.id}>
+          <Icon />
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }

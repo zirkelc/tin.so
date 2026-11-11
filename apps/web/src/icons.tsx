@@ -220,6 +220,25 @@ export const CopyIcon = () => (
   </Glyph>
 );
 
+export const DownloadIcon = () => (
+  <Glyph>
+    <path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" />
+  </Glyph>
+);
+
+export const CheckIcon = () => (
+  <Glyph>
+    <path d="m3 8.5 3 3 7-7" />
+  </Glyph>
+);
+
+export const WarningIcon = () => (
+  <Glyph>
+    <circle cx="8" cy="8" r="6" />
+    <path d="M8 5v3.5M8 11h.01" />
+  </Glyph>
+);
+
 // The GitHub mark from Simple Icons (CC0)
 export const GitHubIcon = () => (
   <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
