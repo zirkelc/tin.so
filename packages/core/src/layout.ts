@@ -10,6 +10,7 @@ import { type Icon, resolveIcon } from "./icons/index.ts";
 import { DEFAULT_FRAME, type Frame } from "./frames/index.ts";
 import { MAC_HEADER, WINDOW_RADIUS } from "./sizes.ts";
 import {
+  errorColor,
   highlight,
   type HighlightedLine,
   inferLanguage,
@@ -21,7 +22,7 @@ import { themeBackground } from "./backgrounds.ts";
 import { backgroundBaseColor, type CssBackground, parseBackground } from "./gradient.ts";
 import {
   type AnnotationSpec,
-  expandLineRanges,
+  highlightColors,
   type MarkSpec,
   parseSpec,
   type PaneSpec,
@@ -47,6 +48,9 @@ export const LINE_HEIGHT = 21;
 const LETTER_SPACING = 0.1;
 const TAB_SIZE = 2;
 const EDITOR_PADDING = 16;
+// The space above the first line below a title bar or a tab. Less than the padding, because the
+// space below the title is part of the bar, and the line box has empty space above the letters.
+const CODE_TOP_BELOW_BAR = 10;
 const LINE_NUMBER_GUTTER = 48;
 const LINE_NUMBER_GUTTER_LARGE = 56;
 const MIN_FRAME_WIDTH = 520;
@@ -97,8 +101,11 @@ export type PaneBox = Rect & {
   code: Rect;
   /** Distance from the left edge of the code area to the first column */
   gutter: number;
+  /** Distance from the top edge of the code area to the top of the first line */
+  codeTop: number;
   lineNumbers: boolean;
-  highlighted: Set<number>;
+  /** The highlighted lines, each with its own color or undefined for the highlight of the theme */
+  highlighted: Map<number, string | undefined>;
   lines: Array<HighlightedLine>;
   annotations: Array<AnnotationBox>;
   /** true when the code is larger than the pane, so that the pane must cut it off */
@@ -133,6 +140,8 @@ export type WindowBox = Rect & {
   natural: { width: number; height: number };
   /** The title bar with the window controls, only in a window with a title bar */
   header?: Rect;
+  /** The title bar has its own color and a line below it */
+  solidTitleBar?: boolean;
   titleBar?: TitleBarBox;
   panes: Array<PaneBox>;
   dividers: Array<{ x1: number; y1: number; x2: number; y2: number }>;
@@ -144,6 +153,8 @@ export type Scene = {
   theme: Theme;
   mode: Mode;
   syntax: Syntax;
+  /** The color of errors in the editor of the theme, for wavy lines */
+  errorColor: string;
   frame: FrameColors;
   /** false for a transparent image */
   background: boolean;
@@ -288,6 +299,7 @@ const MARK_FLAGS = {
   emphasis: "italic",
   underline: "underline",
   strikethrough: "strikethrough",
+  wavy: "wavy",
 } as const;
 
 /** Splits the tokens at the edges of the marks and sets the style and the colors of the marked tokens */
@@ -323,7 +335,7 @@ function applyMarks(
         for (const range of own) {
           if (range.start > from || range.end < to) continue;
           if (range.style) part[MARK_FLAGS[range.style]] = true;
-          if (range.color) part.color = range.color;
+          if (range.color) part.color = part.markColor = range.color;
           if (range.background) part.background = range.background;
         }
         result.push(part);
@@ -380,9 +392,13 @@ async function draftPane(
   path: string,
   scene: SceneBase,
   options: LayoutOptions,
+  // The pane is directly below the title bar of its window
+  belowTitleBar: boolean,
 ): Promise<PaneDraft> {
   const language =
-    pane.language === "auto" ? inferLanguage(pane.title) : resolveLanguage(pane.language);
+    pane.language === "auto"
+      ? inferLanguage(pane.title, pane.code)
+      : resolveLanguage(pane.language);
   const lines = applyMarks(
     await highlight(
       normalizeCode(pane.code, options),
@@ -407,12 +423,13 @@ async function draftPane(
     ),
   );
 
+  const tabbed = window.frame && window.tabs;
+  const codeTop = tabbed || belowTitleBar ? CODE_TOP_BELOW_BAR : EDITOR_PADDING;
   const codeSize = {
     width: gutter + columns * scene.text.cellWidth + EDITOR_PADDING,
-    height: EDITOR_PADDING * 2 + lines.length * LINE_HEIGHT,
+    height: codeTop + EDITOR_PADDING + lines.length * LINE_HEIGHT,
   };
 
-  const tabbed = window.frame && window.tabs;
   const icon = resolveIcon(pane.icon, language);
   const tabWidth =
     TAB_HEADER.paddingX * 2 +
@@ -435,8 +452,9 @@ async function draftPane(
     title: pane.title,
     language,
     gutter,
+    codeTop,
     lineNumbers,
-    highlighted: expandLineRanges(pane.highlight, lines.length),
+    highlighted: highlightColors(pane.highlight, lines.length),
     lines,
     natural,
     size: pane.size,
@@ -459,9 +477,9 @@ const CONTROLS_WIDTH = MAC_HEADER.control * 3 + MAC_HEADER.controlGap * 2;
 // Space between the title and the language in a title bar
 const TITLE_GAP = 12;
 
-function headerHeightOf(frame: Frame, tabs: boolean): number {
+function headerHeightOf(frame: Frame): number {
   const bar = frame.titleBar;
-  return bar.paddingTop + bar.rowHeight + bar.paddingBottom + (tabs ? bar.tabsGap : 0);
+  return bar.paddingTop + bar.rowHeight + bar.paddingBottom;
 }
 
 function draftWindow(
@@ -473,7 +491,7 @@ function draftWindow(
   // A single pane without a tab gives its title to the window
   const titleBar = window.frame && window.titleBar;
   const title = window.title ?? (panes.length === 1 && !window.tabs ? panes[0]!.title : undefined);
-  const headerHeight = titleBar ? headerHeightOf(frame, window.tabs) : 0;
+  const headerHeight = titleBar ? headerHeightOf(frame) : 0;
   const inset = window.frame ? frame.inset : 0;
   const dividers = (panes.length - 1) * DIVIDER;
   const extents = panes.map((pane) => paneExtent(pane, window.split, panes.length));
@@ -583,7 +601,7 @@ function placePane(pane: PaneDraft, rect: Rect, text: TextMetrics): PaneBox {
     // The popover starts below the anchor, aligned with its first character
     annotations: annotations.map((annotation) => {
       const x = code.x + pane.gutter + annotation.column * text.cellWidth;
-      const y = code.y + EDITOR_PADDING + annotation.line * text.lineHeight;
+      const y = code.y + pane.codeTop + annotation.line * text.lineHeight;
       return {
         anchor: { x, y, width: annotation.cells * text.cellWidth },
         box: {
@@ -664,6 +682,7 @@ function placeWindow(draft: WindowDraft, rect: Rect, text: TextMetrics): WindowB
     ...(spec.background && { background: spec.background }),
     natural: draft.natural,
     ...(header && { header, titleBar: placeTitleBar(header, frame, panes[0]!.language) }),
+    ...(header && spec.titleBar === "solid" && { solidTitleBar: true }),
     panes: boxes,
     dividers,
   };
@@ -818,6 +837,7 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
     theme,
     mode,
     syntax,
+    errorColor: await errorColor(theme, mode),
     frame: {
       ...getFrameColors(theme, mode),
       ...(baseColor && { backdrop: { from: baseColor, to: baseColor } }),
@@ -844,6 +864,9 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
               `windows.${windowIndex}.panes.${paneIndex}`,
               base,
               options,
+              window.frame &&
+                window.titleBar !== false &&
+                (window.split === "row" || paneIndex === 0),
             ),
           ),
         ),

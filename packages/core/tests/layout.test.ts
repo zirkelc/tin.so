@@ -296,20 +296,20 @@ describe("window parts", () => {
     // Assert
     const window = scene.windows[0]!;
     const pane = window.panes[0]!;
-    expect(window.header?.height).toBe(44);
+    expect(window.header?.height).toBe(40);
     expect(window.title).toBe("Plans");
-    expect(pane.tab?.y).toBe(window.y + 44);
-    expect(pane.code.y).toBe(window.y + 44 + 40);
+    expect(pane.tab?.y).toBe(window.y + 40);
+    expect(pane.code.y).toBe(window.y + 40 + 40);
   });
 
-  test("should give the title bar no space below the title when no tabs follow", async () => {
+  test("should give the title bar the same height without tabs", async () => {
     // Act
     const scene = await layout({ windows: [{ panes: [{ title: "a.ts", code: "a" }] }] });
 
     // Assert
     const window = scene.windows[0]!;
-    expect(window.header?.height).toBe(34);
-    expect(window.panes[0]!.code.y).toBe(window.y + 34);
+    expect(window.header?.height).toBe(40);
+    expect(window.panes[0]!.code.y).toBe(window.y + 40);
   });
 
   test("should not give the pane title to the title bar when the pane has a tab", async () => {
@@ -530,7 +530,7 @@ describe("sizes and positions", () => {
     // Assert
     const window = scene.windows[0]!;
     expect({ x: window.x, y: window.y }).toEqual({ x: 120, y: 80 });
-    expect(window.panes[0]!.code.y).toBe(80 + 34);
+    expect(window.panes[0]!.code.y).toBe(80 + 40);
     expect({ width: scene.width, height: scene.height }).toEqual({ width: 1_000, height: 600 });
   });
 
@@ -766,5 +766,54 @@ describe("largest image size", () => {
 
     // Assert
     expect({ width: scene.width, height: scene.height }).toEqual({ width: 8_192, height: 8_192 });
+  });
+});
+
+describe("space above the code", () => {
+  test.each([
+    ["a transparent title bar", { controls: "color" as const }, 10],
+    ["a solid title bar", { titleBar: "solid" as const }, 10],
+    ["tabs", { tabs: true }, 10],
+    ["no title bar", { titleBar: false }, 16],
+  ])("should start the first line at its space below %s", async (_, window, expected) => {
+    // Arrange
+    const spec = { windows: [{ ...window, panes: [{ title: "a.ts", code: "x" }] }] };
+
+    // Act
+    const scene = await layout(spec);
+
+    // Assert
+    const pane = scene.windows[0]!.panes[0]!;
+    expect(pane.codeTop).toBe(expected);
+  });
+
+  test("should keep the space of a pane below another pane in a column split", async () => {
+    // Arrange
+    const spec = {
+      windows: [{ split: "column" as const, panes: [{ code: "a" }, { code: "b" }] }],
+    };
+
+    // Act
+    const scene = await layout(spec);
+
+    // Assert
+    const tops = scene.windows[0]!.panes.map((pane) => pane.codeTop);
+    expect(tops).toEqual([10, 16]);
+  });
+
+  test("should give a solid title bar the size and the code place of a transparent one", async () => {
+    // Arrange
+    const pane = { title: "a.ts", code: "x\ny" };
+
+    // Act
+    const transparent = (await layout({ windows: [{ panes: [pane] }] })).windows[0]!;
+    const solid = (await layout({ windows: [{ titleBar: "solid", panes: [pane] }] })).windows[0]!;
+
+    // Assert
+    const firstLine = (window: typeof solid) =>
+      window.panes[0]!.code.y + window.panes[0]!.codeTop - window.y;
+    expect(solid.height).toBe(transparent.height);
+    expect(firstLine(solid)).toBe(firstLine(transparent));
+    expect(firstLine(transparent)).toBe(50);
   });
 });

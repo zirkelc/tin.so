@@ -89,12 +89,23 @@ const list = <SCHEMA extends v.GenericSchema>(schema: SCHEMA, max: number, name:
     v.maxLength(max, (issue) => `${issue.received} ${name}, at most ${max}`),
   );
 
-export const MARK_STYLES = ["strong", "emphasis", "underline", "strikethrough"] as const;
+export const MARK_STYLES = ["strong", "emphasis", "underline", "strikethrough", "wavy"] as const;
 
 // A hex color with 3, 4, 6 or 8 digits, as CSS and SVG read it
 const HEX_COLOR = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
 const hexColor = () => v.pipe(v.string(), v.regex(HEX_COLOR, 'Use a hex color such as "#ff5c57"'));
+
+// A line number, or a range such as "3-5"
+const lineOrRange = () =>
+  v.union([
+    v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(MAX_LINE)),
+    v.pipe(
+      v.string(),
+      v.regex(LINE_RANGE, 'Use a line number or a range such as "3-5"'),
+      v.check(isLineRange, `Use a range from a line to a later line, at most ${MAX_LINE}`),
+    ),
+  ]);
 
 const MarkSchema = v.strictObject({
   line: describe(v.pipe(v.number(), v.integer(), v.minValue(1)), "Line of the text, from 1"),
@@ -105,7 +116,7 @@ const MarkSchema = v.strictObject({
   ),
   style: describe(
     v.optional(v.picklist(MARK_STYLES)),
-    "strong (bold), emphasis (italic), underline or strikethrough",
+    "strong (bold), emphasis (italic), underline, strikethrough, or wavy (a wavy line below the text, as an editor marks an error, in the error red of the theme or in the color of the mark)",
   ),
   color: describe(v.optional(hexColor()), 'Text color, as a hex color such as "#ff5c57"'),
   background: describe(
@@ -175,7 +186,7 @@ const PaneSchema = v.strictObject({
   ),
   language: describe(
     v.optional(language(), "auto"),
-    'Shiki language id or alias, "text", or "auto" to infer it from the title. Run "tin languages" to list the ids. An unknown language is an error',
+    'Shiki language id or alias, "text", "ansi" for terminal output with its color codes, or "auto" to infer it from the title (code with color codes is "ansi"). Run "tin languages" to list the ids. An unknown language is an error',
   ),
   code: describe(
     code(),
@@ -185,19 +196,21 @@ const PaneSchema = v.strictObject({
     v.optional(
       list(
         v.union([
-          v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(MAX_LINE)),
-          v.pipe(
-            v.string(),
-            v.regex(LINE_RANGE, 'Use a line number or a range such as "3-5"'),
-            v.check(isLineRange, `Use a range from a line to a later line, at most ${MAX_LINE}`),
-          ),
+          lineOrRange(),
+          v.strictObject({
+            lines: describe(lineOrRange(), 'A line number or a range such as "3-5"'),
+            color: describe(
+              v.optional(hexColor()),
+              'Color of the highlight, as a hex color such as "#388bfd": a tint of it over the lines and a bar in it at the left edge (default: the highlight of the theme)',
+            ),
+          }),
         ]),
         SPEC_LIMITS.highlightsPerPane,
         "highlight entries",
       ),
       [],
     ),
-    `Lines to highlight: line numbers from 1, or ranges such as "3-5" with the start not after the end. Lines are at most ${MAX_LINE}, and a pane has at most ${SPEC_LIMITS.highlightsPerPane} entries`,
+    `Lines to highlight: line numbers from 1, ranges such as "3-5" with the start not after the end, or objects such as { "lines": "3-5", "color": "#f85149" } with their own color. Lines are at most ${MAX_LINE}, and a pane has at most ${SPEC_LIMITS.highlightsPerPane} entries`,
   ),
   icon: describe(
     v.optional(v.picklist([AUTO_ICON, NO_ICON, ...ICON_IDS]), AUTO_ICON),
@@ -224,8 +237,8 @@ const WindowSchema = v.strictObject({
     "Draw the window. false puts the code directly on the background, without title bar and tabs",
   ),
   titleBar: describe(
-    v.optional(v.boolean(), true),
-    "A title bar with the window controls and the title",
+    v.optional(v.union([v.boolean(), v.literal("solid")]), true),
+    'A title bar with the window controls and the title. true makes it transparent, in the color of the code. "solid" gives it its own color, a little lighter in dark mode and darker in light mode, and a line below it',
   ),
   tabs: describe(
     v.optional(v.boolean(), false),
@@ -452,19 +465,35 @@ export function parseSpec(input: unknown): Spec {
   return spec as Spec;
 }
 
-/** Expands highlight entries such as [2, "4-6"] to a set of line numbers, up to the last line */
-export function expandLineRanges(
-  ranges: PaneSpec["highlight"],
+export type HighlightEntry = PaneSpec["highlight"][number];
+
+/**
+ * The color of each highlighted line, from highlight entries such as [2, "4-6", { lines: 8,
+ * color: "#f85149" }], up to the last line. A line without its own color maps to undefined. A
+ * later entry wins over an earlier one.
+ */
+export function highlightColors(
+  entries: Array<HighlightEntry>,
   lastLine: number = MAX_LINE,
-): Set<number> {
-  const lines = new Set<number>();
-  for (const range of ranges) {
+): Map<number, string | undefined> {
+  const colors = new Map<number, string | undefined>();
+  for (const entry of entries) {
+    const range = typeof entry === "object" ? entry.lines : entry;
+    const color = typeof entry === "object" ? entry.color : undefined;
     if (typeof range === "number") {
-      lines.add(range);
+      colors.set(range, color);
       continue;
     }
     const [start, end = start] = range.split("-").map(Number) as [number, number?];
-    for (let line = start; line <= Math.min(end!, lastLine); line++) lines.add(line);
+    for (let line = start; line <= Math.min(end!, lastLine); line++) colors.set(line, color);
   }
-  return lines;
+  return colors;
+}
+
+/** Expands highlight entries such as [2, "4-6"] to a set of line numbers, up to the last line */
+export function expandLineRanges(
+  entries: Array<HighlightEntry>,
+  lastLine: number = MAX_LINE,
+): Set<number> {
+  return new Set(highlightColors(entries, lastLine).keys());
 }

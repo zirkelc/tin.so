@@ -79,6 +79,15 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]`,
   },
+  ansi: {
+    title: "~/acme — zsh",
+    code: `\u001b[34m~/acme\u001b[0m $ npm test
+
+ \u001b[32m✓\u001b[0m src/users.test.ts \u001b[2m(4 tests)\u001b[0m
+ \u001b[31m×\u001b[0m src/orders.test.ts \u001b[2m(1 failed)\u001b[0m
+
+ \u001b[1mTests\u001b[0m  \u001b[31m1 failed\u001b[0m | \u001b[32m4 passed\u001b[0m`,
+  },
   apex: {
     title: "Greeter.cls",
     code: `public with sharing class Greeter {

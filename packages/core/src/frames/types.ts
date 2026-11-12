@@ -9,8 +9,6 @@ export type TitleBarStyle = {
   rowHeight: number;
   /** Space below the row of the title */
   paddingBottom: number;
-  /** More space below the row of the title when tabs follow */
-  tabsGap: number;
   /** Space between the left and right edge of the window and the first and last part of the row */
   paddingX: number;
   /** Shows the three window controls at the left */

@@ -1,5 +1,5 @@
 import {
-  expandLineRanges,
+  highlightColors,
   inferLanguage,
   normalizeCode,
   parseSpec,
@@ -37,12 +37,68 @@ export function updatePane(
   }));
 }
 
+type HighlightInput = NonNullable<PaneInput["highlight"]>;
+
+/**
+ * Highlight entries from the color of each line: a line of the theme highlight is a number, and
+ * lines next to each other with the same color are one entry with a range.
+ */
+function highlightEntries(colors: Map<number, string | undefined>): HighlightInput {
+  const entries: HighlightInput = [];
+  const lines = [...colors.keys()].sort((a, b) => a - b);
+  for (let i = 0; i < lines.length; i++) {
+    const start = lines[i]!;
+    const color = colors.get(start);
+    if (color === undefined) {
+      entries.push(start);
+      continue;
+    }
+    let end = start;
+    while (lines[i + 1] === end + 1 && colors.get(end + 1) === color) end = lines[++i]!;
+    entries.push({ lines: end === start ? start : `${start}-${end}`, color });
+  }
+  return entries;
+}
+
 /** Adds the line to the highlighted lines, or removes it. Ranges are expanded to single lines. */
 export function toggleHighlight(pane: PaneInput, line: number): PaneInput {
-  const lines = expandLineRanges(pane.highlight ?? []);
-  if (lines.has(line)) lines.delete(line);
-  else lines.add(line);
-  return { ...pane, highlight: [...lines].sort((a, b) => a - b) };
+  const colors = highlightColors(pane.highlight ?? []);
+  if (colors.has(line)) colors.delete(line);
+  else colors.set(line, undefined);
+  return { ...pane, highlight: highlightEntries(colors) };
+}
+
+/** Highlights the lines in the color, or in the highlight of the theme without a color */
+export function setHighlightColor(
+  pane: PaneInput,
+  from: number,
+  to: number,
+  color: string | undefined,
+): PaneInput {
+  const colors = highlightColors(pane.highlight ?? []);
+  for (let line = from; line <= to; line++) colors.set(line, color);
+  return { ...pane, highlight: highlightEntries(colors) };
+}
+
+/** Whether all lines have a highlight in the color, or in the theme color without a color */
+export function hasHighlightColor(
+  pane: PaneInput,
+  from: number,
+  to: number,
+  color: string | undefined,
+): boolean {
+  const colors = highlightColors(pane.highlight ?? []);
+  for (let line = from; line <= to; line++) {
+    if (!colors.has(line) || colors.get(line) !== color) return false;
+  }
+  return true;
+}
+
+/** Removes the highlight of the lines */
+export function removeHighlight(pane: PaneInput, from: number, to: number): PaneInput {
+  const colors = highlightColors(pane.highlight ?? []);
+  for (let line = from; line <= to; line++) colors.delete(line);
+  return { ...pane, highlight: highlightEntries(colors) };
 }
 
 /**
@@ -68,18 +124,6 @@ export function titleBarTarget(window: WindowInput): "window" | "pane" {
   return window.panes.length === 1 && !window.tabs && window.title === undefined
     ? "pane"
     : "window";
-}
-
-export function formatHighlight(highlight: PaneInput["highlight"]): string {
-  return (highlight ?? []).join(", ");
-}
-
-export function parseHighlight(text: string): PaneInput["highlight"] {
-  return text
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .map((part) => (/^\d+$/.test(part) ? Number(part) : part));
 }
 
 export type MarkStyle = NonNullable<PaneInput["marks"]>[number]["style"];
@@ -143,18 +187,6 @@ export function partRange(code: string, part: LinePart): [number, number] | unde
 
 const samePart = (a: LinePart, b: Partial<LinePart>) =>
   a.line === b.line && a.match === b.match && a.occurrence === (b.occurrence ?? 1);
-
-/** Highlights all lines of the range, or removes the highlight when all of them have it */
-export function toggleHighlightRange(pane: PaneInput, from: number, to: number): PaneInput {
-  const lines = expandLineRanges(pane.highlight ?? []);
-  const range = Array.from({ length: to - from + 1 }, (_, index) => from + index);
-  const all = range.every((line) => lines.has(line));
-  for (const line of range) {
-    if (all) lines.delete(line);
-    else lines.add(line);
-  }
-  return { ...pane, highlight: [...lines].sort((a, b) => a - b) };
-}
 
 /** Adds the style to all parts, or removes it when all parts have it */
 export function toggleMark<MARKED extends Marked>(
@@ -375,13 +407,15 @@ function lineMover(
 export function withCode(pane: PaneInput, code: string, caret?: number): PaneInput {
   const { move, editLine } = lineMover(pane.code, code, caret);
   const lineCount = code.split("\n").length;
-  const lines = [...expandLineRanges(pane.highlight ?? [])]
-    .flatMap((line) => move(line) ?? [])
-    .filter((line) => line >= 1 && line <= lineCount);
+  const moved = new Map<number, string | undefined>();
+  for (const [line, color] of highlightColors(pane.highlight ?? [])) {
+    const to = move(line);
+    if (to !== undefined && to >= 1 && to <= lineCount) moved.set(to, color);
+  }
   return {
     ...pane,
     code,
-    highlight: [...new Set(lines)].sort((a, b) => a - b),
+    highlight: highlightEntries(moved),
     ...(pane.marks && { marks: moveMarks(pane.marks, move) }),
     ...(pane.annotations && {
       annotations: pane.annotations.map((annotation) => ({

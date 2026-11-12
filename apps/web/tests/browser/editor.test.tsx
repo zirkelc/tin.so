@@ -1293,3 +1293,102 @@ describe("style panel", () => {
     await expect.element(page.getByRole("toolbar", { name: "Text style" })).not.toBeInTheDocument();
   });
 });
+
+describe("wavy line", () => {
+  test("should draw a wavy line below the selected text", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "save(user);" }] }] });
+    await codeField(1).click();
+    await userEvent.keyboard(
+      "{Home}{Shift>}{ArrowRight}{ArrowRight}{ArrowRight}{ArrowRight}{/Shift}",
+    );
+    const panel = page.getByRole("toolbar", { name: "Text style" });
+
+    // Act
+    await panel.getByRole("button", { name: "Wavy" }).click();
+
+    // Assert
+    await expect
+      .poll(() => window.tin.getSpec().windows[0]?.panes[0]?.marks)
+      .toEqual([{ line: 1, match: "save", occurrence: 1, style: "wavy" }]);
+  });
+});
+
+describe("title bar group", () => {
+  const group = () => page.getByRole("group", { name: "Title bar" });
+
+  test("should keep the title, the controls and the style of the title bar together", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "x" }] }] });
+
+    // Act
+    await group().getByRole("radio", { name: "Colors" }).click();
+    await group().getByRole("radio", { name: "Solid" }).click();
+    await group().getByRole("textbox", { name: "Title" }).fill("api");
+
+    // Assert
+    await expect
+      .poll(() => {
+        const { controls, titleBar, title } = window.tin.getSpec().windows[0]!;
+        return { controls, titleBar, title };
+      })
+      .toEqual({ controls: "color", titleBar: "solid", title: "api" });
+  });
+
+  test("should remove the title bar with its switch and hide its settings", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "x" }] }] });
+
+    // Act
+    await group().getByRole("switch", { name: "Title bar" }).click();
+
+    // Assert
+    await expect.poll(() => window.tin.getSpec().windows[0]?.titleBar).toBe(false);
+    await expect.element(group().getByRole("radio", { name: "Colors" })).not.toBeInTheDocument();
+  });
+});
+
+describe("highlight submenu", () => {
+  const openSubmenu = async () => {
+    await codeField(1).click({ button: "right" });
+    await page.getByRole("menuitem", { name: /^Highlight line/ }).click();
+  };
+
+  test("should highlight the line of the caret in the color of the submenu", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "a\nb" }] }] });
+    await openSubmenu();
+
+    // Act
+    await page.getByRole("menuitemcheckbox", { name: "Red" }).click();
+
+    // Assert
+    await expect
+      .poll(() => window.tin.getSpec().windows[0]?.panes[0]?.highlight)
+      .toEqual([{ lines: expect.any(Number), color: "#f85149" }]);
+  });
+
+  test("should check the color of the highlight and remove it", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({
+      windows: [
+        { panes: [{ title: "a.ts", code: "a", highlight: [{ lines: 1, color: "#388bfd" }] }] },
+      ],
+    });
+    await openSubmenu();
+    await expect
+      .element(page.getByRole("menuitemcheckbox", { name: /Blue$/ }))
+      .toHaveAttribute("aria-checked", "true");
+
+    // Act
+    await page.getByRole("menuitem", { name: "Remove highlight" }).click();
+
+    // Assert
+    await expect.poll(() => window.tin.getSpec().windows[0]?.panes[0]?.highlight).toEqual([]);
+  });
+});

@@ -37,7 +37,8 @@ const NO_FILE_NAME = [
   "git-rebase",
   "nginx",
   "ssh-config",
-  // A terminal session is not a file, and PL/SQL usually is in .sql files
+  // A terminal session or its output is not a file, and PL/SQL usually is in .sql files
+  "ansi",
   "shellsession",
   "plsql",
 ];

@@ -132,8 +132,7 @@ export const DEFAULT_FRAME: Frame = {
   titleBar: {
     paddingTop: MAC_HEADER.paddingTop,
     rowHeight: MAC_HEADER.height,
-    paddingBottom: 0,
-    tabsGap: MAC_HEADER.paddingBottom,
+    paddingBottom: MAC_HEADER.paddingBottom,
     paddingX: MAC_HEADER.paddingX,
     controls: true,
     titleGap: 12,

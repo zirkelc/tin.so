@@ -44,6 +44,20 @@ function fontFaceRules(font: Font, files: Map<string, Uint8Array>): string {
  * so the layout does not depend on how a renderer shapes or spaces the text. Wide and astral
  * characters get their own element, because some renderers count x positions per UTF-16 unit.
  */
+/**
+ * A wavy line from x over the width, as an editor draws below an error: half waves of a fixed
+ * length, so that the wave looks the same under short and long text.
+ */
+function wavyLine(x: number, y: number, width: number, fontSize: number, color: string): string {
+  const half = fontSize * 0.2;
+  const height = fontSize * 0.11;
+  const count = Math.max(2, Math.round(width / half));
+  const step = width / count;
+  let d = `M${round(x)} ${round(y)} q${round(step / 2)} ${round(-height)} ${round(step)} 0`;
+  for (let i = 1; i < count; i++) d += ` t${round(step)} 0`;
+  return `<path ${attrs({ d, fill: "none", stroke: color, "stroke-width": round(Math.max(1, fontSize / 14)), "stroke-linecap": "round" })}/>`;
+}
+
 function renderLine(
   scene: Scene,
   line: HighlightedLine,
@@ -115,12 +129,26 @@ function renderLine(
       const top = y - fontSize * 0.3 - thickness / 2;
       out.push(roundedRect({ x, y: top, width, height: thickness }, 0, { fill: token.color }));
     }
+    if (token.wavy) {
+      // Without a color of its own, the wave has the red of errors and the text keeps its color
+      const color = token.markColor ?? scene.errorColor;
+      out.push(wavyLine(x, y + fontSize * 0.25, width, fontSize, color));
+    }
   }
 }
 
+// The opacity of the color of a highlight over its lines
+const HIGHLIGHT_TINT = 0.16;
+
+// A title bar of its own is lighter than the window in dark mode, and darker in light mode
+const TITLE_BAR_RAISE: Record<Mode, string> = {
+  dark: "rgba(255, 255, 255, 0.04)",
+  light: "rgba(0, 0, 0, 0.03)",
+};
+
 function renderPane(scene: Scene, pane: PaneBox, id: string, out: Array<string>) {
   const { lineHeight, fontSize, baseline } = scene.text;
-  const top = pane.code.y + 16;
+  const top = pane.code.y + pane.codeTop;
 
   // A pane smaller than its code cuts the code off at its edges
   if (pane.clipped) {
@@ -128,18 +156,20 @@ function renderPane(scene: Scene, pane: PaneBox, id: string, out: Array<string>)
     out.push(`<g clip-path="url(#${id})">`);
   }
 
-  for (const line of pane.highlighted) {
+  for (const [line, color] of pane.highlighted) {
     if (line < 1 || line > pane.lines.length) continue;
     const y = top + (line - 1) * lineHeight;
+    const row = { x: pane.code.x, y, width: pane.code.width, height: lineHeight };
+    // A highlight with its own color is a tint of it, with a bar in the full color at the left
     out.push(
-      roundedRect({ x: pane.code.x, y, width: pane.code.width, height: lineHeight }, 0, {
-        fill: scene.frame.highlight,
-      }),
+      color
+        ? roundedRect(row, 0, { fill: color, "fill-opacity": HIGHLIGHT_TINT })
+        : roundedRect(row, 0, { fill: scene.frame.highlight }),
     );
     out.push(
-      roundedRect({ x: pane.code.x, y, width: 2, height: lineHeight }, 0, {
-        fill: scene.frame.highlightBorderLine,
-      }),
+      color
+        ? roundedRect({ ...row, width: 3 }, 0, { fill: color })
+        : roundedRect({ ...row, width: 2 }, 0, { fill: scene.frame.highlightBorderLine }),
     );
   }
 
@@ -229,10 +259,13 @@ function renderWindow(parent: FrameContext, window: WindowBox, index: number, ou
 
   out.push(DEFAULT_FRAME.body(context, window));
   out.push(`<g clip-path="url(#window-${index})">`);
+  if (window.header && window.solidTitleBar)
+    out.push(roundedRect(window.header, 0, { fill: TITLE_BAR_RAISE[scene.mode] }));
   if (window.header) out.push(DEFAULT_FRAME.header(context, window));
 
   window.panes.forEach((pane, i) => renderPane(scene, pane, `pane-${index}-${i}`, out));
-  if (window.header && window.panes.some((pane) => pane.tab)) {
+  // One line below the title bar, for the tabs that follow it or for a title bar of its own
+  if (window.header && (window.solidTitleBar || window.panes.some((pane) => pane.tab))) {
     const y = window.header.y + window.header.height - 0.5;
     out.push(
       `<line ${attrs({ x1: window.header.x, y1: y, x2: window.header.x + window.header.width, y2: y, stroke: scene.frame.divider })}/>`,

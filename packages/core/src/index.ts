@@ -75,6 +75,7 @@ export {
 export { initPng, loadSceneFonts, sceneFontFiles, svgToPng, type PngOptions } from "./png.ts";
 export {
   expandLineRanges,
+  highlightColors,
   LATEST_SPEC_VERSION,
   ANNOTATION_TYPES,
   MARK_STYLES,
@@ -82,6 +83,7 @@ export {
   SPEC_LIMITS,
   SpecError,
   SpecSchema,
+  type HighlightEntry,
   type MarkStyle,
   type PaneSpec,
   type Spec,

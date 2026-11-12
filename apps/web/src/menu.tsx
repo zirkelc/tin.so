@@ -9,6 +9,7 @@ export type MenuItem =
       disabled?: boolean;
       onSelect: () => void;
     }
+  | { label: string; disabled?: boolean; items: Array<MenuItem> }
   | "separator";
 
 const MARGIN = 8;
@@ -61,30 +62,100 @@ export function ContextMenu(props: {
       style={position}
       onContextMenu={(event) => event.preventDefault()}
     >
-      {props.items.map((item, index) =>
-        item === "separator" ? (
-          <div key={index} className="menu-separator" role="separator" />
-        ) : (
-          <button
-            key={index}
-            type="button"
-            role={item.checked === undefined ? "menuitem" : "menuitemcheckbox"}
-            aria-checked={item.checked}
-            className="menu-item"
-            disabled={item.disabled}
-            onClick={() => {
-              item.onSelect();
-              onClose();
-            }}
-          >
-            <span className="menu-check">{item.checked ? "✓" : ""}</span>
-            <span className="menu-label">{item.label}</span>
-            {item.shortcut && <span className="menu-shortcut">{item.shortcut}</span>}
-          </button>
-        ),
-      )}
+      <MenuItems items={props.items} onClose={onClose} />
     </div>,
     document.body,
+  );
+}
+
+function MenuItems(props: { items: Array<MenuItem>; onClose: () => void }) {
+  const [open, setOpen] = useState<number>();
+  return props.items.map((item, index) => {
+    if (item === "separator")
+      return <div key={index} className="menu-separator" role="separator" />;
+    if ("items" in item)
+      return (
+        <Submenu
+          key={index}
+          item={item}
+          open={open === index}
+          onOpen={(next) => setOpen(next ? index : undefined)}
+          onClose={props.onClose}
+        />
+      );
+    return (
+      <button
+        key={index}
+        type="button"
+        role={item.checked === undefined ? "menuitem" : "menuitemcheckbox"}
+        aria-checked={item.checked}
+        className="menu-item"
+        disabled={item.disabled}
+        onPointerEnter={() => setOpen(undefined)}
+        onClick={() => {
+          item.onSelect();
+          props.onClose();
+        }}
+      >
+        <span className="menu-check">{item.checked ? "✓" : ""}</span>
+        <span className="menu-label">{item.label}</span>
+        {item.shortcut && <span className="menu-shortcut">{item.shortcut}</span>}
+      </button>
+    );
+  });
+}
+
+/**
+ * An item that opens its own menu at its side: on hover, a click or the right arrow key. The menu
+ * opens at the left when the window has no room at the right.
+ */
+function Submenu(props: {
+  item: Extract<MenuItem, { items: Array<MenuItem> }>;
+  open: boolean;
+  onOpen: (open: boolean) => void;
+  onClose: () => void;
+}) {
+  const { item, open, onOpen } = props;
+  const ref = useRef<HTMLDivElement>(null);
+  const [left, setLeft] = useState(false);
+
+  useLayoutEffect(() => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (open && rect) setLeft(rect.right > window.innerWidth - MARGIN);
+  }, [open]);
+
+  return (
+    <div className="menu-sub" onPointerEnter={() => !item.disabled && onOpen(true)}>
+      <button
+        type="button"
+        role="menuitem"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="menu-item"
+        disabled={item.disabled}
+        onClick={() => onOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowRight") onOpen(true);
+          if (event.key === "ArrowLeft") onOpen(false);
+        }}
+      >
+        <span className="menu-check" />
+        <span className="menu-label">{item.label}</span>
+        <span className="menu-arrow" aria-hidden="true">
+          ›
+        </span>
+      </button>
+      {open && (
+        <div
+          ref={ref}
+          className={left ? "menu menu-submenu left" : "menu menu-submenu"}
+          role="menu"
+          aria-label={item.label}
+        >
+          <MenuItems items={item.items} onClose={props.onClose} />
+        </div>
+      )}
+    </div>
   );
 }
 

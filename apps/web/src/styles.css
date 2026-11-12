@@ -524,6 +524,20 @@ textarea.code {
   border-radius: 10px;
 }
 
+/* The title bar and its settings, in a box as a pane */
+.title-bar-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.title-bar-editor:not(:has(.field)) {
+  padding-bottom: 4px;
+}
+
 .pane-editor-header {
   display: flex;
   align-items: center;
@@ -1678,6 +1692,33 @@ button.icon {
   font-size: 12px;
 }
 
+.menu-sub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-arrow {
+  color: var(--text-muted);
+}
+
+/* A submenu at the side of its item, with its first item at the height of the item */
+.menu.menu-submenu {
+  position: absolute;
+  top: -5px;
+  left: calc(100% + 4px);
+  min-width: 160px;
+}
+
+.menu.menu-submenu.left {
+  right: calc(100% + 4px);
+  left: auto;
+}
+
+.menu-sub:has(> [aria-expanded="true"]) > .menu-item {
+  background: var(--border);
+}
+
 .menu-separator {
   height: 1px;
   margin: 4px 0;
@@ -1792,6 +1833,11 @@ button.compact {
 
 .mark-style-strikethrough {
   text-decoration: line-through;
+}
+
+.mark-style-wavy {
+  text-decoration: underline wavy var(--error);
+  text-underline-offset: 3px;
 }
 
 .mark-clear {

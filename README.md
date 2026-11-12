@@ -78,7 +78,9 @@ A popover points to a word in the code and looks like the hover card of an edito
 Show the reader where to look. Highlight full lines, or give any part of a line a style, a text color or a fill.
 
 - Highlight lines. Option-click a line, or right-click the code.
+- Give a highlight a color, such as blue for a note or red for an error, in the Highlight submenu of the code. The lines get a tint of the color and a bar at the left edge.
 - Bold, italic, underline and strikethrough on any part of a line, also in popovers.
+- A wavy line below a part of a line, as an editor marks an error, in the red of the theme.
 - Text colors and fills from a palette of 16 colors, or any hex color in a spec. The fill is translucent, as a highlighter.
 - Select code in the image to open a panel with the colors and the styles.
 - Highlights, styles and popovers stay on their lines when you edit the code.
@@ -120,6 +122,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 </p>
 
 - A title bar with a title, or no title bar.
+- A solid title bar, with its own color and a line below it. The title, the controls and the style of the title bar are together in its own box in the window settings.
 - Gray window controls, or red, yellow and green as in macOS.
 - A tab for each pane, with the file name and the icon of the language or any icon from a list.
 - No window: the code goes directly on the background.
@@ -133,6 +136,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 
 - Type the code directly in the image.
 - Syntax highlighting with Shiki for all its languages. The language comes from the file name, or you select it: the popular languages are at the top, and the search also finds other names, such as "bash" for Shell.
+- Terminal output with its color codes, in the terminal colors of the theme. Code with color codes gets the language Terminal Output (`ansi`) by itself, for example from `oxlint --color | tin`.
 - An example for each of the 242 languages.
 - Format the code with Prettier, for JavaScript, TypeScript, JSON, CSS, HTML, Markdown, YAML and more.
 - Edit the full spec as JSON, with each problem shown while you type.

@@ -14,8 +14,11 @@ import {
   resetPositions,
   selectionLines,
   selectionParts,
+  setHighlightColor,
+  hasHighlightColor,
+  removeHighlight,
   setLineNumbers,
-  toggleHighlightRange,
+  toggleHighlight,
   toggleMark,
   markColor,
   setMarkColor,
@@ -78,24 +81,6 @@ describe("selectionParts", () => {
 
     // Assert
     expect(parts).toEqual([{ line: 2, match: "a", occurrence: 2 }]);
-  });
-});
-
-describe("toggleHighlightRange", () => {
-  test("should highlight all lines of the range", () => {
-    // Act
-    const pane = toggleHighlightRange({ code: CODE, highlight: [2] }, 1, 3);
-
-    // Assert
-    expect(pane.highlight).toEqual([1, 2, 3]);
-  });
-
-  test("should remove the highlight when all lines have it", () => {
-    // Act
-    const pane = toggleHighlightRange({ code: CODE, highlight: ["1-3", 5] }, 2, 3);
-
-    // Assert
-    expect(pane.highlight).toEqual([1, 5]);
   });
 });
 
@@ -1221,5 +1206,80 @@ describe("withLanguage", () => {
 
     // Assert
     expect(result).toEqual({ title: "main.py", code: "x = 1", highlight: [1], language: "rust" });
+  });
+});
+
+describe("highlight colors", () => {
+  test("should keep the colors of the other lines when it toggles a line", () => {
+    // Act
+    const pane = toggleHighlight(
+      { code: CODE, highlight: [{ lines: "1-2", color: "#f85149" }] },
+      3,
+    );
+
+    // Assert
+    expect(pane.highlight).toEqual([{ lines: "1-2", color: "#f85149" }, 3]);
+  });
+
+  test("should give the lines a color and highlight them", () => {
+    // Act
+    const pane = setHighlightColor({ code: "a\nb\nc\nd", highlight: [1] }, 2, 3, "#388bfd");
+
+    // Assert
+    expect(pane.highlight).toEqual([1, { lines: "2-3", color: "#388bfd" }]);
+  });
+
+  test("should give the lines the color of the theme again without a color", () => {
+    // Act
+    const pane = setHighlightColor(
+      { code: "a\nb", highlight: [{ lines: "1-2", color: "#388bfd" }] },
+      1,
+      1,
+      undefined,
+    );
+
+    // Assert
+    expect(pane.highlight).toEqual([1, { lines: 2, color: "#388bfd" }]);
+  });
+
+  test("should say whether all lines have the highlight of the color", () => {
+    // Arrange
+    const pane = { code: "a\nb\nc", highlight: [{ lines: "1-2", color: "#388bfd" }, 3] };
+
+    // Act
+    const blue = hasHighlightColor(pane, 1, 2, "#388bfd");
+    const mixedAsTheme = hasHighlightColor(pane, 2, 3, undefined);
+    const theme = hasHighlightColor(pane, 3, 3, undefined);
+
+    // Assert
+    expect(blue).toBe(true);
+    expect(mixedAsTheme).toBe(false);
+    expect(theme).toBe(true);
+  });
+
+  test("should remove the highlight of the lines and keep the others", () => {
+    // Act
+    const pane = removeHighlight(
+      { code: "a\nb\nc", highlight: [{ lines: "1-3", color: "#388bfd" }] },
+      2,
+      2,
+    );
+
+    // Assert
+    expect(pane.highlight).toEqual([
+      { lines: 1, color: "#388bfd" },
+      { lines: 3, color: "#388bfd" },
+    ]);
+  });
+
+  test("should move a colored highlight with its line", () => {
+    // Arrange
+    const pane: PaneInput = { code: "a\nb", highlight: [{ lines: 2, color: "#f85149" }] };
+
+    // Act
+    const result = withCode(pane, "new\na\nb");
+
+    // Assert
+    expect(result.highlight).toEqual([{ lines: 3, color: "#f85149" }]);
   });
 });

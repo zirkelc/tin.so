@@ -49,36 +49,36 @@ Only `windows`, `panes` and `code` are required, but always add `"$schema"`. Lea
 
 **Window** (each item of `windows`)
 
-| Field             | Default        | What it does                                                   |
-| ----------------- | -------------- | -------------------------------------------------------------- |
-| `panes`           | required       | the panes, from 1 to 20                                        |
-| `split`           | `row`          | panes side by side (`row`) or below each other (`column`)      |
-| `titleBar`        | `true`         | the title bar with the three window dots and the title         |
-| `tabs`            | `false`        | a tab with the language icon and the file name above each pane |
-| `frame`           | `true`         | `false` puts the code directly on the background               |
-| `controls`        | `gray`         | `color` gives red, yellow and green window dots                |
-| `background`      | the theme      | a hex color for the window in place of the theme color         |
-| `title`           | the pane title | the title in the title bar                                     |
-| `width`, `height` | fit            | a fixed window size in px                                      |
-| `x`, `y`          | none           | a fixed place in the image (see the rules)                     |
+| Field             | Default        | What it does                                                                                                 |
+| ----------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `panes`           | required       | the panes, from 1 to 20                                                                                      |
+| `split`           | `row`          | panes side by side (`row`) or below each other (`column`)                                                    |
+| `titleBar`        | `true`         | the title bar with the three window dots and the title; `"solid"` gives it its own color and a line below it |
+| `tabs`            | `false`        | a tab with the language icon and the file name above each pane                                               |
+| `frame`           | `true`         | `false` puts the code directly on the background                                                             |
+| `controls`        | `gray`         | `color` gives red, yellow and green window dots                                                              |
+| `background`      | the theme      | a hex color for the window in place of the theme color                                                       |
+| `title`           | the pane title | the title in the title bar                                                                                   |
+| `width`, `height` | fit            | a fixed window size in px                                                                                    |
+| `x`, `y`          | none           | a fixed place in the image (see the rules)                                                                   |
 
 **Pane** (each item of `panes`)
 
-| Field         | Default       | What it does                                                          |
-| ------------- | ------------- | --------------------------------------------------------------------- |
-| `code`        | required      | the code; `\n` between lines                                          |
-| `title`       | none          | the file name; it also sets the language from its extension           |
-| `language`    | `auto`        | a Shiki language id or alias, or `text`; `tin languages` lists them   |
-| `highlight`   | `[]`          | lines to highlight, from 1: `[3]`, `[2, "5-7"]`                       |
-| `marks`       | `[]`          | styles and colors on parts of a line (see below)                      |
-| `annotations` | `[]`          | popovers below a word (see below)                                     |
-| `icon`        | `auto`        | the tab icon: `auto`, `file`, `none` or an icon id                    |
-| `lineNumbers` | image setting | line numbers for this pane only                                       |
-| `size`        | fit           | the pane width in a row split, or its height in a column split, in px |
+| Field         | Default       | What it does                                                                                                                                                   |
+| ------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code`        | required      | the code; `\n` between lines                                                                                                                                   |
+| `title`       | none          | the file name; it also sets the language from its extension                                                                                                    |
+| `language`    | `auto`        | a Shiki language id or alias, `text`, or `ansi` for terminal output with color codes; `tin languages` lists them. With `auto`, code with color codes is `ansi` |
+| `highlight`   | `[]`          | lines to highlight, from 1: `[3]`, `[2, "5-7"]`, or with a color: `[{ "lines": "5-7", "color": "#f85149" }]`                                                   |
+| `marks`       | `[]`          | styles and colors on parts of a line (see below)                                                                                                               |
+| `annotations` | `[]`          | popovers below a word (see below)                                                                                                                              |
+| `icon`        | `auto`        | the tab icon: `auto`, `file`, `none` or an icon id                                                                                                             |
+| `lineNumbers` | image setting | line numbers for this pane only                                                                                                                                |
+| `size`        | fit           | the pane width in a row split, or its height in a column split, in px                                                                                          |
 
 **Mark** (each item of `marks`): `line` and `match` say which text: the text `match` in line `line` (from 1). `occurrence` picks a later match in the same line (default 1). Then at least one of:
 
-- `style`: `strong` (bold), `emphasis` (italic), `underline` or `strikethrough`
+- `style`: `strong` (bold), `emphasis` (italic), `underline`, `strikethrough`, or `wavy` (a wavy line below the text, as an editor marks an error; it is in the error red of the theme, or in `color`, which also colors the text)
 - `color`: the text color as a hex color, for example `"#f43f5e"`
 - `background`: a fill behind the text, for example `"#fcd34d40"`. Two more hex digits give the alpha: `40` is about 25 %, a highlighter that keeps the text readable
 
@@ -179,6 +179,41 @@ Use several marks on the same text to combine them, for example one with `"style
 }
 ```
 
+**An error in the code and in the terminal**: a red highlight and a wavy line in the code, and the output of the tool with its color codes. In JSON, write the escape character as `\u001b`.
+
+```json
+{
+  "windows": [
+    {
+      "controls": "color",
+      "titleBar": "solid",
+      "panes": [
+        {
+          "title": "src/users.ts",
+          "code": "export function signUp(email: string) {\n  saveUser({ email });\n}",
+          "lineNumbers": true,
+          "highlight": [{ "lines": 2, "color": "#f85149" }],
+          "marks": [{ "line": 2, "match": "saveUser({ email })", "style": "wavy" }]
+        }
+      ]
+    },
+    {
+      "controls": "color",
+      "titleBar": "solid",
+      "title": "~/acme — zsh",
+      "panes": [
+        {
+          "language": "ansi",
+          "code": "$ oxlint\n\u001b[31m× acme(must-use-result):\u001b[0m Unused `Result<User>`"
+        }
+      ]
+    }
+  ]
+}
+```
+
+To show the real output of a tool, run it with colors and pipe it: `oxlint --color | tin -o lint.png`. The CLI reads the color codes as `ansi`.
+
 **An image for a post on X**: add `"aspectRatio": "16:9"` at the top level. Use `"1.91:1"` for LinkedIn and link previews, `"4:5"` for an Instagram post, and `"9:16"` for a story.
 
 **Code without a window**: `"frame": false` on the window. The code sits directly on the background.
@@ -191,7 +226,7 @@ Use several marks on the same text to combine them, for example one with `"style
 - **No `"$schema"` on stdin:** the CLI renders the JSON as code, and says so on stderr. Add the field, or pass `--spec`.
 - **Keys that start with `x-` are ignored** in every object. Use them for your own notes or tool data, never for image settings.
 - **Unknown fields are errors.** The names are case-sensitive: `lineNumbers`, `titleBar`, `aspectRatio`, `offsetX`. The style names are `strong` and `emphasis`, not `bold` and `italic`.
-- **Colors are hex only:** `"#f43f5e"` or `"#f43f5e40"`, not `"red"`.
+- **Colors are hex only:** `"#f43f5e"` or `"#f43f5e40"`, not `"red"`. For terminal colors that follow the theme, use `"language": "ansi"` with color codes in place of marks.
 - **`aspectRatio` with both `width` and `height` is an error.** Use it alone, or with one of the two.
 - **`language` must be a known id.** An unknown language is an error; use `"text"` for plain text, or leave `language` out and give a `title` with the right extension.
 - **`x` and `y`** put a window at a fixed place, and that window no longer follows `direction`, `gap` and `padding`. Use them only when the user wants overlapping or freely placed windows, and then set them on every window, and set the image `width` and `height`.

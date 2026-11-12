@@ -82,7 +82,9 @@ import {
   type WindowInput,
   titleBarTarget,
   toggleHighlight,
-  toggleHighlightRange,
+  hasHighlightColor,
+  removeHighlight,
+  setHighlightColor,
   updatePane,
   updateWindow,
   visibleAnnotations,
@@ -351,7 +353,7 @@ function CodeEditor(
 
   const style: CSSProperties = {
     left: pane.code.x + pane.gutter,
-    top: pane.code.y + EDITOR_PADDING,
+    top: pane.code.y + pane.codeTop,
     width: Math.max(pane.code.width - pane.gutter - EDITOR_PADDING, text.cellWidth * 4),
     height: lineCount * text.lineHeight,
     ...gridText(scene, text),
@@ -1333,6 +1335,16 @@ function popoverItems(
   ];
 }
 
+// Colors of line highlights, as an editor marks a line: the colors of GitHub for info, errors,
+// success, warnings and done
+const HIGHLIGHT_COLORS: Array<[string, string]> = [
+  ["Blue", "#388bfd"],
+  ["Red", "#f85149"],
+  ["Green", "#3fb950"],
+  ["Yellow", "#d29922"],
+  ["Purple", "#a371f7"],
+];
+
 function codeItems(
   spec: SpecInput,
   windowIndex: number,
@@ -1357,8 +1369,25 @@ function codeItems(
 
   return [
     {
-      label: highlighted ? `Remove highlight of ${lines}` : `Highlight ${lines}`,
-      onSelect: () => update((pane) => toggleHighlightRange(pane, from, to)),
+      label: `Highlight ${lines}`,
+      items: [
+        {
+          label: "Theme color",
+          checked: hasHighlightColor(pane, from, to, undefined),
+          onSelect: () => update((pane) => setHighlightColor(pane, from, to, undefined)),
+        },
+        ...HIGHLIGHT_COLORS.map(([name, color]) => ({
+          label: name,
+          checked: hasHighlightColor(pane, from, to, color),
+          onSelect: () => update((pane) => setHighlightColor(pane, from, to, color)),
+        })),
+        "separator",
+        {
+          label: "Remove highlight",
+          disabled: !highlighted,
+          onSelect: () => update((pane) => removeHighlight(pane, from, to)),
+        },
+      ],
     },
     "separator",
     {

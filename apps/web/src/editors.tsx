@@ -20,13 +20,11 @@ import { Field, Segmented, Switch } from "./controls.tsx";
 import {
   ChevronIcon,
   CloseIcon,
-  ControlsIcon,
   FrameIcon,
   PlusIcon,
   SplitColumnIcon,
   SplitRowIcon,
   TabsIcon,
-  TitleBarIcon,
 } from "./icons.tsx";
 import { jsonTokens } from "./json-tokens.ts";
 import { registerRegularFaces } from "./renderer.ts";
@@ -538,14 +536,6 @@ export function WindowEditor(props: {
 
   return (
     <div className="window-editor">
-      <Field label="Title">
-        <input
-          placeholder={titleBarTarget(window) === "pane" ? window.panes[0]?.title : "Untitled"}
-          value={window.title ?? ""}
-          disabled={!frame || !titleBar}
-          onChange={(event) => onChange({ ...window, title: event.target.value || undefined })}
-        />
-      </Field>
       <div className="field">
         <span className="field-label">Frame</span>
         <div className="parts">
@@ -556,27 +546,60 @@ export function WindowEditor(props: {
             onChange={(frame) => onChange({ ...window, frame })}
           />
           <PartToggle
-            label="Title bar"
-            icon={<TitleBarIcon />}
-            pressed={frame && titleBar}
-            disabled={!frame}
-            onChange={(titleBar) => onChange({ ...window, titleBar })}
-          />
-          <PartToggle
             label="Tabs"
             icon={<TabsIcon />}
             pressed={frame && (window.tabs ?? false)}
             disabled={!frame}
             onChange={(tabs) => onChange({ ...window, tabs })}
           />
-          <PartToggle
-            label="Colors"
-            icon={<ControlsIcon />}
-            pressed={frame && titleBar && window.controls === "color"}
-            disabled={!frame || !titleBar}
-            onChange={(color) => onChange({ ...window, controls: color ? "color" : undefined })}
+        </div>
+      </div>
+      <div className="title-bar-editor" role="group" aria-label="Title bar">
+        <div className="switches">
+          <Switch
+            label="Title bar"
+            checked={frame && titleBar !== false}
+            disabled={!frame}
+            onChange={(on) => onChange({ ...window, titleBar: on })}
           />
         </div>
+        {frame && titleBar !== false && (
+          <>
+            <Field label="Title">
+              <input
+                placeholder={
+                  titleBarTarget(window) === "pane" ? window.panes[0]?.title : "Untitled"
+                }
+                value={window.title ?? ""}
+                onChange={(event) =>
+                  onChange({ ...window, title: event.target.value || undefined })
+                }
+              />
+            </Field>
+            <Segmented
+              label="Controls"
+              value={window.controls ?? "gray"}
+              options={[
+                { value: "gray", label: "Gray" },
+                { value: "color", label: "Colors" },
+              ]}
+              onChange={(controls) =>
+                onChange({ ...window, controls: controls === "color" ? "color" : undefined })
+              }
+            />
+            <Segmented
+              label="Style"
+              value={titleBar === "solid" ? "solid" : "transparent"}
+              options={[
+                { value: "transparent", label: "Transparent" },
+                { value: "solid", label: "Solid" },
+              ]}
+              onChange={(style) =>
+                onChange({ ...window, titleBar: style === "solid" ? "solid" : true })
+              }
+            />
+          </>
+        )}
       </div>
       {window.panes.length > 1 && (
         <Segmented

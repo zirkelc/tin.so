@@ -115,11 +115,12 @@ const PALETTE: Array<[name: string, color: string]> = [
 // A fill is translucent, as a highlighter, so that the text on it stays readable
 const FILL_ALPHA = "40";
 
-const STYLES: Array<{ style: MarkStyle; label: string; shortcut: string }> = [
+const STYLES: Array<{ style: MarkStyle; label: string; shortcut?: string }> = [
   { style: "strong", label: "Bold", shortcut: "⌘B" },
   { style: "emphasis", label: "Italic", shortcut: "⌘I" },
   { style: "underline", label: "Underline", shortcut: "⌘U" },
   { style: "strikethrough", label: "Strike", shortcut: "⌘⇧X" },
+  { style: "wavy", label: "Wavy" },
 ];
 
 function ColorRow(props: {
@@ -202,7 +203,7 @@ export function MarkPanel(props: {
             type="button"
             className={`mark-style mark-style-${style}`}
             aria-pressed={active.has(style)}
-            title={`${label} (${shortcut})`}
+            title={shortcut ? `${label} (${shortcut})` : label}
             onClick={() => onChange((old) => toggleMark(old, parts, style))}
           >
             {label}

@@ -15,6 +15,10 @@ export type Token = {
   italic: boolean;
   underline: boolean;
   strikethrough?: boolean;
+  /** A wavy line below the text, as an editor marks an error */
+  wavy?: boolean;
+  /** The color that a mark gave the text, which a wavy line takes */
+  markColor?: string;
   /** A fill behind the text */
   background?: string;
 };
@@ -22,20 +26,28 @@ export type Token = {
 export type HighlightedLine = Array<Token>;
 
 export const PLAIN_TEXT = "text";
+// Terminal output with its color codes. Shiki reads it with the terminal colors of the theme.
+export const ANSI = "ansi";
 
-export const LANGUAGE_IDS = [PLAIN_TEXT, ...bundledLanguagesInfo.map((language) => language.id)];
+export const LANGUAGE_IDS = [
+  PLAIN_TEXT,
+  ANSI,
+  ...bundledLanguagesInfo.map((language) => language.id),
+];
 
 /** A language with its display name and its other names, such as "bash" for the shell */
 export type LanguageInfo = { id: string; name: string; aliases: Array<string> };
 
 export const LANGUAGES: Array<LanguageInfo> = [
   { id: PLAIN_TEXT, name: "Plain Text", aliases: [] },
+  { id: ANSI, name: "Terminal Output", aliases: [] },
   ...bundledLanguagesInfo.map(({ id, name, aliases }) => ({ id, name, aliases: aliases ?? [] })),
 ];
 
 /** The display name of a language, such as "TypeScript" for "typescript" */
 export function languageName(language: string): string {
   if (language === PLAIN_TEXT) return "Plain Text";
+  if (language === ANSI) return "Terminal Output";
   return bundledLanguagesInfo.find((info) => info.id === language)?.name ?? language;
 }
 
@@ -114,7 +126,10 @@ const PLAIN_TEXT_IDS = new Set([PLAIN_TEXT, "plaintext", "plain"]);
 export function isKnownLanguage(language: string): boolean {
   const id = language.toLowerCase();
   return (
-    PLAIN_TEXT_IDS.has(id) || Object.hasOwn(bundledLanguages, id) || Object.hasOwn(EXTENSIONS, id)
+    PLAIN_TEXT_IDS.has(id) ||
+    id === ANSI ||
+    Object.hasOwn(bundledLanguages, id) ||
+    Object.hasOwn(EXTENSIONS, id)
   );
 }
 
@@ -122,14 +137,25 @@ export function isKnownLanguage(language: string): boolean {
 export function resolveLanguage(language: string): string {
   const id = language.toLowerCase();
   if (PLAIN_TEXT_IDS.has(id)) return PLAIN_TEXT;
+  if (id === ANSI) return ANSI;
   // Only the own keys, because "constructor" and other object keys are not languages
   if (Object.hasOwn(bundledLanguages, id))
     return bundledLanguagesInfo.find((info) => info.id === id || info.aliases?.includes(id))!.id;
   return (Object.hasOwn(EXTENSIONS, id) && EXTENSIONS[id]) || PLAIN_TEXT;
 }
 
-/** Infers the language from a file name such as "main.ts" or "Dockerfile" */
-export function inferLanguage(fileName: string | undefined): string {
+// The start of an escape sequence that sets the color or the style of terminal output
+// oxlint-disable-next-line no-control-regex
+const ANSI_SHORT_RESET = /\u001b\[m/g;
+// oxlint-disable-next-line no-control-regex
+const ANSI_ESCAPE = /\u001b\[[\d;]*m/;
+
+/**
+ * Infers the language from a file name such as "main.ts" or "Dockerfile". Code with color codes
+ * is terminal output, whatever the file name.
+ */
+export function inferLanguage(fileName: string | undefined, code = ""): string {
+  if (ANSI_ESCAPE.test(code)) return ANSI;
   if (!fileName) return PLAIN_TEXT;
   const name = fileName.toLowerCase();
   const extension = name.includes(".") ? name.slice(name.lastIndexOf(".") + 1) : name;
@@ -156,12 +182,14 @@ export async function highlight(
   const shiki = await getHighlighter();
   const lang = language === "typescript" ? "tsx" : language;
 
-  if (lang !== PLAIN_TEXT && !shiki.getLoadedLanguages().includes(lang)) {
+  if (lang !== PLAIN_TEXT && lang !== ANSI && !shiki.getLoadedLanguages().includes(lang)) {
     await shiki.loadLanguage(bundledLanguages[lang as keyof typeof bundledLanguages]);
   }
 
   const themeName = await loadThemeName(shiki, theme, mode);
-  const lines = shiki.codeToTokensBase(code, { lang, theme: themeName });
+  // Git and other tools end a color with ESC[m, which Shiki does not read as a reset
+  const input = lang === ANSI ? code.replace(ANSI_SHORT_RESET, "\u001b[0m") : code;
+  const lines = shiki.codeToTokensBase(input, { lang, theme: themeName });
 
   return lines.map((tokens) =>
     tokens.map((token) => {
@@ -172,7 +200,19 @@ export async function highlight(
         bold: (fontStyle & BOLD) !== 0,
         italic: (fontStyle & ITALIC) !== 0,
         underline: (fontStyle & UNDERLINE) !== 0,
+        // Only terminal output has a fill: the background color of its color codes
+        ...(token.bgColor && { background: token.bgColor }),
       };
     }),
   );
+}
+
+// The red of errors when a theme has none, by mode, from GitHub
+const ERROR_COLORS: Record<Mode, string> = { dark: "#f85149", light: "#cf222e" };
+
+/** The color that the editor of the theme gives to errors, such as the wavy line below an error */
+export async function errorColor(theme: Theme, mode: Mode): Promise<string> {
+  const shiki = await getHighlighter();
+  const colors = shiki.getTheme(await loadThemeName(shiki, theme, mode)).colors ?? {};
+  return colors["editorError.foreground"] ?? colors["terminal.ansiRed"] ?? ERROR_COLORS[mode];
 }

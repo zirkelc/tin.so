@@ -682,3 +682,59 @@ describe("removed themes", () => {
     expect(issues.length).toBe(1);
   });
 });
+
+describe("highlight entries with a color", () => {
+  test("should accept a line or a range with a color", () => {
+    // Act
+    const spec = parseSpec({
+      windows: [
+        { panes: [{ code: "x", highlight: [{ lines: 1, color: "#388bfd" }, { lines: "2-3" }] }] },
+      ],
+    });
+
+    // Assert
+    expect(spec.windows[0]!.panes[0]!.highlight).toEqual([
+      { lines: 1, color: "#388bfd" },
+      { lines: "2-3" },
+    ]);
+  });
+
+  test("should reject a color that is not hex", () => {
+    // Act
+    const issues = specIssues({
+      windows: [{ panes: [{ code: "x", highlight: [{ lines: 1, color: "blue" }] }] }],
+    });
+
+    // Assert
+    expect(issues.length).toBe(1);
+    expect(issues[0]!.startsWith("windows.0.panes.0.highlight.0")).toBe(true);
+  });
+
+  test("should expand the lines of an entry with a color", () => {
+    // Act
+    const lines = expandLineRanges([{ lines: "2-3", color: "#388bfd" }, 5]);
+
+    // Assert
+    expect([...lines]).toEqual([2, 3, 5]);
+  });
+});
+
+describe("new values", () => {
+  test("should accept the mark style wavy, the language ansi and a solid title bar", () => {
+    // Act
+    const spec = parseSpec({
+      windows: [
+        {
+          titleBar: "solid",
+          panes: [{ code: "x", language: "ansi", marks: [{ line: 1, match: "x", style: "wavy" }] }],
+        },
+      ],
+    });
+
+    // Assert
+    const window = spec.windows[0]!;
+    expect(window.titleBar).toBe("solid");
+    expect(window.panes[0]!.language).toBe("ansi");
+    expect(window.panes[0]!.marks[0]!.style).toBe("wavy");
+  });
+});

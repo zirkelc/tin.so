@@ -678,3 +678,195 @@ describe.skip("ambient backgrounds", () => {
     expect(svg).not.toContain("ambient-blur");
   });
 });
+
+describe("highlight colors", () => {
+  test("should tint a highlighted line in its color and draw a bar in the full color", async () => {
+    // Arrange
+    const scene = await layout({
+      windows: [
+        {
+          panes: [
+            {
+              language: "text",
+              code: "a\nb\nc",
+              highlight: [1, { lines: "2-3", color: "#388bfd" }],
+            },
+          ],
+        },
+      ],
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    const tints = [...svg.matchAll(/<rect [^>]*fill="#388bfd" fill-opacity="0.16"[^>]*\/>/g)];
+    const bars = [...svg.matchAll(/<rect [^>]*width="3"[^>]*fill="#388bfd"\/>/g)];
+    expect(tints.length).toBe(2);
+    expect(bars.length).toBe(2);
+    expect(svg.includes(`fill="${scene.frame.highlight}"`)).toBe(true);
+  });
+});
+
+describe("wavy marks", () => {
+  test("should draw a wavy line below the text in the error color, and keep the text color", async () => {
+    // Arrange
+    const scene = await layout({
+      theme: "github",
+      windows: [
+        {
+          panes: [
+            {
+              language: "text",
+              code: "save(user);",
+              marks: [{ line: 1, match: "save(user)", style: "wavy" }],
+            },
+          ],
+        },
+      ],
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toMatch(/<path [^>]*d="M[^"]+q[^"]+"[^>]*stroke="#ff7b72"/);
+    expect(svg).toMatch(new RegExp(`fill="${scene.syntax.foreground}"[^>]*>save\\(user\\)</text>`));
+  });
+
+  test("should draw the wavy line in the color of the mark", async () => {
+    // Arrange
+    const scene = await layout({
+      windows: [
+        {
+          panes: [
+            {
+              language: "text",
+              code: "save(user);",
+              marks: [{ line: 1, match: "save", style: "wavy", color: "#d29922" }],
+            },
+          ],
+        },
+      ],
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toMatch(/<path [^>]*stroke="#d29922"/);
+  });
+});
+
+describe("ansi", () => {
+  test("should color terminal output with the terminal colors of the theme", async () => {
+    // Arrange
+    const scene = await layout({
+      theme: "github",
+      windows: [
+        {
+          panes: [
+            {
+              language: "ansi",
+              code: "\u001b[31merror\u001b[0m \u001b[1mbold\u001b[0m \u001b[41m bg \u001b[0m",
+            },
+          ],
+        },
+      ],
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toMatch(/fill="#ff7b72"[^>]*>error<\/text>/);
+    expect(svg).toMatch(/font-weight="700"[^>]*>bold<\/text>/);
+    expect(svg.includes("\u001b")).toBe(false);
+    expect(svg).toMatch(/<rect [^>]*fill="#ff7b72"\/>/);
+  });
+
+  test("should end a color at a reset without a number, as git writes it", async () => {
+    // Arrange
+    const spec = {
+      theme: "github",
+      windows: [{ panes: [{ language: "ansi", code: "\u001b[36m@@ -1 +1 @@\u001b[m context" }] }],
+    };
+
+    // Act
+    const scene = await layout(spec);
+
+    // Assert
+    const [hunk, context] = scene.windows[0]!.panes[0]!.lines[0]!;
+    expect(hunk!.color).toBe("#39c5cf");
+    expect(context!.content).toBe(" context");
+    expect(context!.color).toBe(scene.syntax.foreground);
+  });
+
+  test("should read code with escape codes as terminal output when the language is auto", async () => {
+    // Arrange
+    const spec = { windows: [{ panes: [{ code: "\u001b[32mok\u001b[0m" }] }] };
+
+    // Act
+    const scene = await layout(spec);
+
+    // Assert
+    const pane = scene.windows[0]!.panes[0]!;
+    expect(pane.language).toBe("ansi");
+    expect(pane.lines[0]!.map((token) => token.content).join("")).toBe("ok");
+  });
+
+  test("should mark the visible text of terminal output", async () => {
+    // Arrange
+    const spec = {
+      windows: [
+        {
+          panes: [
+            {
+              language: "ansi",
+              code: "\u001b[31m× rule\u001b[0m: message",
+              marks: [{ line: 1, match: "rule: mess", style: "strong" as const }],
+            },
+          ],
+        },
+      ],
+    };
+
+    // Act
+    const scene = await layout(spec);
+
+    // Assert
+    const bold = scene.windows[0]!.panes[0]!.lines[0]!.filter((token) => token.bold);
+    expect(bold.map((token) => token.content).join("")).toBe("rule: mess");
+  });
+});
+
+describe("solid title bar", () => {
+  test("should fill the title bar and draw a line below it", async () => {
+    // Arrange
+    const spec = { windows: [{ titleBar: "solid" as const, panes: [{ code: "x" }] }] };
+    const plain = { windows: [{ panes: [{ code: "x" }] }] };
+
+    // Act
+    const svg = toSvg(await layout(spec));
+    const before = toSvg(await layout(plain));
+
+    // Assert
+    expect(svg).toMatch(/<rect [^>]*fill="rgba\(255, 255, 255, 0.04\)"\/>/);
+    expect([...svg.matchAll(/<line /g)].length).toBe(1);
+    expect([...before.matchAll(/<line /g)].length).toBe(0);
+  });
+
+  test("should give the title the same space above and below in the bar", async () => {
+    // Arrange
+    const spec = { windows: [{ titleBar: "solid" as const, panes: [{ code: "x" }] }] };
+
+    // Act
+    const scene = await layout(spec);
+
+    // Assert
+    const { header, titleBar } = scene.windows[0]!;
+    const above = titleBar!.title.y - header!.y;
+    const below = header!.y + header!.height - (titleBar!.title.y + titleBar!.title.height);
+    expect(below).toBe(above);
+  });
+});

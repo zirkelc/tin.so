@@ -25,15 +25,6 @@ export const FrameIcon = () => (
   </Glyph>
 );
 
-export const TitleBarIcon = () => (
-  <Glyph>
-    <rect x="2" y="2.5" width="12" height="11" rx="2.5" />
-    <path d="M2 6h12" />
-    <circle cx="4.3" cy="4.3" r="0.4" />
-    <circle cx="6" cy="4.3" r="0.4" />
-  </Glyph>
-);
-
 export const TabsIcon = () => (
   <Glyph>
     <path d="M2 13.5v-9a2 2 0 0 1 2-2h3l1.5 2.5H12a2 2 0 0 1 2 2v6.5z" />
@@ -89,14 +80,6 @@ export const CenterVerticalIcon = () => (
   <Glyph>
     <path d="M1.5 8h13" />
     <rect x="4.5" y="3.5" width="7" height="9" rx="1.5" />
-  </Glyph>
-);
-
-export const ControlsIcon = () => (
-  <Glyph>
-    <circle cx="3.5" cy="8" r="1.6" />
-    <circle cx="8" cy="8" r="1.6" />
-    <circle cx="12.5" cy="8" r="1.6" />
   </Glyph>
 );
 
