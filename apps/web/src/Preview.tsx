@@ -1345,6 +1345,9 @@ const HIGHLIGHT_COLORS: Array<[string, string]> = [
   ["Purple", "#a371f7"],
 ];
 
+// The highlight of a pane before the first preview of the code menu, by the menu that shows it
+const highlightPreviews = new WeakMap<object, { highlight: PaneInput["highlight"] }>();
+
 function codeItems(
   spec: SpecInput,
   windowIndex: number,
@@ -1361,7 +1364,30 @@ function codeItems(
     ? selectionLines(pane.code, code.start, code.end)
     : [code.line, code.line];
   const parts = selectionParts(pane.code, code.start, code.end);
-  const highlighted = isHighlighted(pane, from, to);
+  // The items show the highlight without the preview
+  const base = highlightPreviews.get(code);
+  const shown = base ? { ...pane, highlight: base.highlight } : pane;
+  const highlighted = isHighlighted(shown, from, to);
+  // A color shows on the lines while the pointer is on it, and a click keeps it
+  const highlightItem = (change: (pane: PaneInput) => PaneInput) => ({
+    onPreview: (active: boolean) => {
+      const saved = highlightPreviews.get(code);
+      // The saved highlight stays until a choice, because the pane of this render can still show
+      // the preview of the item that the pointer just left
+      if (!active) {
+        if (saved) update((pane) => ({ ...pane, highlight: saved.highlight }));
+        return;
+      }
+      const start = saved ?? { highlight: pane.highlight };
+      highlightPreviews.set(code, start);
+      update((pane) => change({ ...pane, highlight: start.highlight }));
+    },
+    onSelect: () => {
+      const saved = highlightPreviews.get(code);
+      highlightPreviews.delete(code);
+      update((pane) => change(saved ? { ...pane, highlight: saved.highlight } : pane));
+    },
+  });
   const lines = from === to ? `line ${from}` : `lines ${from}–${to}`;
   const part = parts.length === 1 ? parts[0] : undefined;
   const annotation = part ? annotationAt(pane, part) : -1;
@@ -1373,19 +1399,19 @@ function codeItems(
       items: [
         {
           label: "Theme color",
-          checked: hasHighlightColor(pane, from, to, undefined),
-          onSelect: () => update((pane) => setHighlightColor(pane, from, to, undefined)),
+          checked: hasHighlightColor(shown, from, to, undefined),
+          ...highlightItem((pane) => setHighlightColor(pane, from, to, undefined)),
         },
         ...HIGHLIGHT_COLORS.map(([name, color]) => ({
           label: name,
-          checked: hasHighlightColor(pane, from, to, color),
-          onSelect: () => update((pane) => setHighlightColor(pane, from, to, color)),
+          checked: hasHighlightColor(shown, from, to, color),
+          ...highlightItem((pane) => setHighlightColor(pane, from, to, color)),
         })),
         "separator",
         {
           label: "Remove highlight",
           disabled: !highlighted,
-          onSelect: () => update((pane) => removeHighlight(pane, from, to)),
+          ...highlightItem((pane) => removeHighlight(pane, from, to)),
         },
       ],
     },

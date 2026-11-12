@@ -78,11 +78,11 @@ A popover points to a word in the code and looks like the hover card of an edito
 Show the reader where to look. Highlight full lines, or give any part of a line a style, a text color or a fill.
 
 - Highlight lines. Option-click a line, or right-click the code.
-- Give a highlight a color, such as blue for a note or red for an error, in the Highlight submenu of the code. The lines get a tint of the color and a bar at the left edge.
+- Give a highlight a color, such as blue for a note or red for an error, in the Highlight submenu of the code. Point to a color to see it on the lines. The lines get a tint of the color and a bar at the left edge.
 - Bold, italic, underline and strikethrough on any part of a line, also in popovers.
 - A wavy line below a part of a line, as an editor marks an error, in the red of the theme.
 - Text colors and fills from a palette of 16 colors, or any hex color in a spec. The fill is translucent, as a highlighter.
-- Select code in the image to open a panel with the colors and the styles.
+- Select code in the image to open a panel with the colors and the styles. Point to a color or a style to see it in the image, and click to keep it.
 - Highlights, styles and popovers stay on their lines when you edit the code.
 - Line numbers for all panes or for one pane.
 

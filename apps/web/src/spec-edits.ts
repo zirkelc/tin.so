@@ -1,5 +1,6 @@
 import {
   highlightColors,
+  MARK_STYLES,
   inferLanguage,
   normalizeCode,
   parseSpec,
@@ -274,7 +275,7 @@ export function activeMarks(pane: Marked, parts: Array<LinePart>): Set<MarkStyle
   const marks = pane.marks ?? [];
   const styles = new Set<MarkStyle>();
   if (parts.length === 0) return styles;
-  for (const style of ["strong", "emphasis", "underline", "strikethrough"] as const) {
+  for (const style of MARK_STYLES) {
     if (parts.every((part) => marks.some((mark) => mark.style === style && samePart(part, mark))))
       styles.add(style);
   }

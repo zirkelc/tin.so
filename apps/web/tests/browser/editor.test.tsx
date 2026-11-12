@@ -1392,3 +1392,122 @@ describe("highlight submenu", () => {
     await expect.poll(() => window.tin.getSpec().windows[0]?.panes[0]?.highlight).toEqual([]);
   });
 });
+
+describe("style panel preview", () => {
+  const selectSave = async () => {
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "save(user);" }] }] });
+    await codeField(1).click();
+    await userEvent.keyboard(
+      "{Home}{Shift>}{ArrowRight}{ArrowRight}{ArrowRight}{ArrowRight}{/Shift}",
+    );
+    return page.getByRole("toolbar", { name: "Text style" });
+  };
+  const marks = () => window.tin.getSpec().windows[0]?.panes[0]?.marks ?? [];
+
+  test("should show a style in the image while the pointer is on its button", async () => {
+    // Arrange
+    const panel = await selectSave();
+
+    // Act
+    await panel.getByRole("button", { name: "Wavy" }).hover();
+
+    // Assert
+    await expect.poll(marks).toEqual([{ line: 1, match: "save", occurrence: 1, style: "wavy" }]);
+    await expect
+      .element(panel.getByRole("button", { name: "Wavy" }))
+      .toHaveAttribute("aria-pressed", "false");
+  });
+
+  test("should remove the preview when the pointer leaves the button", async () => {
+    // Arrange
+    const panel = await selectSave();
+    await panel.getByRole("button", { name: "Text Red" }).hover();
+    await expect.poll(() => marks().length).toBe(1);
+
+    // Act
+    await panel.getByRole("button", { name: "Text Red" }).unhover();
+
+    // Assert
+    await expect.poll(marks).toEqual([]);
+  });
+
+  test("should put the marks back after the pointer moves over two buttons", async () => {
+    // Arrange
+    const panel = await selectSave();
+    await panel.getByRole("button", { name: "Text Red" }).hover();
+    await expect.poll(() => marks().length).toBe(1);
+
+    // Act
+    await panel.getByRole("button", { name: "Text Blue", exact: true }).hover();
+    await panel.getByRole("button", { name: "Text Blue", exact: true }).unhover();
+
+    // Assert
+    await expect.poll(marks).toEqual([]);
+  });
+
+  test("should keep the style after a click on the button under the pointer", async () => {
+    // Arrange
+    const panel = await selectSave();
+
+    // Act
+    await panel.getByRole("button", { name: "Wavy" }).click();
+    await panel.getByRole("button", { name: "Wavy" }).unhover();
+
+    // Assert
+    await expect.poll(marks).toEqual([{ line: 1, match: "save", occurrence: 1, style: "wavy" }]);
+    await expect
+      .element(panel.getByRole("button", { name: "Wavy" }))
+      .toHaveAttribute("aria-pressed", "true");
+  });
+});
+
+describe("highlight submenu preview", () => {
+  const openSubmenu = async () => {
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "a" }] }] });
+    await codeField(1).click({ button: "right" });
+    await page.getByRole("menuitem", { name: /^Highlight line/ }).click();
+  };
+  const highlight = () => window.tin.getSpec().windows[0]?.panes[0]?.highlight ?? [];
+  const red = () => page.getByRole("menuitemcheckbox", { name: /Red$/ });
+
+  test("should show the color on the line while the pointer is on it", async () => {
+    // Arrange
+    await openSubmenu();
+
+    // Act
+    await red().hover();
+
+    // Assert
+    await expect.poll(highlight).toEqual([{ lines: 1, color: "#f85149" }]);
+    await expect.element(red()).toHaveAttribute("aria-checked", "false");
+  });
+
+  test("should put the highlight back when the pointer leaves the color", async () => {
+    // Arrange
+    await openSubmenu();
+    await red().hover();
+    await expect.poll(() => highlight().length).toBe(1);
+
+    // Act
+    await page.getByRole("menuitemcheckbox", { name: /Theme color$/ }).hover();
+    await page.getByRole("menuitemcheckbox", { name: /Theme color$/ }).unhover();
+
+    // Assert
+    await expect.poll(highlight).toEqual([]);
+  });
+
+  test("should put the highlight back when the menu closes during a preview", async () => {
+    // Arrange
+    await openSubmenu();
+    await red().hover();
+    await expect.poll(() => highlight().length).toBe(1);
+
+    // Act
+    await userEvent.keyboard("{Escape}");
+
+    // Assert
+    await expect.poll(highlight).toEqual([]);
+  });
+});

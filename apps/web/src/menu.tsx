@@ -8,6 +8,11 @@ export type MenuItem =
       checked?: boolean;
       disabled?: boolean;
       onSelect: () => void;
+      /**
+       * Shows the change of the item while the pointer is on it (true), and takes it back when
+       * the pointer leaves or the menu closes without a choice (false)
+       */
+      onPreview?: (active: boolean) => void;
     }
   | { label: string; disabled?: boolean; items: Array<MenuItem> }
   | "separator";
@@ -70,6 +75,10 @@ export function ContextMenu(props: {
 
 function MenuItems(props: { items: Array<MenuItem>; onClose: () => void }) {
   const [open, setOpen] = useState<number>();
+  // The item that shows a preview, by its index, which ends when the menu closes. The items are
+  // new on each render, so the index finds the item and not its function.
+  const previewing = useRef<{ index: number; end: () => void }>(undefined);
+  useEffect(() => () => previewing.current?.end(), []);
   return props.items.map((item, index) => {
     if (item === "separator")
       return <div key={index} className="menu-separator" role="separator" />;
@@ -91,7 +100,18 @@ function MenuItems(props: { items: Array<MenuItem>; onClose: () => void }) {
         aria-checked={item.checked}
         className="menu-item"
         disabled={item.disabled}
-        onPointerEnter={() => setOpen(undefined)}
+        onPointerEnter={() => {
+          setOpen(undefined);
+          if (!item.onPreview || item.disabled) return;
+          const { onPreview } = item;
+          previewing.current = { index, end: () => onPreview(false) };
+          onPreview(true);
+        }}
+        onPointerLeave={() => {
+          if (previewing.current?.index !== index) return;
+          previewing.current = undefined;
+          item.onPreview?.(false);
+        }}
         onClick={() => {
           item.onSelect();
           props.onClose();

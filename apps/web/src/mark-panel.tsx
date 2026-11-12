@@ -1,5 +1,12 @@
 import { cellCount, type MarkStyle, type TextMetrics } from "@tin.so/core";
-import { type CSSProperties, type KeyboardEvent, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import {
   activeMarks,
   clearMarks,
@@ -123,11 +130,15 @@ const STYLES: Array<{ style: MarkStyle; label: string; shortcut?: string }> = [
   { style: "wavy", label: "Wavy" },
 ];
 
+// The pointer events of a button that shows its change in the image before a click
+type Hover = { onPointerEnter: () => void; onPointerLeave: () => void };
+
 function ColorRow(props: {
   label: string;
   kind: MarkColorKind;
   current: string | undefined;
   onPick: (color: string | undefined) => void;
+  hover: (color: string | undefined) => Hover;
 }) {
   const suffix = props.kind === "background" ? FILL_ALPHA : "";
   return (
@@ -139,6 +150,7 @@ function ColorRow(props: {
         aria-label={`No ${props.label.toLowerCase()} color`}
         aria-pressed={props.current === undefined}
         title="None"
+        {...props.hover(undefined)}
         onClick={() => props.onPick(undefined)}
       />
       {PALETTE.map(([name, color]) => {
@@ -152,12 +164,21 @@ function ColorRow(props: {
             aria-pressed={props.current === value}
             title={name}
             style={{ "--swatch": value } as CSSProperties}
+            {...props.hover(value)}
             onClick={() => props.onPick(value)}
           />
         );
       })}
     </div>
   );
+}
+
+/**
+ * The marked code with these marks. The field stays when it is undefined, because the editor
+ * merges the result into the pane, and a missing field would keep the marks of the preview.
+ */
+function withMarks<MARKED extends Marked>(marked: MARKED, marks: Marked["marks"]): MARKED {
+  return { ...marked, marks };
 }
 
 /**
@@ -172,8 +193,47 @@ export function MarkPanel(props: {
   style: CSSProperties;
   onChange: (change: (marked: Marked) => Marked) => void;
 }) {
-  const { pane, parts, onChange } = props;
+  const { parts, onChange } = props;
+  // The marks before the first preview, which come back when the pointer leaves a button without a click
+  const base = useRef<{ marks: Marked["marks"] } | undefined>(undefined);
+  // A click can give the spec of the preview, so the panel renders itself after a click
+  const [, render] = useReducer((count: number) => count + 1, 0);
+  // The buttons show the marks without the preview
+  const pane = base.current ? withMarks(props.pane, base.current.marks) : props.pane;
   const active = activeMarks(pane, parts);
+
+  // The saved marks stay until a click, because the pane of this render can still show the
+  // preview of the button that the pointer just left
+  // The pointer is on a button and the image shows its preview
+  const previewing = useRef(false);
+  const end = () => {
+    const saved = base.current;
+    previewing.current = false;
+    if (saved) onChange((old) => withMarks(old, saved.marks));
+  };
+  const commit = (change: (marked: Marked) => Marked) => {
+    const saved = base.current;
+    base.current = undefined;
+    previewing.current = false;
+    render();
+    onChange((old) => change(saved ? withMarks(old, saved.marks) : old));
+  };
+  const hover = (change: (marked: Marked) => Marked): Hover => ({
+    onPointerEnter: () => {
+      previewing.current = true;
+      base.current ??= { marks: props.pane.marks };
+      const saved = base.current;
+      onChange((old) => change(withMarks(old, saved.marks)));
+    },
+    onPointerLeave: end,
+  });
+
+  // A panel that closes during a preview, for example on Escape, puts the marks back. After a
+  // preview, an edit of the code can move the marks, so the saved marks are old then.
+  const endRef = useRef(end);
+  endRef.current = end;
+  useEffect(() => () => void (previewing.current && endRef.current()), []);
+
   return (
     <div
       className="mark-panel"
@@ -187,13 +247,15 @@ export function MarkPanel(props: {
         label="Text"
         kind="color"
         current={markColor(pane, parts, "color")}
-        onPick={(color) => onChange((old) => setMarkColor(old, parts, "color", color))}
+        onPick={(color) => commit((old) => setMarkColor(old, parts, "color", color))}
+        hover={(color) => hover((old) => setMarkColor(old, parts, "color", color))}
       />
       <ColorRow
         label="Fill"
         kind="background"
         current={markColor(pane, parts, "background")}
-        onPick={(color) => onChange((old) => setMarkColor(old, parts, "background", color))}
+        onPick={(color) => commit((old) => setMarkColor(old, parts, "background", color))}
+        hover={(color) => hover((old) => setMarkColor(old, parts, "background", color))}
       />
       <div className="mark-panel-row" role="group" aria-label="Style">
         <span className="mark-panel-label">Style</span>
@@ -204,7 +266,8 @@ export function MarkPanel(props: {
             className={`mark-style mark-style-${style}`}
             aria-pressed={active.has(style)}
             title={shortcut ? `${label} (${shortcut})` : label}
-            onClick={() => onChange((old) => toggleMark(old, parts, style))}
+            {...hover((old) => toggleMark(old, parts, style))}
+            onClick={() => commit((old) => toggleMark(old, parts, style))}
           >
             {label}
           </button>
@@ -213,8 +276,9 @@ export function MarkPanel(props: {
           type="button"
           className="mark-style mark-clear"
           title="Clear styles and colors of the selection"
+          {...hover((old) => clearMarks(old, props.selection.start, props.selection.end))}
           onClick={() =>
-            onChange((old) => clearMarks(old, props.selection.start, props.selection.end))
+            commit((old) => clearMarks(old, props.selection.start, props.selection.end))
           }
         >
           Clear

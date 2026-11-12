@@ -14,6 +14,7 @@ import {
   resetPositions,
   selectionLines,
   selectionParts,
+  activeMarks,
   setHighlightColor,
   hasHighlightColor,
   removeHighlight,
@@ -1281,5 +1282,19 @@ describe("highlight colors", () => {
 
     // Assert
     expect(result.highlight).toEqual([{ lines: 3, color: "#f85149" }]);
+  });
+});
+
+describe("activeMarks", () => {
+  test("should report every mark style, also wavy", () => {
+    // Arrange
+    const part = { line: 1, match: "save", occurrence: 1 };
+    const pane = { code: "save(user);", marks: [{ ...part, style: "wavy" as const }] };
+
+    // Act
+    const styles = activeMarks(pane, [part]);
+
+    // Assert
+    expect([...styles]).toEqual(["wavy"]);
   });
 });
