@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/zirkelc/tin.so/compare/cli-v1.0.1...cli-v1.1.0) (2026-11-12)
+
+
+### Miscellaneous Chores
+
+* **cli:** Synchronize tin.so versions
+
 ## [1.0.1](https://github.com/zirkelc/tin.so/compare/cli-v1.0.0...cli-v1.0.1) (2026-11-10)
 
 
