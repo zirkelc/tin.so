@@ -25,10 +25,15 @@ export function ContextMenu(props: {
   y: number;
   items: Array<MenuItem>;
   onClose: () => void;
+  /**
+   * false keeps the focus where it is, so that a code field keeps its selection visible while the
+   * menu is open
+   */
+  focus?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ left: props.x, top: props.y });
-  const { onClose } = props;
+  const { onClose, focus = true } = props;
 
   // Keeps the menu in the window
   useLayoutEffect(() => {
@@ -41,7 +46,7 @@ export function ContextMenu(props: {
   }, [props.x, props.y]);
 
   useEffect(() => {
-    ref.current?.focus();
+    if (focus) ref.current?.focus();
     const outside = (event: Event) =>
       !(event.target instanceof Node && ref.current?.contains(event.target)) && onClose();
     const onKey = (event: KeyboardEvent) => event.key === "Escape" && onClose();
@@ -56,7 +61,7 @@ export function ContextMenu(props: {
       document.removeEventListener("keydown", onKey);
       window.removeEventListener("blur", onClose);
     };
-  }, [onClose]);
+  }, [onClose, focus]);
 
   return createPortal(
     <div
@@ -66,6 +71,7 @@ export function ContextMenu(props: {
       tabIndex={-1}
       style={position}
       onContextMenu={(event) => event.preventDefault()}
+      onMouseDown={(event) => !focus && event.preventDefault()}
     >
       <MenuItems items={props.items} onClose={onClose} />
     </div>,

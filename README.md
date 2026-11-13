@@ -55,7 +55,9 @@ An image can show more than one file. Split a window into panes, put several win
 - Change the order of overlapping windows as in Figma, with ⌘] and ⌘[.
 - Duplicate windows with ⌘D, and copy and paste them with ⌘C and ⌘V, also from one browser tab to another.
 - A toolbar above the selected windows and the right-click menus give the actions for each window.
-- Zoom in and out, or fit the image to the screen.
+- Zoom in and out, or fit the image to the screen. To move around a zoomed image, pick the hand tool at the bottom left (H) and drag. Space with a drag and a drag with the middle mouse button also move the image.
+- A pane is as wide as its code. A popover can lie over the next pane, and a wider window gives it more room.
+- The Fit button in the window toolbar gives the window and its panes the size of the code again.
 
 ### Popovers
 
@@ -66,6 +68,8 @@ An image can show more than one file. Split a window into panes, put several win
 A popover points to a word in the code and looks like the hover card of an editor. Use it to show a type, a signature or a value next to the code that uses it.
 
 - Select a word, right-click and choose "Add popover".
+- "Add popover" also underlines the word with a text style. Change it in the style panel like any other style, for example to a wavy line or to another color, or clear it.
+- Select code and right-click: the selection stays, so the menu acts on the selected text.
 - A popover has its own code and language.
 - Move and resize a popover. Double-click it to put it back below its word.
 
@@ -81,7 +85,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 - Give a highlight a color, such as blue for a note or red for an error, in the Highlight submenu of the code. Point to a color to see it on the lines. The lines get a tint of the color and a bar at the left edge.
 - Bold, italic, underline and strikethrough on any part of a line, also in popovers.
 - A wavy line below a part of a line, as an editor marks an error, in the red of the theme.
-- Text colors and fills from a palette of 16 colors, or any hex color in a spec. The fill is translucent, as a highlighter.
+- Text colors and fills from a palette of 16 colors, or any hex color in a spec. The fill is translucent, as a highlighter. A color from the spec that is not in the palette shows as one more swatch in the style panel.
 - Select code in the image to open a panel with the colors and the styles. Point to a color or a style to see it in the image, and click to keep it.
 - Highlights, styles and popovers stay on their lines when you edit the code.
 - Line numbers for all panes or for one pane.
@@ -168,6 +172,8 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 | ⌘C, ⌘V           | Copy and paste windows                                                                      |
 | ⌘], ⌘⇧], ⌘[, ⌘⇧[ | Bring the selected window forward or to front, or send it backward or to back (free layout) |
 | ⌫                | Remove the selected windows or popover                                                      |
+| V, H             | Select tool, hand tool                                                                      |
+| Space + drag     | Move around the image                                                                       |
 | ?                | Show all shortcuts                                                                          |
 
 ## CLI
@@ -268,6 +274,7 @@ A spec is JSON that describes the whole image: its windows, the panes of each wi
           "title": "route.ts",
           "code": "import { User } from \"./schema\";\n…",
           "highlight": [4],
+          "marks": [{ "line": 4, "match": "user", "style": "underline" }],
           "annotations": [{ "line": 4, "match": "user", "code": "const user: {\n  id: string;\n…" }]
         }
       ]

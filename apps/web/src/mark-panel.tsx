@@ -141,6 +141,12 @@ function ColorRow(props: {
   hover: (color: string | undefined) => Hover;
 }) {
   const suffix = props.kind === "background" ? FILL_ALPHA : "";
+  // A color from the spec that the palette does not have gets its own swatch, so the row shows it
+  const custom =
+    props.current !== undefined &&
+    !PALETTE.some(([, color]) => `${color}${suffix}` === props.current)
+      ? props.current
+      : undefined;
   return (
     <div className="mark-panel-row" role="group" aria-label={props.label}>
       <span className="mark-panel-label">{props.label}</span>
@@ -169,6 +175,18 @@ function ColorRow(props: {
           />
         );
       })}
+      {custom && (
+        <button
+          type="button"
+          className="swatch"
+          aria-label={`${props.label} ${custom}`}
+          aria-pressed="true"
+          title={custom}
+          style={{ "--swatch": custom } as CSSProperties}
+          {...props.hover(custom)}
+          onClick={() => props.onPick(custom)}
+        />
+      )}
     </div>
   );
 }

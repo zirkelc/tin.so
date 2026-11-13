@@ -25,6 +25,8 @@ export const SHORTCUTS: Array<{ action: string; keys: Array<string> }> = [
   { action: "Bring forward, send backward", keys: ["⌘", "]", "⌘", "["] },
   { action: "Bring to front, send to back", keys: ["⌘", "⇧", "]", "⌘", "⇧", "["] },
   { action: "Remove the selection", keys: ["⌫"] },
+  { action: "Select tool, hand tool", keys: ["V", "H"] },
+  { action: "Move around the image", keys: ["Space", "drag"] },
   { action: "Edit an exported image", keys: ["Drop the file"] },
   { action: "Open this dialog", keys: ["?"] },
 ];

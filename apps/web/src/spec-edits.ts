@@ -283,6 +283,34 @@ export function activeMarks(pane: Marked, parts: Array<LinePart>): Set<MarkStyle
 }
 
 /** The index of the annotation on the part, or -1 */
+/**
+ * Adds a popover on a part of a line. Its anchor gets an underline mark, so that the style panel
+ * can change the style and the color of the anchor. A line of a mark that is there already stays.
+ */
+export function addPopover(pane: PaneInput, part: LinePart): PaneInput {
+  const marks = pane.marks ?? [];
+  const lined = marks.some(
+    (mark) => (mark.style === "underline" || mark.style === "wavy") && samePart(part, mark),
+  );
+  return {
+    ...pane,
+    marks: lined ? marks : [...marks, { ...part, style: "underline" }],
+    annotations: [...(pane.annotations ?? []), { ...part, code: part.match }],
+  };
+}
+
+/** Removes a popover and the underline mark of its anchor */
+export function removePopover(pane: PaneInput, index: number): PaneInput {
+  const annotation = pane.annotations?.[index];
+  if (!annotation) return pane;
+  const part = { ...annotation, occurrence: annotation.occurrence ?? 1 };
+  return {
+    ...pane,
+    marks: (pane.marks ?? []).filter((mark) => mark.style !== "underline" || !samePart(part, mark)),
+    annotations: (pane.annotations ?? []).filter((_, i) => i !== index),
+  };
+}
+
 export function annotationAt(pane: PaneInput, part: LinePart): number {
   return (pane.annotations ?? []).findIndex((annotation) => samePart(part, annotation));
 }

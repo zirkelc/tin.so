@@ -80,7 +80,7 @@ export type TextMetrics = {
 };
 
 export type AnnotationBox = {
-  /** The text that the annotation points to, below which the underline goes */
+  /** The text that the annotation points to */
   anchor: { x: number; y: number; width: number };
   box: Rect;
   lines: Array<HighlightedLine>;
@@ -373,10 +373,12 @@ async function draftAnnotation(
     height: POPOVER.paddingY * 2 + popoverLines.length * POPOVER.lineHeight,
   };
 
+  const column = textCells(text.slice(0, index));
+  const cells = textCells(annotation.match);
   return {
     line: annotation.line,
-    column: textCells(text.slice(0, index)),
-    cells: textCells(annotation.match),
+    column,
+    cells,
     lines: popoverLines,
     natural,
     size: { width: annotation.width ?? natural.width, height: annotation.height ?? natural.height },
@@ -435,16 +437,8 @@ async function draftPane(
     TAB_HEADER.paddingX * 2 +
     (icon ? TAB_HEADER.icon + TAB_HEADER.iconGap : 0) +
     measureUiText(pane.title ?? "", TAB_HEADER.titleSize);
-  // A pane is wide enough for its popovers, so that they do not cover the next pane
-  const popoverWidth = Math.max(
-    0,
-    ...annotations.map(
-      (annotation) =>
-        gutter + annotation.column * scene.text.cellWidth + annotation.size.width + EDITOR_PADDING,
-    ),
-  );
   const natural = {
-    width: Math.max(codeSize.width, popoverWidth, tabbed ? tabWidth : 0),
+    width: Math.max(codeSize.width, tabbed ? tabWidth : 0),
     height: codeSize.height + (tabbed ? TAB_HEADER.height : 0),
   };
 

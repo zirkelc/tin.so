@@ -26,6 +26,8 @@ import {
   withCode,
   withLanguage,
   withPopoverCode,
+  addPopover,
+  removePopover,
   withFormattedCode,
   alignWindows,
   distributeWindows,
@@ -372,6 +374,61 @@ describe("withPopoverCode", () => {
 
     // Assert
     expect(result.marks).toEqual([{ line: 3, match: "B", style: "strong" }]);
+  });
+});
+
+describe("addPopover", () => {
+  test("should add the popover and underline its anchor with a mark", () => {
+    // Arrange
+    const pane: PaneInput = { code: "const plans = 1;" };
+    const part = { line: 1, match: "plans", occurrence: 1 };
+
+    // Act
+    const result = addPopover(pane, part);
+
+    // Assert
+    expect(result).toEqual({
+      code: "const plans = 1;",
+      marks: [{ ...part, style: "underline" }],
+      annotations: [{ ...part, code: "plans" }],
+    });
+  });
+
+  test("should keep a line that the anchor has already", () => {
+    // Arrange
+    const part = { line: 1, match: "plans", occurrence: 1 };
+    const pane: PaneInput = { code: "const plans = 1;", marks: [{ ...part, style: "wavy" }] };
+
+    // Act
+    const result = addPopover(pane, part);
+
+    // Assert
+    expect(result.marks).toEqual([{ ...part, style: "wavy" }]);
+  });
+});
+
+describe("removePopover", () => {
+  test("should remove the popover and the underline of its anchor", () => {
+    // Arrange
+    const part = { line: 1, match: "plans", occurrence: 1 };
+    const pane: PaneInput = {
+      code: "const plans = 1;",
+      marks: [
+        { ...part, style: "underline" },
+        { ...part, color: "#f43f5e" },
+      ],
+      annotations: [{ ...part, code: "plans" }],
+    };
+
+    // Act
+    const result = removePopover(pane, 0);
+
+    // Assert
+    expect(result).toEqual({
+      code: "const plans = 1;",
+      marks: [{ ...part, color: "#f43f5e" }],
+      annotations: [],
+    });
   });
 });
 

@@ -2424,6 +2424,7 @@ export async function handler(request: Request) {
   const user = await getUser(id!);
   return Response.json({ name: user.name });
 }`,
+              marks: [{ line: 5, match: "user", style: "underline" }],
               annotations: [
                 {
                   line: 5,
@@ -2573,6 +2574,7 @@ class Order:
 
 order = Order(id=1, items=["book"])`,
               highlight: [4],
+              marks: [{ line: 11, match: "Order", style: "underline" }],
               annotations: [
                 {
                   line: 11,
@@ -2610,6 +2612,7 @@ mod tests {
     }
 }`,
               highlight: ["11-13"],
+              marks: [{ line: 3, match: "count", style: "underline" }],
               annotations: [{ line: 3, match: "count", code: "pub fn count(self) -> usize" }],
             },
           ],
@@ -2643,6 +2646,7 @@ func main() {
     http.ListenAndServe(":8080", nil)
 }`,
               highlight: [14],
+              marks: [{ line: 15, match: "ListenAndServe", style: "underline" }],
               annotations: [
                 {
                   line: 15,
@@ -2745,6 +2749,7 @@ struct CounterView: View {
         .buttonStyle(.borderedProminent)
     }
 }`,
+              marks: [{ line: 4, match: "@State", style: "underline" }],
               annotations: [
                 {
                   line: 4,
@@ -2842,6 +2847,7 @@ app.MapGet("/todos/{id}", (int id, TodoDb db) =>
     db.Todos.Find(id) is Todo todo ? Results.Ok(todo) : Results.NotFound());
 
 app.Run();`,
+              marks: [{ line: 4, match: "TodoDb", style: "underline" }],
               annotations: [
                 {
                   line: 4,
@@ -3100,7 +3106,10 @@ npm publish --access public`,
   }
 }`,
               highlight: [4],
-              marks: [{ line: 3, match: "1.2.0", style: "strong", color: "#fcd34d" }],
+              marks: [
+                { line: 3, match: "1.2.0", style: "strong", color: "#fcd34d" },
+                { line: 4, match: "module", style: "underline" },
+              ],
               annotations: [
                 {
                   line: 4,

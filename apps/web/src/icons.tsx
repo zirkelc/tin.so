@@ -69,6 +69,26 @@ export const FormatIcon = () => (
   </Glyph>
 );
 
+// Four corners that point inward, as in "shrink to fit"
+export const FitIcon = () => (
+  <Glyph>
+    <path d="M2.5 6V3.5a1 1 0 0 1 1-1H6M10 2.5h2.5a1 1 0 0 1 1 1V6M13.5 10v2.5a1 1 0 0 1-1 1H10M6 13.5H3.5a1 1 0 0 1-1-1V10" />
+    <path d="M5.5 8h5" />
+  </Glyph>
+);
+
+export const PointerIcon = () => (
+  <Glyph>
+    <path d="M3.5 2.5l9 4-3.8 1.5L7 12z" />
+  </Glyph>
+);
+
+export const HandIcon = () => (
+  <Glyph>
+    <path d="M5 8.5V4a1 1 0 0 1 2 0v3.5M7 7V3a1 1 0 0 1 2 0v4M9 7V3.8a1 1 0 0 1 2 0V8M11 7.5a1 1 0 0 1 2 0v2a4.5 4.5 0 0 1-4.5 4.5h-.6a4 4 0 0 1-3.2-1.6L2.8 9.8a1 1 0 0 1 1.5-1.3L5 9.3" />
+  </Glyph>
+);
+
 export const CenterHorizontalIcon = () => (
   <Glyph>
     <path d="M8 1.5v13" />

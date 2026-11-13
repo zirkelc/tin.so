@@ -84,7 +84,7 @@ Only `windows`, `panes` and `code` are required, but always add `"$schema"`. Lea
 
 Use several marks on the same text to combine them, for example one with `"style": "strong"` and one with `"color"`.
 
-**Popover** (each item of `annotations`): it points to the text `match` in line `line`, like the hover card of an editor.
+**Popover** (each item of `annotations`): it points to the text `match` in line `line`, like the hover card of an editor. The popover draws no line below the word. To mark the word, add a mark on it, for example `{ "line": 2, "match": "user", "style": "underline" }`.
 
 | Field                         | Default               | What it does                                                                                                                   |
 | ----------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -109,6 +109,7 @@ Use several marks on the same text to combine them, for example one with `"style
         {
           "title": "user.ts",
           "code": "const user = await getUser(id);\nuser.email;",
+          "marks": [{ "line": 1, "match": "user", "style": "underline" }],
           "annotations": [
             {
               "line": 1,

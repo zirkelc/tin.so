@@ -317,52 +317,54 @@ export function App() {
             </button>
           )}
         </header>
-        {json ? (
-          <JsonEditor spec={spec} onChange={update} />
-        ) : (
-          <>
-            <Settings spec={spec} scene={rendered?.scene} onChange={update} />
-            <WindowList
-              windows={spec.windows}
-              // A selected popover keeps its window open, but the list shows only windows as selected
-              selected={selection?.popover ? [] : (selection?.windows ?? [])}
-              open={selection?.added ? undefined : selectedIndex}
-              onSelect={(windows, added) =>
-                setSelected(windows.length > 0 ? { windows, ...(added && { added }) } : undefined)
-              }
-              onHover={setHovered}
-              onAdd={() => {
-                update((current) => ({
-                  ...current,
-                  windows: [...current.windows, { panes: [{ title: "untitled.ts", code: "" }] }],
-                }));
-                setSelected({ windows: [spec.windows.length] });
-              }}
-            >
-              {selectedIndex !== undefined && !selection?.added && selectedWindow && (
-                <WindowEditor
-                  key={selectedIndex}
-                  window={selectedWindow}
-                  lineNumbers={spec.lineNumbers ?? false}
-                  onChange={(window) =>
-                    update((current) => updateWindow(current, selectedIndex, () => window))
-                  }
-                  selectedPopover={selection?.popover}
-                  onSelectPopover={(popover) =>
-                    setSelected({ windows: [selectedIndex], ...(popover && { popover }) })
-                  }
-                  onHoverPopover={(popover) =>
-                    setHoveredPopover(popover && { window: selectedIndex, ...popover })
-                  }
-                />
-              )}
-            </WindowList>
-            <p className="sidebar-hint">
-              Type in the image. Select code for colors and styles. Right-click code for highlights
-              and popovers.
-            </p>
-          </>
-        )}
+        <div className="sidebar-body">
+          {json ? (
+            <JsonEditor spec={spec} onChange={update} />
+          ) : (
+            <>
+              <Settings spec={spec} scene={rendered?.scene} onChange={update} />
+              <WindowList
+                windows={spec.windows}
+                // A selected popover keeps its window open, but the list shows only windows as selected
+                selected={selection?.popover ? [] : (selection?.windows ?? [])}
+                open={selection?.added ? undefined : selectedIndex}
+                onSelect={(windows, added) =>
+                  setSelected(windows.length > 0 ? { windows, ...(added && { added }) } : undefined)
+                }
+                onHover={setHovered}
+                onAdd={() => {
+                  update((current) => ({
+                    ...current,
+                    windows: [...current.windows, { panes: [{ title: "untitled.ts", code: "" }] }],
+                  }));
+                  setSelected({ windows: [spec.windows.length] });
+                }}
+              >
+                {selectedIndex !== undefined && !selection?.added && selectedWindow && (
+                  <WindowEditor
+                    key={selectedIndex}
+                    window={selectedWindow}
+                    lineNumbers={spec.lineNumbers ?? false}
+                    onChange={(window) =>
+                      update((current) => updateWindow(current, selectedIndex, () => window))
+                    }
+                    selectedPopover={selection?.popover}
+                    onSelectPopover={(popover) =>
+                      setSelected({ windows: [selectedIndex], ...(popover && { popover }) })
+                    }
+                    onHoverPopover={(popover) =>
+                      setHoveredPopover(popover && { window: selectedIndex, ...popover })
+                    }
+                  />
+                )}
+              </WindowList>
+              <p className="sidebar-hint">
+                Type in the image. Select code for colors and styles. Right-click code for
+                highlights and popovers.
+              </p>
+            </>
+          )}
+        </div>
       </aside>
       <main className="stage">
         <ToastMessage toast={toast} />

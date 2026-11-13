@@ -1140,6 +1140,118 @@ describe("examples", () => {
   });
 });
 
+describe("window toolbar", () => {
+  test("should fit the window and its panes to the code", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({
+      windows: [
+        {
+          width: 900,
+          height: 500,
+          panes: [
+            { title: "a.ts", code: "const a = 1;", size: 400 },
+            { title: "b.ts", code: "const b = 2;", size: 200 },
+          ],
+        },
+      ],
+    });
+
+    // Act
+    await page.getByRole("button", { name: "Fit the window to the code" }).click();
+
+    // Assert
+    await expect
+      .poll(() => window.tin.getSpec().windows[0])
+      .toEqual({
+        panes: [
+          { title: "a.ts", code: "const a = 1;" },
+          { title: "b.ts", code: "const b = 2;" },
+        ],
+      });
+  });
+});
+
+describe("canvas pan", () => {
+  const zoomIn = async () => {
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "const a = 1;" }] }] });
+    for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "Zoom in" }).click();
+    const stage = document.querySelector<HTMLElement>(".preview")!;
+    await expect.poll(() => stage.scrollWidth > stage.clientWidth + 200).toBe(true);
+    stage.scrollLeft = 0;
+    stage.scrollTop = 0;
+    return stage;
+  };
+  const dragOn = (stage: HTMLElement, button: number) => {
+    const at = { clientX: 600, clientY: 400, button, pointerId: 1, bubbles: true };
+    stage.dispatchEvent(new PointerEvent("pointerdown", at));
+    window.dispatchEvent(new PointerEvent("pointermove", { ...at, clientX: 400, clientY: 300 }));
+    window.dispatchEvent(new PointerEvent("pointerup", { ...at, clientX: 400, clientY: 300 }));
+  };
+
+  test("should scroll the zoomed canvas with a drag while Space is held", async () => {
+    // Arrange
+    const stage = await zoomIn();
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", { code: "Space", key: " ", bubbles: true }),
+    );
+
+    // Act
+    dragOn(stage, 0);
+    document.body.dispatchEvent(
+      new KeyboardEvent("keyup", { code: "Space", key: " ", bubbles: true }),
+    );
+
+    // Assert
+    expect([stage.scrollLeft, stage.scrollTop]).toEqual([200, 100]);
+  });
+
+  test("should scroll the zoomed canvas with a drag in the hand tool", async () => {
+    // Arrange
+    const stage = await zoomIn();
+    await page.getByRole("button", { name: "Hand (H)" }).click();
+
+    // Act
+    dragOn(stage, 0);
+
+    // Assert
+    expect([stage.scrollLeft, stage.scrollTop]).toEqual([200, 100]);
+    await expect
+      .element(page.getByRole("button", { name: "Hand (H)" }))
+      .toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("should switch between the select and the hand tool with V and H", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "const a = 1;" }] }] });
+
+    // Act
+    document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "h", bubbles: true }));
+    await expect
+      .element(page.getByRole("button", { name: "Hand (H)" }))
+      .toHaveAttribute("aria-pressed", "true");
+    document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "v", bubbles: true }));
+
+    // Assert
+    await expect
+      .element(page.getByRole("button", { name: "Select (V)" }))
+      .toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("should scroll the zoomed canvas with a drag of the middle button", async () => {
+    // Arrange
+    const stage = await zoomIn();
+
+    // Act
+    dragOn(stage, 1);
+
+    // Assert
+    expect([stage.scrollLeft, stage.scrollTop]).toEqual([200, 100]);
+  });
+});
+
 describe("style panel", () => {
   test("should color and style the selected text", async () => {
     // Arrange
@@ -1168,6 +1280,41 @@ describe("style panel", () => {
     await expect
       .element(panel.getByRole("button", { name: "Bold" }))
       .toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("should show a fill color that is not in the palette as a pressed swatch", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({
+      windows: [
+        {
+          panes: [
+            {
+              title: "a.ts",
+              code: "const a = 1;",
+              marks: [{ line: 1, match: "const", background: "#f8514940" }],
+            },
+          ],
+        },
+      ],
+    });
+    await codeField(1).click();
+
+    // Act
+    await userEvent.keyboard(
+      "{Home}{Shift>}{ArrowRight}{ArrowRight}{ArrowRight}{ArrowRight}{ArrowRight}{/Shift}",
+    );
+
+    // Assert
+    const fill = page
+      .getByRole("toolbar", { name: "Text style" })
+      .getByRole("group", { name: "Fill" });
+    await expect
+      .element(fill.getByRole("button", { name: "Fill #f8514940" }))
+      .toHaveAttribute("aria-pressed", "true");
+    await expect
+      .element(fill.getByRole("button", { name: "No fill color" }))
+      .toHaveAttribute("aria-pressed", "false");
   });
 
   test("should clear the styles and colors of the selected text", async () => {
@@ -1351,6 +1498,29 @@ describe("title bar group", () => {
   });
 });
 
+describe("code context menu", () => {
+  test("should keep the selected text when the menu opens and closes", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "const a = 1;" }] }] });
+    const field = codeField(1);
+    await field.click();
+    await userEvent.keyboard("{Home}{Shift>}{End}{/Shift}");
+    const element = field.element() as HTMLTextAreaElement;
+
+    // Act
+    await field.click({ button: "right", position: { x: 30, y: 10 } });
+    const open = [element.selectionStart, element.selectionEnd, document.activeElement === element];
+    await expect.element(page.getByRole("menuitem", { name: "Add popover" })).toBeVisible();
+    await userEvent.keyboard("{Escape}");
+
+    // Assert
+    expect(open).toEqual([0, 12, true]);
+    expect([element.selectionStart, element.selectionEnd]).toEqual([0, 12]);
+    await expect.poll(() => document.activeElement).toBe(element);
+  });
+});
+
 describe("highlight submenu", () => {
   const openSubmenu = async () => {
     await codeField(1).click({ button: "right" });
@@ -1459,6 +1629,33 @@ describe("style panel preview", () => {
     await expect
       .element(panel.getByRole("button", { name: "Wavy" }))
       .toHaveAttribute("aria-pressed", "true");
+  });
+});
+
+describe("highlight submenu twice", () => {
+  test("should keep the color of the first line when a second line gets another color", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "a\nb" }] }] });
+    const field = codeField(1);
+    const box = field.element().getBoundingClientRect();
+    const pick = async (y: number, color: RegExp) => {
+      await field.click({ button: "right", position: { x: 20, y } });
+      await page.getByRole("menuitem", { name: /^Highlight line/ }).click();
+      await page.getByRole("menuitemcheckbox", { name: color }).click();
+    };
+
+    // Act
+    await pick(box.height * 0.25, /Blue$/);
+    await pick(box.height * 0.75, /Red$/);
+
+    // Assert
+    await expect
+      .poll(() => window.tin.getSpec().windows[0]?.panes[0]?.highlight)
+      .toEqual([
+        { lines: 1, color: "#388bfd" },
+        { lines: 2, color: "#f85149" },
+      ]);
   });
 });
 

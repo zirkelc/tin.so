@@ -74,6 +74,7 @@ tin -o plans.png <<'EOF'
           "title": "main.ts",
           "code": "import plans from \"./plans.toml\";\n\nplans.free.price;",
           "highlight": [3],
+          "marks": [{ "line": 1, "match": "plans", "style": "underline" }],
           "annotations": [
             { "line": 1, "match": "plans", "code": "const plans: {\n  free: { price: 0 };\n}" }
           ]

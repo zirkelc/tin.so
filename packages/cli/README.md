@@ -104,6 +104,7 @@ tin -o hover.png <<'EOF'
         {
           "title": "user.ts",
           "code": "const user = await getUser(id);",
+          "marks": [{ "line": 1, "match": "user", "style": "underline" }],
           "annotations": [{ "line": 1, "match": "user", "code": "const user: { id: string }" }]
         }
       ]

@@ -189,14 +189,6 @@ function renderPane(scene: Scene, pane: PaneBox, id: string, out: Array<string>)
     renderLine(scene, line, origin, scene.text, out);
   });
 
-  // The underline of an annotation anchor, at the bottom of its line
-  for (const { anchor } of pane.annotations) {
-    out.push(
-      roundedRect({ x: anchor.x, y: anchor.y - 2, width: anchor.width, height: 2 }, 1, {
-        fill: scene.syntax.keyword ?? scene.syntax.foreground,
-      }),
-    );
-  }
   if (pane.clipped) out.push("</g>");
 
   if (pane.tab) {

@@ -68,6 +68,7 @@ const SPECS: Record<string, object> = {
             title: "route.ts",
             code: route,
             highlight: [4],
+            marks: [{ line: 4, match: "user", style: "underline" }],
             annotations: [
               {
                 line: 4,
@@ -150,6 +151,7 @@ const SPECS: Record<string, object> = {
           {
             title: "fetch.ts",
             code: `const response = await fetch("https://api.github.com/repos/zirkelc/tin.so");\nconst repo = await response.json();\nconsole.log(repo.stargazers_count);`,
+            marks: [{ line: 1, match: "fetch", style: "underline" }],
             annotations: [
               {
                 line: 1,

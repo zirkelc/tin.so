@@ -95,9 +95,20 @@ textarea {
   flex-direction: column;
   border-right: 1px solid var(--border);
   background: var(--panel);
+  overflow: hidden;
+}
+
+/*
+ * Only the part below the header scrolls, so that the line of the header goes to the edge. The
+ * scrollbar takes its space only when the content scrolls, because the lines of the sections stop
+ * at that space.
+ */
+.sidebar-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
   overflow-y: auto;
-  /* The space of the scrollbar stays, so that the content does not move when it shows */
-  scrollbar-gutter: stable;
 }
 
 /* Thin scrollbars that show only the thumb */
@@ -1016,6 +1027,12 @@ button.icon {
   background: var(--panel-raised);
 }
 
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .tool.zoom-value {
   width: auto;
   min-width: 44px;
@@ -1030,6 +1047,18 @@ button.icon {
   height: 18px;
   margin: 0 4px;
   background: var(--border);
+}
+
+/* The hand tool or Space held over the stage: a drag scrolls it */
+.preview.pan-ready,
+.preview.pan-ready * {
+  cursor: grab !important;
+}
+
+.preview.pan-dragging,
+.preview.pan-dragging * {
+  cursor: grabbing !important;
+  user-select: none;
 }
 
 .preview.stale .canvas-image {

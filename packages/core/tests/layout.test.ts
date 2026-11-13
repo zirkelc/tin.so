@@ -262,27 +262,21 @@ describe("annotations", () => {
 });
 
 describe("annotations in split panes", () => {
-  test("should make the pane wide enough for its popover", async () => {
+  test("should not make the pane wider for its popover", async () => {
     // Arrange
     const popover = "x".repeat(60);
-    const spec = {
-      windows: [
-        {
-          panes: [
-            { code: "a b", annotations: [{ line: 1, match: "b", code: popover }] },
-            { code: "next" },
-          ],
-        },
-      ],
-    };
+    const at = (annotations: Array<{ line: number; match: string; code: string }>) => ({
+      windows: [{ panes: [{ code: "a b", annotations }, { code: "next" }] }],
+    });
 
     // Act
-    const scene = await layout(spec);
+    const [plain, annotated] = await Promise.all([
+      layout(at([])),
+      layout(at([{ line: 1, match: "b", code: popover }])),
+    ]);
 
     // Assert
-    const [first, second] = scene.windows[0]!.panes;
-    const { box } = first!.annotations[0]!;
-    expect(second!.x).toBeGreaterThan(box.x + box.width);
+    expect(annotated.windows[0]!.panes[0]!.width).toBe(plain.windows[0]!.panes[0]!.width);
   });
 });
 

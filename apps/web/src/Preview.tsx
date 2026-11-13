@@ -39,9 +39,12 @@ import {
   CopyIcon,
   DistributeHorizontalIcon,
   DistributeVerticalIcon,
+  FitIcon,
   FormatIcon,
+  HandIcon,
   MinusIcon,
   PlusIcon,
+  PointerIcon,
   SendToBackIcon,
   SplitColumnIcon,
   SplitRowIcon,
@@ -55,6 +58,7 @@ import { Select } from "./select.tsx";
 import {
   type Alignment,
   alignWindows,
+  addPopover,
   annotationAt,
   type Axis,
   boundsOf,
@@ -73,6 +77,7 @@ import {
   copyWindows,
   pasteWindows,
   readCopiedWindows,
+  removePopover,
   removeWindows,
   resetPositions,
   resizeImage,
@@ -207,14 +212,17 @@ function changeAnnotation(
   index: number,
   change: (annotation: Annotation) => Annotation | undefined,
 ): SpecInput {
-  return updatePane(spec, windowIndex, paneIndex, (pane) => ({
-    ...pane,
-    annotations: (pane.annotations ?? []).flatMap((old, i) => {
-      if (i !== index) return [old];
-      const next = change(old);
-      return next ? [next] : [];
-    }),
-  }));
+  return updatePane(spec, windowIndex, paneIndex, (pane) => {
+    const old = pane.annotations?.[index];
+    if (!old) return pane;
+    const next = change(old);
+    // A removed popover takes the underline of its anchor with it
+    if (!next) return removePopover(pane, index);
+    return {
+      ...pane,
+      annotations: pane.annotations!.map((item, i) => (i === index ? next : item)),
+    };
+  });
 }
 
 /** Moves a window to another layer, and keeps the window selected at its new index */
@@ -793,6 +801,11 @@ function WindowEditors(
   const center = (axis: Axis) =>
     onChange((current) => centerWindow(current, rendered.scene, windowIndex, axis));
   const formattable = windowSpec.panes.some((pane) => canFormat(paneLanguage(pane)));
+  // The window or one of its panes has a size that the user set
+  const fitted =
+    windowSpec.width !== undefined ||
+    windowSpec.height !== undefined ||
+    windowSpec.panes.some((pane) => pane.size !== undefined);
 
   // A resize at the left or the top moves the window too, so the window gets its place in the image
   const resizeWindow = (event: PointerEvent<HTMLElement>, edges: Edges) => {
@@ -1111,6 +1124,13 @@ function WindowEditors(
             )}
             <span className="tool-separator" />
             <Tool
+              label="Fit the window to the code"
+              disabled={!fitted}
+              onClick={() => change(fitWindow)}
+            >
+              <FitIcon />
+            </Tool>
+            <Tool
               label="Format the code (⇧⌥F)"
               disabled={!formattable}
               onClick={() => formatPanes(spec, [windowIndex], onChange)}
@@ -1149,6 +1169,11 @@ function outsideOf(window: Box, popovers: Array<Box>): string | undefined {
     (box) => `M${box.x - window.x},${box.y - window.y}h${box.width}v${box.height}h${-box.width}Z`,
   );
   return `path(evenodd, "${outer}${holes.join("")}")`;
+}
+
+/** The window and its panes without a set size, so that they fit the code */
+function fitWindow({ width: _width, height: _height, ...window }: WindowInput): WindowInput {
+  return { ...window, panes: window.panes.map(({ size: _size, ...pane }) => pane) };
 }
 
 /** Formats the code of the panes that have a formatter. Code that does not parse stays as it is. */
@@ -1202,11 +1227,11 @@ function windowItems(actions: Actions, windowIndex: number): Array<MenuItem> {
     },
     {
       label: "Fit window to code",
-      disabled: window?.width === undefined && window?.height === undefined,
-      onSelect: () =>
-        onChange((current) =>
-          updateWindow(current, windowIndex, ({ width: _w, height: _h, ...old }) => old),
-        ),
+      disabled:
+        window?.width === undefined &&
+        window?.height === undefined &&
+        !window?.panes.some((pane) => pane.size !== undefined),
+      onSelect: () => onChange((current) => updateWindow(current, windowIndex, fitWindow)),
     },
     {
       label: "Reset position",
@@ -1426,19 +1451,11 @@ function codeItems(
       ? {
           label: "Add popover",
           disabled: !part,
-          onSelect: () =>
-            update((pane) => ({
-              ...pane,
-              annotations: [...(pane.annotations ?? []), { ...part!, code: part!.match }],
-            })),
+          onSelect: () => update((pane) => addPopover(pane, part!)),
         }
       : {
           label: "Remove popover",
-          onSelect: () =>
-            update((pane) => ({
-              ...pane,
-              annotations: (pane.annotations ?? []).filter((_, i) => i !== annotation),
-            })),
+          onSelect: () => update((pane) => removePopover(pane, annotation)),
         },
     "separator",
     {
@@ -1569,6 +1586,85 @@ export function Preview(props: {
   const [marquee, setMarquee] = useState<Box>();
   // A number is a zoom that the user set, and undefined fits the image into the stage
   const [userZoom, setUserZoom] = useState<number>();
+  // The hand tool makes a drag scroll the stage instead of selecting, as in design tools
+  const [tool, setTool] = useState<"select" | "hand">("select");
+  // Space held down gives the hand tool for a moment: "ready" until the drag starts
+  const [pan, setPan] = useState<"ready" | "dragging">();
+  const spaceDown = useRef(false);
+  useEffect(() => {
+    // A key types into a text field and Space presses a focused button, so the keys act only outside them
+    const onCanvas = (event: globalThis.KeyboardEvent) =>
+      event.target instanceof Element &&
+      (event.target === document.body || !!stageRef.current?.contains(event.target)) &&
+      !event.target.matches("input, textarea, select, button, [contenteditable]");
+    const down = (event: globalThis.KeyboardEvent) => {
+      if (!onCanvas(event)) return;
+      if (event.code === "Space") {
+        event.preventDefault();
+        spaceDown.current = true;
+        setPan((current) => current ?? "ready");
+        return;
+      }
+      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+      const key = event.key.toLowerCase();
+      if (key === "h") setTool("hand");
+      if (key === "v") setTool("select");
+    };
+    const up = (event: globalThis.KeyboardEvent) => {
+      if (event.code !== "Space") return;
+      spaceDown.current = false;
+      setPan((current) => (current === "ready" ? undefined : current));
+    };
+    const reset = () => {
+      spaceDown.current = false;
+      setPan(undefined);
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    window.addEventListener("blur", reset);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", reset);
+    };
+  }, [stageRef]);
+  /**
+   * A drag in the hand tool, with Space held or with the middle button scrolls the stage, before the
+   * windows below see it. The toolbars in the image stay usable in the hand tool.
+   */
+  const panStart = (event: PointerEvent<HTMLDivElement>) => {
+    const stageElement = stageRef.current;
+    const hand =
+      (spaceDown.current ||
+        (tool === "hand" &&
+          !(event.target instanceof Element && event.target.closest("[role=toolbar]")))) &&
+      event.button === 0;
+    if (!stageElement || !(hand || event.button === 1)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const { clientX, clientY } = event;
+    const { scrollLeft, scrollTop } = stageElement;
+    setPan("dragging");
+    const move = (moved: globalThis.PointerEvent) => {
+      stageElement.scrollLeft = scrollLeft - (moved.clientX - clientX);
+      stageElement.scrollTop = scrollTop - (moved.clientY - clientY);
+    };
+    const end = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+      setPan(spaceDown.current ? "ready" : undefined);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+  };
+  const panClass =
+    pan === "dragging"
+      ? "pan-dragging"
+      : pan === "ready" || tool === "hand"
+        ? "pan-ready"
+        : undefined;
   const { rendered, spec, onChange, onSelect, onCopyImage } = props;
   const width = rendered?.scene.width ?? 0;
   const height = rendered?.scene.height ?? 0;
@@ -1853,7 +1949,8 @@ export function Preview(props: {
     <div className="preview-frame">
       <div
         ref={stageRef}
-        className={props.stale ? "preview stale" : "preview"}
+        className={["preview", props.stale && "stale", panClass].filter(Boolean).join(" ")}
+        onPointerDownCapture={panStart}
         onPointerDown={onBackgroundDown}
         onContextMenu={(event) => {
           const target = event.target as Element;
@@ -1970,46 +2067,63 @@ export function Preview(props: {
           </div>
         )}
       </div>
-      <div className="zoom-controls" role="group" aria-label="Zoom">
-        <button
-          type="button"
-          className="tool"
-          aria-label="Zoom out"
-          title="Zoom out"
-          onClick={() => setUserZoom(zoomStep(zoom, -1))}
-        >
-          <MinusIcon />
-        </button>
-        <button
-          type="button"
-          className="tool zoom-value"
-          title="Show the image at 100%"
-          onClick={() => setUserZoom(1)}
-        >
-          {Math.round(zoom * 100)}%
-        </button>
-        <button
-          type="button"
-          className="tool"
-          aria-label="Zoom in"
-          title="Zoom in"
-          onClick={() => setUserZoom(zoomStep(zoom, 1))}
-        >
-          <PlusIcon />
-        </button>
+      <div className="zoom-controls">
+        <div className="control-group" role="group" aria-label="Tool">
+          <Tool label="Select (V)" pressed={tool === "select"} onClick={() => setTool("select")}>
+            <PointerIcon />
+          </Tool>
+          <Tool label="Hand (H)" pressed={tool === "hand"} onClick={() => setTool("hand")}>
+            <HandIcon />
+          </Tool>
+        </div>
         <span className="tool-separator" />
-        <button
-          type="button"
-          className="tool zoom-value"
-          aria-pressed={userZoom === undefined}
-          title="Fit the image into the window"
-          onClick={() => setUserZoom(undefined)}
-        >
-          Fit
-        </button>
+        <div className="control-group" role="group" aria-label="Zoom">
+          <button
+            type="button"
+            className="tool"
+            aria-label="Zoom out"
+            title="Zoom out"
+            onClick={() => setUserZoom(zoomStep(zoom, -1))}
+          >
+            <MinusIcon />
+          </button>
+          <button
+            type="button"
+            className="tool zoom-value"
+            title="Show the image at 100%"
+            onClick={() => setUserZoom(1)}
+          >
+            {Math.round(zoom * 100)}%
+          </button>
+          <button
+            type="button"
+            className="tool"
+            aria-label="Zoom in"
+            title="Zoom in"
+            onClick={() => setUserZoom(zoomStep(zoom, 1))}
+          >
+            <PlusIcon />
+          </button>
+          <span className="tool-separator" />
+          <button
+            type="button"
+            className="tool zoom-value"
+            aria-pressed={userZoom === undefined}
+            title="Fit the image into the window"
+            onClick={() => setUserZoom(undefined)}
+          >
+            Fit
+          </button>
+        </div>
       </div>
       {menu && actions && (
-        <ContextMenu x={menu.x} y={menu.y} items={menuItems(actions, menu)} onClose={closeMenu} />
+        <ContextMenu
+          x={menu.x}
+          y={menu.y}
+          items={menuItems(actions, menu)}
+          onClose={closeMenu}
+          focus={!menu.code}
+        />
       )}
     </div>
   );
