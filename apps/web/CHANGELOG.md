@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/zirkelc/tin.so/compare/web-v1.1.0...web-v1.2.0) (2026-11-13)
+
+
+### Features
+
+* hand tool, fit button and popover underline as a text style ([42dcf74](https://github.com/zirkelc/tin.so/commit/42dcf746b050c38a8263366c3f702de0c802b1fa))
+
 ## [1.1.0](https://github.com/zirkelc/tin.so/compare/web-v1.0.0...web-v1.1.0) (2026-11-12)
 
 
