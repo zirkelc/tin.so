@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/zirkelc/tin.so/compare/core-v1.2.0...core-v1.3.0) (2026-11-16)
+
+
+### Features
+
+* **core:** Copilot background for GitHub dark and a Canvas preset ([37cc252](https://github.com/zirkelc/tin.so/commit/37cc25293ecc19e7030e7f4854ba7b78ba21c8ba))
+
 ## [1.2.0](https://github.com/zirkelc/tin.so/compare/core-v1.1.0...core-v1.2.0) (2026-11-13)
 
 
