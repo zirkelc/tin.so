@@ -154,6 +154,12 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     css: "linear-gradient(135deg, #22d3ee 0%, #a5f3fc 55%, #ecfeff 100%)",
   },
   {
+    id: "canvas",
+    name: "Canvas",
+    kind: "mesh",
+    css: "radial-gradient(at 50% 0%, #1f6feb 0px, transparent 60%), #0d1117",
+  },
+  {
     id: "primer",
     name: "Primer",
     kind: "gradient",
@@ -218,6 +224,12 @@ export const BACKGROUNDS: Array<BackgroundPreset> = [
     css: "linear-gradient(to right top, #ffd8b5, #ffd8eb, #e9d8fd)",
   },
   {
+    id: "copilot",
+    name: "Copilot",
+    kind: "gradient",
+    css: "linear-gradient(135deg, #0d1117 0%, #2b1764 55%, #8957e5 100%)",
+  },
+  {
     id: "plum",
     name: "Plum",
     kind: "gradient",
@@ -273,7 +285,7 @@ const THEME_BACKGROUNDS: Record<string, Partial<Record<Mode, string>>> = {
   ayu: { dark: "ember", light: "honey" },
   catppuccin: { dark: "twilight", light: "lavender" },
   dracula: { dark: "mesh-orchid", light: "rose" },
-  github: { dark: "dusk", light: "sunrise" },
+  github: { dark: "copilot", light: "sunrise" },
   material: { dark: "slate", light: "ice" },
   "night-owl": { dark: "deep-sea", light: "ice" },
   nord: { dark: "nordic" },

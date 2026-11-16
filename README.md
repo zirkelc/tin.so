@@ -103,10 +103,10 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 ### Backgrounds
 
 <p align="center">
-  <img alt="The 55 background presets: colors, gradients and meshes" src="docs/images/backgrounds.png" width="860">
+  <img alt="The 57 background presets: colors, gradients and meshes" src="docs/images/backgrounds.png" width="860">
 </p>
 
-- 55 presets of colors, gradients and meshes, a color picker, and your own CSS linear or radial gradients.
+- 57 presets of colors, gradients and meshes, a color picker, and your own CSS linear or radial gradients.
 - An opacity slider, down to a transparent image.
 - Padding around the windows.
 

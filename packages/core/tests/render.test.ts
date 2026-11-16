@@ -4,7 +4,7 @@ import { layout } from "../src/layout.ts";
 import { readImageSpec } from "../src/metadata.ts";
 import { render, renderScene } from "../src/node.ts";
 import { toSvg } from "../src/svg.ts";
-import { themeBackground } from "../src/backgrounds.ts";
+import { BACKGROUNDS, themeBackground } from "../src/backgrounds.ts";
 import { resolveMode, THEMES } from "../src/themes/index.ts";
 
 const FIXTURES = new URL("./fixtures/", import.meta.url);
@@ -592,6 +592,26 @@ describe("image background", () => {
       expect(svg).toContain(`stop-color="${glow}"`);
     },
   );
+
+  test("should draw the Copilot background for the GitHub theme in the dark mode by default", async () => {
+    // Arrange
+    const scene = await layout({ theme: "github", mode: "dark", windows });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg).toContain('stop-color="#2b1764"');
+    expect(svg).toContain('stop-color="#8957e5"');
+  });
+
+  test("should have the Canvas background preset", () => {
+    // Act
+    const preset = BACKGROUNDS.find((preset) => preset.id === "canvas");
+
+    // Assert
+    expect(preset?.css).toBe("radial-gradient(at 50% 0%, #1f6feb 0px, transparent 60%), #0d1117");
+  });
 
   test("should draw the background preset of the only mode of a theme", async () => {
     // Arrange
