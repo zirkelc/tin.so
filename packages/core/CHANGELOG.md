@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/zirkelc/tin.so/compare/core-v1.3.0...core-v1.3.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* **core:** keep a window in place when its popover moves ([724bd2b](https://github.com/zirkelc/tin.so/commit/724bd2b228049675d86c038e1b579784d99d006b))
+
 ## [1.3.0](https://github.com/zirkelc/tin.so/compare/core-v1.2.0...core-v1.3.0) (2026-11-16)
 
 

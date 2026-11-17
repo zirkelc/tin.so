@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/zirkelc/tin.so/compare/web-v1.3.0...web-v1.4.0) (2026-11-17)
+
+
+### Features
+
+* **web:** keep the zoom when an edit changes the size of the image ([7376f8a](https://github.com/zirkelc/tin.so/commit/7376f8a2e22c7ebd407840b2f9a6f6077bda2c7a))
+
 ## [1.3.0](https://github.com/zirkelc/tin.so/compare/web-v1.2.0...web-v1.3.0) (2026-11-17)
 
 
