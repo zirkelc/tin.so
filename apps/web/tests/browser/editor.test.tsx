@@ -1236,6 +1236,12 @@ describe("pane sizes", () => {
   };
   const divider = () =>
     page.getByTitle("Drag to resize the panes. Double-click to fit them to the code.").first();
+  // The pointer can still be at the place of the divider from the test before, and a hover there
+  // does not move it, so no pointer event fires. It first goes to another control.
+  const hoverDivider = async () => {
+    await page.getByRole("button", { name: "Fit the window to the code" }).hover();
+    await divider().hover();
+  };
 
   test("should make the panes the same size with the toolbar button", async () => {
     // Arrange
@@ -1257,7 +1263,7 @@ describe("pane sizes", () => {
     await window.tin.setSpec(THREE_PANES);
 
     // Act
-    await divider().hover();
+    await hoverDivider();
 
     // Assert
     await expect.element(page.getByText("300 px · 27%")).toBeVisible();
@@ -1269,7 +1275,7 @@ describe("pane sizes", () => {
     // Arrange
     await mountApp();
     await window.tin.setSpec(THREE_PANES);
-    await divider().hover();
+    await hoverDivider();
     await expect.element(page.getByText("300 px · 27%")).toBeVisible();
 
     // Act
