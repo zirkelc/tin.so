@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.3.0](https://github.com/zirkelc/tin.so/compare/web-v1.2.0...web-v1.3.0) (2026-11-17)
+
+
+### Features
+
+* **web:** keep formatted code within the width of the pane ([728683e](https://github.com/zirkelc/tin.so/commit/728683eb6a62182d380f85b4b63e6c48abc022b0))
+* **web:** show pane sizes while resizing and a button for the same size ([2dbf6ae](https://github.com/zirkelc/tin.so/commit/2dbf6ae3c031162079f68d9e21e55c1539f5aac2))
+
+
+### Bug Fixes
+
+* **web:** indent selected lines with Tab and keep undo ([cbf57d5](https://github.com/zirkelc/tin.so/commit/cbf57d599fdb85b66a91cef3abf9bf9791c184cd))
+
+
+### Tests
+
+* **web:** move the pointer before it points to a pane divider ([6ac3908](https://github.com/zirkelc/tin.so/commit/6ac3908ae83dc7fbcf63e705d508e55e27f6fd6d))
+
 ## [1.2.0](https://github.com/zirkelc/tin.so/compare/web-v1.1.0...web-v1.2.0) (2026-11-13)
 
 
