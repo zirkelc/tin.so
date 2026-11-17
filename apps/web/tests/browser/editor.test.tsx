@@ -1222,6 +1222,64 @@ describe("window toolbar", () => {
   });
 });
 
+describe("pane sizes", () => {
+  const THREE_PANES: SpecInput = {
+    windows: [
+      {
+        panes: [
+          { title: "a.ts", code: "const a = 1;", size: 300 },
+          { title: "b.ts", code: "const b = 2;", size: 420 },
+          { title: "c.ts", code: "const c = 3;", size: 380 },
+        ],
+      },
+    ],
+  };
+  const divider = () =>
+    page.getByTitle("Drag to resize the panes. Double-click to fit them to the code.").first();
+
+  test("should make the panes the same size with the toolbar button", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec(THREE_PANES);
+
+    // Act
+    await page.getByRole("button", { name: "Make the panes the same size" }).click();
+
+    // Assert
+    await expect
+      .poll(() => window.tin.getSpec().windows[0]?.panes.map((pane) => pane.size))
+      .toEqual([367, 367, 366]);
+  });
+
+  test("should show the size of each pane when the pointer is on a divider", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec(THREE_PANES);
+
+    // Act
+    await divider().hover();
+
+    // Assert
+    await expect.element(page.getByText("300 px · 27%")).toBeVisible();
+    await expect.element(page.getByText("420 px · 38%")).toBeVisible();
+    await expect.element(page.getByText("380 px · 35%")).toBeVisible();
+  });
+
+  test("should hide the sizes when the pointer leaves the divider", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec(THREE_PANES);
+    await divider().hover();
+    await expect.element(page.getByText("300 px · 27%")).toBeVisible();
+
+    // Act
+    await page.getByRole("button", { name: "Fit the window to the code" }).hover();
+
+    // Assert
+    await expect.poll(() => page.getByText("300 px · 27%").elements().length).toBe(0);
+  });
+});
+
 describe("canvas pan", () => {
   const zoomIn = async () => {
     await mountApp();

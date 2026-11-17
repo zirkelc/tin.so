@@ -77,6 +77,16 @@ export const FitIcon = () => (
   </Glyph>
 );
 
+// Three panes of the same size, side by side or, for a column split, below each other
+export const SamePanesIcon = (props: { vertical?: boolean }) => (
+  <Glyph>
+    <g transform={props.vertical ? "rotate(90 8 8)" : undefined}>
+      <rect x="1.5" y="3" width="13" height="10" rx="1.5" />
+      <path d="M5.8 3v10M10.2 3v10" />
+    </g>
+  </Glyph>
+);
+
 export const PointerIcon = () => (
   <Glyph>
     <path d="M3.5 2.5l9 4-3.8 1.5L7 12z" />

@@ -58,6 +58,8 @@ An image can show more than one file. Split a window into panes, put several win
 - Zoom in and out, or fit the image to the screen. To move around a zoomed image, pick the hand tool at the bottom left (H) and drag. Space with a drag and a drag with the middle mouse button also move the image.
 - A pane is as wide as its code. A popover can lie over the next pane, and a wider window gives it more room.
 - The Fit button in the window toolbar gives the window and its panes the size of the code again.
+- Point to the divider between two panes, or drag it, to see the size of each pane in pixels and in percent of the window.
+- A button in the window toolbar gives all panes of a window the same size, in the space that they share.
 
 ### Popovers
 

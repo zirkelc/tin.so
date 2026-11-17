@@ -45,6 +45,7 @@ import {
   MinusIcon,
   PlusIcon,
   PointerIcon,
+  SamePanesIcon,
   SendToBackIcon,
   SplitColumnIcon,
   SplitRowIcon,
@@ -799,6 +800,9 @@ function WindowEditors(
   },
 ) {
   const { window, windowIndex, spec, zoom, onChange, rendered } = props;
+  // The sizes of the panes show while the pointer is on a divider and while a divider moves
+  const [dividerHovered, setDividerHovered] = useState(false);
+  const [dividerDragged, setDividerDragged] = useState(false);
   const windowSpec = spec.windows[windowIndex];
   if (!windowSpec) return null;
   const titleColor = rendered.scene.frame.title;
@@ -907,24 +911,30 @@ function WindowEditors(
   const resizePanes = (event: PointerEvent<HTMLElement>, index: number) => {
     const sizes = window.panes.map((pane) => (split === "row" ? pane.width : pane.height));
     const total = sizes[index]! + sizes[index + 1]!;
-    drag(event, zoom, (dx, dy) => {
-      const first = Math.round(
-        Math.min(
-          total - MIN_PANE_SIZE,
-          Math.max(MIN_PANE_SIZE, sizes[index]! + (split === "row" ? dx : dy)),
-        ),
-      );
-      change((old) => ({
-        ...old,
-        panes: old.panes.map((pane, i) =>
-          i === index
-            ? { ...pane, size: first }
-            : i === index + 1
-              ? { ...pane, size: total - first }
-              : pane,
-        ),
-      }));
-    });
+    setDividerDragged(true);
+    drag(
+      event,
+      zoom,
+      (dx, dy) => {
+        const first = Math.round(
+          Math.min(
+            total - MIN_PANE_SIZE,
+            Math.max(MIN_PANE_SIZE, sizes[index]! + (split === "row" ? dx : dy)),
+          ),
+        );
+        change((old) => ({
+          ...old,
+          panes: old.panes.map((pane, i) =>
+            i === index
+              ? { ...pane, size: first }
+              : i === index + 1
+                ? { ...pane, size: total - first }
+                : pane,
+          ),
+        }));
+      },
+      () => setDividerDragged(false),
+    );
   };
 
   return (
@@ -1101,11 +1111,14 @@ function WindowEditors(
               : { left: divider.x1, top: divider.y1 - 4, width: divider.x2 - divider.x1, height: 8 }
           }
           onPointerDown={(event) => resizePanes(event, index)}
+          onPointerEnter={() => setDividerHovered(true)}
+          onPointerLeave={() => setDividerHovered(false)}
           onDoubleClick={() =>
             change((old) => ({ ...old, panes: old.panes.map(({ size: _size, ...pane }) => pane) }))
           }
         />
       ))}
+      {(dividerHovered || dividerDragged) && <PaneSizes panes={window.panes} split={split} />}
       {props.active && (
         <>
           {RESIZE_HANDLES.map(({ edges, cursor }) => (
@@ -1173,6 +1186,15 @@ function WindowEditors(
             >
               <FitIcon />
             </Tool>
+            {windowSpec.panes.length > 1 && (
+              <Tool
+                label="Make the panes the same size"
+                disabled={samePaneSizes(paneSizes(window.panes, split)) === undefined}
+                onClick={() => change((old) => withSameSizes(old, paneSizes(window.panes, split)))}
+              >
+                <SamePanesIcon vertical={split === "column"} />
+              </Tool>
+            )}
             <Tool
               label="Format the code (⇧⌥F)"
               disabled={!formattable}
@@ -1195,6 +1217,58 @@ function WindowEditors(
 }
 
 type Box = { x: number; y: number; width: number; height: number };
+
+/** The size of each pane in the image: its width in a row split, its height in a column split */
+function paneSizes(panes: Array<Box>, split: "row" | "column"): Array<number> {
+  return panes.map((pane) => Math.round(split === "row" ? pane.width : pane.height));
+}
+
+/**
+ * The same size for each pane, in the space that the panes share now. The first panes get the
+ * pixels that do not divide evenly. Undefined when the sizes already differ by one pixel at most.
+ */
+function samePaneSizes(sizes: Array<number>): Array<number> | undefined {
+  if (Math.max(...sizes) - Math.min(...sizes) <= 1) return undefined;
+  const total = sizes.reduce((sum, size) => sum + size, 0);
+  const size = Math.floor(total / sizes.length);
+  const rest = total - size * sizes.length;
+  return sizes.map((_, index) => size + (index < rest ? 1 : 0));
+}
+
+function withSameSizes(window: WindowInput, sizes: Array<number>): WindowInput {
+  const same = samePaneSizes(sizes);
+  if (!same) return window;
+  return { ...window, panes: window.panes.map((pane, index) => ({ ...pane, size: same[index] })) };
+}
+
+/** A measure line along each pane with its size in pixels and its share of the window */
+function PaneSizes(props: { panes: Array<Box>; split: "row" | "column" }) {
+  const sizes = paneSizes(props.panes, props.split);
+  const total = sizes.reduce((sum, size) => sum + size, 0);
+  const inset = 8;
+  return props.panes.map((pane, index) => (
+    <div
+      key={index}
+      className={`pane-measure ${props.split}`}
+      style={
+        props.split === "row"
+          ? {
+              left: pane.x + inset,
+              top: pane.y + pane.height - inset,
+              width: pane.width - inset * 2,
+            }
+          : // The line starts below the remove button at the top right of the pane
+            {
+              left: pane.x + pane.width - inset,
+              top: pane.y + inset + REMOVE_SIZE,
+              height: pane.height - inset * 2 - REMOVE_SIZE,
+            }
+      }
+    >
+      <span>{`${sizes[index]} px · ${Math.round((sizes[index]! / total) * 100)}%`}</span>
+    </div>
+  ));
+}
 
 function selectionStyle(box: Box): CSSProperties {
   return { left: box.x, top: box.y, width: box.width, height: box.height };

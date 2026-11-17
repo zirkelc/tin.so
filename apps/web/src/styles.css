@@ -1646,6 +1646,84 @@ button.icon {
   background: rgba(255, 255, 255, 0.15);
 }
 
+/* A measure line along a pane, with end ticks and its size in the middle. The line and the label keep their size on the screen at every zoom. */
+.pane-measure {
+  --tick: calc(9px / var(--zoom));
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.pane-measure.row {
+  height: 0;
+  border-top: calc(1px / var(--zoom)) solid var(--selection);
+}
+
+.pane-measure.column {
+  width: 0;
+  border-left: calc(1px / var(--zoom)) solid var(--selection);
+}
+
+.pane-measure::before,
+.pane-measure::after {
+  content: "";
+  position: absolute;
+  border-color: var(--selection);
+  border-style: solid;
+  border-width: 0;
+}
+
+.pane-measure.row::before,
+.pane-measure.row::after {
+  top: calc(var(--tick) / -2);
+  height: var(--tick);
+  border-left-width: calc(1px / var(--zoom));
+}
+
+.pane-measure.row::before {
+  left: 0;
+}
+
+.pane-measure.row::after {
+  right: 0;
+}
+
+.pane-measure.column::before,
+.pane-measure.column::after {
+  left: calc(var(--tick) / -2);
+  width: var(--tick);
+  border-top-width: calc(1px / var(--zoom));
+}
+
+.pane-measure.column::before {
+  top: 0;
+}
+
+.pane-measure.column::after {
+  bottom: 0;
+}
+
+.pane-measure span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(calc(1 / var(--zoom)));
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--selection);
+  color: #fff;
+  font: 500 11px/1.2 var(--mono, ui-monospace, monospace);
+  white-space: nowrap;
+}
+
+.pane-measure.row span {
+  top: 0;
+}
+
+.pane-measure.column span {
+  left: 0;
+}
+
 .guide {
   position: absolute;
   pointer-events: none;
