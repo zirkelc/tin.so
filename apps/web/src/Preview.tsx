@@ -60,6 +60,7 @@ import {
   type Alignment,
   alignWindows,
   addPopover,
+  attachToLine,
   annotationAt,
   type Axis,
   boundsOf,
@@ -79,6 +80,7 @@ import {
   pasteWindows,
   readCopiedWindows,
   removePopover,
+  isDetached,
   removeWindows,
   resetPositions,
   resizeImage,
@@ -661,14 +663,15 @@ function PopoverEditors(
       const popover = { pane: paneIndex, annotation: index };
       const select = () => props.onSelect({ windows: [windowIndex], popover });
 
+      // A drag gives the popover a fixed place in its pane, so that it no longer moves with its line
       const move = (event: PointerEvent<HTMLElement>) => {
         select();
-        const start = { x: annotationSpec?.offsetX ?? 0, y: annotationSpec?.offsetY ?? 0 };
+        const start = { x: box.x - pane.code.x, y: box.y - pane.code.y };
         drag(event, zoom, (dx, dy) =>
-          updateAnnotation((old) => ({
+          updateAnnotation(({ offsetX: _x, offsetY: _y, ...old }) => ({
             ...old,
-            offsetX: Math.round(start.x + dx),
-            offsetY: Math.round(start.y + dy),
+            x: Math.round(start.x + dx),
+            y: Math.round(start.y + dy),
           })),
         );
       };
@@ -694,10 +697,12 @@ function PopoverEditors(
           />
           <div
             className="handle handle-popover"
-            title="Drag to move the popover. Double-click to put it back below its text."
+            title="Drag to move the popover. Double-click to attach it to its line again."
             style={{ left: box.x, top: box.y, width: box.width, height: box.height }}
             onPointerDown={move}
-            onDoubleClick={() => updateAnnotation(({ offsetX: _x, offsetY: _y, ...old }) => old)}
+            onDoubleClick={() =>
+              updateAnnotation((old) => (old.line === undefined ? old : attachToLine(old)))
+            }
             onContextMenu={(event) => {
               event.preventDefault();
               select();
@@ -1471,9 +1476,13 @@ function popoverItems(
     );
   return [
     {
-      label: "Reset position",
-      disabled: (annotation.offsetX ?? 0) === 0 && (annotation.offsetY ?? 0) === 0,
-      onSelect: () => update(({ offsetX: _x, offsetY: _y, ...old }) => old),
+      label: annotation.line === undefined ? "Attach to line" : `Attach to line ${annotation.line}`,
+      disabled:
+        annotation.line === undefined ||
+        (!isDetached(annotation) &&
+          (annotation.offsetX ?? 0) === 0 &&
+          (annotation.offsetY ?? 0) === 0),
+      onSelect: () => update(attachToLine),
     },
     {
       label: "Fit popover to code",
@@ -1583,8 +1592,7 @@ function codeItems(
     annotation === -1
       ? {
           label: "Add popover",
-          disabled: !part,
-          onSelect: () => update((pane) => addPopover(pane, part!)),
+          onSelect: () => update((pane) => addPopover(pane, part ?? { line: from })),
         }
       : {
           label: "Remove popover",

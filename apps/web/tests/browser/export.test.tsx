@@ -148,6 +148,21 @@ describe("export menu", () => {
   });
 });
 
+describe("export help", () => {
+  test("should explain the scale of the saved image", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await exportOptions().click();
+
+    // Assert
+    await expect
+      .element(page.getByText("Scale", { exact: true }))
+      .toHaveAccessibleDescription(/pixels the saved image has/);
+  });
+});
+
 describe("export toast", () => {
   function toast() {
     return page.getByRole("status", { name: "Notification" });

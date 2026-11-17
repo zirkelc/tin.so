@@ -236,6 +236,17 @@ describe("withCode", () => {
     expect(result.annotations![0]!.line).toBe(4);
   });
 
+  test("should keep a popover without a line as it is", () => {
+    // Arrange
+    const pane: PaneInput = { code: "a\nb", annotations: [{ x: 40, y: 20, code: "C" }] };
+
+    // Act
+    const result = withCode(pane, "new\na\nb");
+
+    // Assert
+    expect(result.annotations).toEqual([{ x: 40, y: 20, code: "C" }]);
+  });
+
   test("should keep a highlight on its line when an earlier line is deleted", () => {
     // Arrange
     const pane: PaneInput = { code: "a\nb\nc\nd", highlight: [3] };
@@ -311,6 +322,21 @@ describe("withCode", () => {
 });
 
 describe("withoutMissingParts", () => {
+  test("should keep the popovers that have no match", () => {
+    // Arrange
+    const annotations = [
+      { line: 2, column: 4, code: "B" },
+      { x: 10, y: 10, code: "C" },
+    ];
+    const spec: SpecInput = { windows: [{ panes: [{ code: "a\nb", annotations }] }] };
+
+    // Act
+    const result = withoutMissingParts(spec);
+
+    // Assert
+    expect(result.windows[0]!.panes[0]!.annotations).toEqual(annotations);
+  });
+
   test("should remove the marks and popovers whose text is not in their line", () => {
     // Arrange
     const spec = {
@@ -390,8 +416,19 @@ describe("addPopover", () => {
     expect(result).toEqual({
       code: "const plans = 1;",
       marks: [{ ...part, style: "underline" }],
-      annotations: [{ ...part, code: "plans" }],
+      annotations: [{ line: 1, column: 7, code: "plans" }],
     });
+  });
+
+  test("should add an empty popover below the start of a line without a selection", () => {
+    // Arrange
+    const pane: PaneInput = { code: "a\nb" };
+
+    // Act
+    const result = addPopover(pane, { line: 2 });
+
+    // Assert
+    expect(result).toEqual({ code: "a\nb", annotations: [{ line: 2, column: 1, code: "" }] });
   });
 
   test("should keep a line that the anchor has already", () => {
@@ -417,7 +454,7 @@ describe("removePopover", () => {
         { ...part, style: "underline" },
         { ...part, color: "#f43f5e" },
       ],
-      annotations: [{ ...part, code: "plans" }],
+      annotations: [{ line: 1, column: 7, code: "plans" }],
     };
 
     // Act

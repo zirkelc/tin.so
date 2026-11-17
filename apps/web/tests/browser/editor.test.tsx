@@ -937,21 +937,72 @@ describe("popover list", () => {
     await expect.poll(() => document.querySelectorAll(".selection.hovered").length).toBe(1);
   });
 
-  test("should remove a popover with the button in its settings", async () => {
+  test("should remove a popover with the button in its row", async () => {
     // Arrange
     await mountApp();
     await window.tin.setSpec(POPOVER_SPEC);
 
-    await page.getByRole("button", { name: "Popover plans, line 1" }).click();
-
     // Act
-    await page
-      .getByRole("group", { name: "Selected popover" })
-      .getByRole("button", { name: "Remove" })
-      .click();
+    await page.getByRole("button", { name: "Remove popover plans" }).click();
 
     // Assert
     await expect.poll(() => window.tin.getSpec().windows[0]?.panes[0]?.annotations).toEqual([]);
+  });
+
+  test("should show the line that a popover is attached to in its settings", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec(POPOVER_SPEC);
+
+    // Act
+    await page.getByRole("button", { name: "Popover plans, line 1" }).click();
+
+    // Assert
+    await expect
+      .element(
+        page.getByRole("group", { name: "Selected popover" }).getByText("Attached to line 1"),
+      )
+      .toBeVisible();
+  });
+
+  test("should explain what it means that a popover is attached to its line", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec(POPOVER_SPEC);
+    await page.getByRole("button", { name: "Popover plans, line 1" }).click();
+
+    // Act
+    const term = page
+      .getByRole("group", { name: "Selected popover" })
+      .getByText("Attached to line 1");
+
+    // Assert
+    await expect.element(term).toHaveAccessibleDescription(/moves with it/);
+  });
+
+  test("should show no place in the row of a popover that was moved", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await window.tin.setSpec({
+      windows: [
+        {
+          panes: [
+            {
+              title: "a.ts",
+              code: "const plans = 1;",
+              annotations: [{ line: 1, x: 40, y: 40, code: "type Plans = number" }],
+            },
+          ],
+        },
+      ],
+    });
+
+    // Assert
+    const row = page.getByRole("button", { name: /^Popover type Plans = number/ });
+    await expect.element(row).toBeVisible();
+    expect(row.element().textContent).toBe("type Plans = number");
   });
 
   test("should mark a popover whose text is not in the code", async () => {
@@ -1335,6 +1386,139 @@ describe("format code", () => {
     await expect
       .poll(() => window.tin.getSpec().windows[0]?.panes[1]?.code)
       .toBe('const user = {\n  id: 1,\n  name: "Ada",\n  email: "ada@example.com",\n};');
+  });
+});
+
+describe("help", () => {
+  test("should underline a help term only while the side panel has the pointer or the focus", async () => {
+    // Arrange
+    await mountApp();
+    const term = page.getByText("Padding", { exact: true });
+    const underline = () => getComputedStyle(term.element()).textDecorationColor;
+    await page.getByRole("button", { name: "Zoom in" }).hover();
+    await expect.poll(underline).toBe("rgba(0, 0, 0, 0)");
+
+    // Act
+    await page.getByText("Theme", { exact: true }).hover();
+
+    // Assert
+    await expect.poll(underline).not.toBe("rgba(0, 0, 0, 0)");
+  });
+
+  test.each([
+    ["Format", /shape of the image/],
+    ["Padding", /space between the windows and the edge/],
+    ["Mode", /dark or the light colors/],
+    ["Opacity", /transparent background/],
+    ["Frame", /editor window around the code/],
+    ["Style", /title bar has its own color/],
+    ["Tab icon", /icon on the tab of this pane/],
+  ])("should explain the setting %s", async (label, help) => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    const term = page.getByText(label, { exact: true }).first();
+
+    // Assert
+    await expect.element(term).toHaveAccessibleDescription(help);
+  });
+});
+
+describe("popover place", () => {
+  const POPOVER: SpecInput = {
+    windows: [
+      {
+        panes: [
+          {
+            title: "a.ts",
+            code: "const plans = 1;\nconst team = 2;",
+            annotations: [{ line: 1, column: 7, code: "type Plans = number" }],
+          },
+        ],
+      },
+    ],
+  };
+  const annotation = () => window.tin.getSpec().windows[0]?.panes[0]?.annotations?.[0];
+  const handle = () =>
+    page.getByTitle("Drag to move the popover. Double-click to attach it to its line again.");
+
+  test("should add a popover to a line without a selection", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "a\nb" }] }] });
+    const field = codeField(1);
+    // The zoom fits the new image first, so the field has its place only after it stops moving
+    let last = "";
+    await expect
+      .poll(() => {
+        const now = JSON.stringify(field.element().getBoundingClientRect());
+        const stable = now === last;
+        last = now;
+        return stable;
+      })
+      .toBe(true);
+    const box = field.element().getBoundingClientRect();
+    await field.click({ button: "right", position: { x: 4, y: box.height * 0.75 } });
+
+    // Act
+    await page.getByRole("menuitem", { name: "Add popover" }).click();
+
+    // Assert
+    await expect
+      .poll(() => window.tin.getSpec().windows[0]?.panes[0]?.annotations)
+      .toEqual([{ line: 2, column: 1, code: "" }]);
+  });
+
+  test("should keep the popover when the text that it starts below changes", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec(POPOVER);
+
+    // Act
+    await userEvent.fill(codeField(1), "const users = 1;\nconst team = 2;");
+
+    // Assert
+    await expect.poll(() => document.querySelectorAll(".handle-popover").length).toBe(1);
+    expect(annotation()).toEqual({ line: 1, column: 7, code: "type Plans = number" });
+  });
+
+  test("should give the popover a fixed place when it is dragged", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec(POPOVER);
+
+    // Act
+    await userEvent.dragAndDrop(handle(), codeField(1), {
+      sourcePosition: { x: 20, y: 20 },
+      targetPosition: { x: 200, y: 4 },
+      force: true,
+    });
+
+    // Assert
+    await expect
+      .poll(() => annotation()?.x !== undefined && annotation()?.y !== undefined)
+      .toBe(true);
+    expect(annotation()?.offsetX).toBe(undefined);
+    expect(annotation()?.line).toBe(1);
+  });
+
+  test("should attach a popover with a fixed place to its line again from its menu", async () => {
+    // Arrange
+    await mountApp();
+    const pane = POPOVER.windows[0]!.panes[0]!;
+    await window.tin.setSpec({
+      windows: [
+        { panes: [{ ...pane, annotations: [{ ...pane.annotations![0]!, x: 200, y: 80 }] }] },
+      ],
+    });
+    await handle().click({ button: "right", position: { x: 20, y: 20 }, force: true });
+
+    // Act
+    await page.getByRole("menuitem", { name: "Attach to line 1" }).click();
+
+    // Assert
+    await expect.poll(annotation).toEqual({ line: 1, column: 7, code: "type Plans = number" });
   });
 });
 
@@ -1824,6 +2008,16 @@ describe("highlight submenu twice", () => {
     await mountApp();
     await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "a\nb" }] }] });
     const field = codeField(1);
+    // The zoom fits the new image first, so the field has its place only after it stops moving
+    let last = "";
+    await expect
+      .poll(() => {
+        const now = JSON.stringify(field.element().getBoundingClientRect());
+        const stable = now === last;
+        last = now;
+        return stable;
+      })
+      .toBe(true);
     const box = field.element().getBoundingClientRect();
     const pick = async (y: number, color: RegExp) => {
       await field.click({ button: "right", position: { x: 20, y } });

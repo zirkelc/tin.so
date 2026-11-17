@@ -1963,6 +1963,71 @@ button.compact {
   white-space: nowrap;
 }
 
+.popover-row {
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+}
+
+.popover-row .window-row {
+  min-width: 0;
+  flex: 1;
+}
+
+.popover-position {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.help-term {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--text-muted);
+  text-underline-offset: 3px;
+}
+
+/* In the side panel, the underline shows only while the panel has the pointer or the focus */
+.sidebar .help-term {
+  text-decoration-color: transparent;
+  transition: text-decoration-color 150ms;
+}
+
+.sidebar:hover .help-term,
+.sidebar:focus-within .help-term {
+  text-decoration-color: var(--text-muted);
+}
+
+.help-term:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--selection);
+  outline-offset: 2px;
+}
+
+.help-tip {
+  position: fixed;
+  z-index: 1000;
+  display: none;
+  pointer-events: none;
+  width: max-content;
+  max-width: 200px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-raised);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  text-decoration: none;
+}
+
+.help-tip[data-open] {
+  display: block;
+}
+
 .popover-editor {
   display: flex;
   flex-direction: column;

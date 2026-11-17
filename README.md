@@ -43,7 +43,7 @@ Open [tin.so](https://tin.so), type or paste your code into the window, and save
 
 An image can show more than one file. Split a window into panes, put several windows below each other or side by side, or place windows freely and let them overlap.
 
-- Split a window into panes, side by side or below each other.
+- Split a window into panes, side by side or below each other. Panes side by side without tabs have a line below the title bar, where the lines between them end.
 - Put several windows below each other or side by side.
 - Place windows anywhere in a free layout, where they can overlap.
 - Resize the image at its edges. With an aspect ratio, the image keeps the ratio.
@@ -70,12 +70,15 @@ An image can show more than one file. Split a window into panes, put several win
 
 A popover points to a word in the code and looks like the hover card of an editor. Use it to show a type, a signature or a value next to the code that uses it.
 
-- Select a word, right-click and choose "Add popover".
+- Right-click a line and choose "Add popover". Select a word first to start the popover below it. A pane without code can have a popover too.
 - "Add popover" also underlines the word with a text style. Change it in the style panel like any other style, for example to a wavy line or to another color, or clear it.
 - Select code and right-click: the selection stays, so the menu acts on the selected text.
 - A popover has its own code and language.
-- Move and resize a popover. Double-click it to put it back below its word.
-- A popover can reach into the padding of the image, up to its edge. The image grows only when a popover goes past the edge, and the window keeps its place while you move its popover.
+- A popover belongs to its line, not to the text in it: it moves with its line when you edit the code, and it stays when the text below it changes.
+- Move and resize a popover. A popover that you move stays at its place in the pane. Double-click it, or choose "Attach to line" in its menu, to attach it to its line again.
+- A popover can reach into the padding of the image, up to its edge. The image grows only when a popover below its line goes past the edge. A popover that you moved never changes the image, which cuts off what is outside of it. The window keeps its place while you move its popover.
+- Settings that need more than a name have a dotted underline: point to it, or focus it with Tab, to read what the setting does. Format, Padding, Mode, Opacity, Frame, the title bar Style, Tab icon, the export Scale and the position of a popover have one.
+- The settings of a popover show its position ("Attached to line 2", or a free place) with a button to attach it to its line again. The X in its row removes it.
 
 ### Highlights, styles and colors
 

@@ -1,4 +1,5 @@
 import {
+  cellCount,
   highlightColors,
   MARK_STYLES,
   inferLanguage,
@@ -282,37 +283,95 @@ export function activeMarks(pane: Marked, parts: Array<LinePart>): Set<MarkStyle
   return styles;
 }
 
-/** The index of the annotation on the part, or -1 */
+type Annotation = NonNullable<PaneInput["annotations"]>[number];
+
+/** The column of a part in its line, from 1, in cells as the image counts them */
+function partColumn(code: string, part: Omit<LinePart, "occurrence"> & { occurrence?: number }) {
+  const normalized = normalizeCode(code);
+  const range = partRange(normalized, { ...part, occurrence: part.occurrence ?? 1 });
+  if (!range) return undefined;
+  let cells = 0;
+  for (const char of normalized.split("\n")[part.line - 1]!.slice(0, range[0])) {
+    cells += cellCount(char);
+  }
+  return cells + 1;
+}
+
+/** true when the popover starts below the part: at its match, or at the column of the part */
+function onPart(code: string, annotation: Annotation, part: LinePart): boolean {
+  if (annotation.match !== undefined) return samePart(part, annotation as Partial<LinePart>);
+  return annotation.line === part.line && annotation.column === partColumn(code, part);
+}
+
 /**
- * Adds a popover on a part of a line. Its anchor gets an underline mark, so that the style panel
- * can change the style and the color of the anchor. A line of a mark that is there already stays.
+ * Adds a popover below a part of a line, or below the start of a line. The popover keeps only the
+ * line and the column, so that it stays when the text there changes. The part gets an underline
+ * mark, so that the style panel can change its style and color. A line of a mark that is there
+ * already stays.
  */
-export function addPopover(pane: PaneInput, part: LinePart): PaneInput {
+export function addPopover(pane: PaneInput, at: LinePart | { line: number }): PaneInput {
+  if (!("match" in at)) {
+    return {
+      ...pane,
+      annotations: [...(pane.annotations ?? []), { line: at.line, column: 1, code: "" }],
+    };
+  }
   const marks = pane.marks ?? [];
   const lined = marks.some(
-    (mark) => (mark.style === "underline" || mark.style === "wavy") && samePart(part, mark),
+    (mark) => (mark.style === "underline" || mark.style === "wavy") && samePart(at, mark),
   );
+  const column = partColumn(pane.code, at) ?? 1;
   return {
     ...pane,
-    marks: lined ? marks : [...marks, { ...part, style: "underline" }],
-    annotations: [...(pane.annotations ?? []), { ...part, code: part.match }],
+    marks: lined ? marks : [...marks, { ...at, style: "underline" }],
+    annotations: [...(pane.annotations ?? []), { line: at.line, column, code: at.match }],
   };
 }
 
-/** Removes a popover and the underline mark of its anchor */
+/** Removes a popover and the underline mark of the part that it starts below */
 export function removePopover(pane: PaneInput, index: number): PaneInput {
   const annotation = pane.annotations?.[index];
   if (!annotation) return pane;
-  const part = { ...annotation, occurrence: annotation.occurrence ?? 1 };
+  const underline = (mark: NonNullable<PaneInput["marks"]>[number]) =>
+    mark.style === "underline" &&
+    onPart(pane.code, annotation, { ...mark, occurrence: mark.occurrence ?? 1 });
   return {
     ...pane,
-    marks: (pane.marks ?? []).filter((mark) => mark.style !== "underline" || !samePart(part, mark)),
+    marks: (pane.marks ?? []).filter((mark) => !underline(mark)),
     annotations: (pane.annotations ?? []).filter((_, i) => i !== index),
   };
 }
 
+/** The index of the popover below the part, or -1 */
 export function annotationAt(pane: PaneInput, part: LinePart): number {
-  return (pane.annotations ?? []).findIndex((annotation) => samePart(part, annotation));
+  return (pane.annotations ?? []).findIndex((annotation) => onPart(pane.code, annotation, part));
+}
+
+/** true when the popover has a fixed place in its pane and does not move with its line */
+export function isDetached(annotation: Annotation): boolean {
+  return annotation.x !== undefined || annotation.y !== undefined || annotation.line === undefined;
+}
+
+/** Puts the popover back below its line, so that it moves with the code again */
+export function attachToLine<ANNOTATION extends Annotation>({
+  x: _x,
+  y: _y,
+  offsetX: _offsetX,
+  offsetY: _offsetY,
+  ...annotation
+}: ANNOTATION): Omit<ANNOTATION, "x" | "y" | "offsetX" | "offsetY"> {
+  return annotation;
+}
+
+/**
+ * true when the image can show the popover: its match is in its line, or its line exists. A
+ * popover without a line has a fixed place.
+ */
+export function hasAnchor(code: string, annotation: Annotation): boolean {
+  if (annotation.match !== undefined && annotation.line !== undefined) {
+    return hasPart(code, { ...annotation, line: annotation.line, match: annotation.match });
+  }
+  return annotation.line === undefined || annotation.line <= code.split("\n").length;
 }
 
 type SceneWindow = {
@@ -447,10 +506,11 @@ export function withCode(pane: PaneInput, code: string, caret?: number): PaneInp
     highlight: highlightEntries(moved),
     ...(pane.marks && { marks: moveMarks(pane.marks, move) }),
     ...(pane.annotations && {
-      annotations: pane.annotations.map((annotation) => ({
-        ...annotation,
-        line: move(annotation.line) ?? editLine,
-      })),
+      annotations: pane.annotations.map((annotation) =>
+        annotation.line === undefined
+          ? annotation
+          : { ...annotation, line: move(annotation.line) ?? editLine },
+      ),
     }),
   };
 }
@@ -491,7 +551,7 @@ export function hasPart(code: string, part: StoredPart): boolean {
 /** The indexes of the popovers that the image shows, in the order of the image */
 export function visibleAnnotations(pane: PaneInput): Array<number> {
   return (pane.annotations ?? []).flatMap((annotation, index) =>
-    hasPart(pane.code, annotation) ? [index] : [],
+    hasAnchor(pane.code, annotation) ? [index] : [],
   );
 }
 
@@ -509,10 +569,12 @@ export function withoutMissingParts(spec: SpecInput): SpecInput {
         ...pane,
         ...(pane.marks && { marks: pane.marks.filter(found(pane.code)) }),
         ...(pane.annotations && {
-          annotations: pane.annotations.filter(found(pane.code)).map((annotation) => ({
-            ...annotation,
-            ...(annotation.marks && { marks: annotation.marks.filter(found(annotation.code)) }),
-          })),
+          annotations: pane.annotations
+            .filter((annotation) => hasAnchor(pane.code, annotation))
+            .map((annotation) => ({
+              ...annotation,
+              ...(annotation.marks && { marks: annotation.marks.filter(found(annotation.code)) }),
+            })),
         }),
       })),
     })),

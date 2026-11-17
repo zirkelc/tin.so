@@ -25,6 +25,7 @@ import {
   XIcon,
 } from "./icons.tsx";
 import { Dropdown } from "./menu.tsx";
+import { HelpTerm } from "./controls.tsx";
 import { type HoveredPopover, Preview, type Selection } from "./Preview.tsx";
 import { type ImageFormat, type Rendered, renderImage, renderPreview } from "./renderer.ts";
 import {
@@ -438,7 +439,11 @@ export function App() {
                   ))}
                   <div className="menu-separator" role="separator" />
                   <div className="export-scale">
-                    <span>Scale</span>
+                    <span>
+                      <HelpTerm help="How many pixels the saved image has for each pixel of the image. 2x is sharp on Retina screens.">
+                        Scale
+                      </HelpTerm>
+                    </span>
                     <div className="segmented" role="radiogroup" aria-label="Scale">
                       {SCALES.map((value) => (
                         <button

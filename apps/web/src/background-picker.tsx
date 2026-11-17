@@ -15,6 +15,7 @@ import {
   themeBackground,
 } from "@tin.so/core";
 import { type KeyboardEvent, type PointerEvent, useEffect, useRef, useState } from "react";
+import { HelpTerm } from "./controls.tsx";
 import { CloseIcon } from "./icons.tsx";
 import THEME_PREVIEWS from "./theme-previews.json";
 
@@ -197,7 +198,11 @@ export function BackgroundPicker(props: {
         </span>
       </button>
       <label className="background-opacity">
-        <span className="field-label">Opacity</span>
+        <span className="field-label">
+          <HelpTerm help="How much of the background shows. At 0 %, the image has a transparent background.">
+            Opacity
+          </HelpTerm>
+        </span>
         <input
           type="range"
           min={0}

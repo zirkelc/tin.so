@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { HelpTerm } from "./controls.tsx";
 import { CloseIcon } from "./icons.tsx";
 
 export type SelectOption<VALUE extends string> = {
@@ -84,6 +85,8 @@ export function Select<VALUE extends string>(props: {
   label: string;
   /** Hides the label above the trigger. The label stays for screen readers. */
   hideLabel?: boolean;
+  /** An explanation of the setting, which shows when the pointer is on the label */
+  help?: string;
   /** Replaces the content of the trigger, for a trigger that looks like a part of the image */
   trigger?: ReactNode;
   className?: string;
@@ -205,7 +208,11 @@ export function Select<VALUE extends string>(props: {
 
   return (
     <div className={props.className ?? "field select"} style={props.style}>
-      {!props.hideLabel && <span className="field-label">{props.label}</span>}
+      {!props.hideLabel && (
+        <span className="field-label">
+          {props.help ? <HelpTerm help={props.help}>{props.label}</HelpTerm> : props.label}
+        </span>
+      )}
       <button
         ref={triggerRef}
         type="button"
