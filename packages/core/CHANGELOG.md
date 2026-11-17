@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/zirkelc/tin.so/compare/core-v1.3.1...core-v1.4.0) (2026-11-17)
+
+
+### Features
+
+* **core:** popovers that refer to a line or have a fixed place ([5704e7b](https://github.com/zirkelc/tin.so/commit/5704e7bb2eafac6ca115d7fa85455631cfa7c0ed))
+* let the theme decide if a window can be without its frame ([b2bd66d](https://github.com/zirkelc/tin.so/commit/b2bd66d50a98029cb3bf7ac0e97172f01343a9fa))
+
 ## [1.3.1](https://github.com/zirkelc/tin.so/compare/core-v1.3.0...core-v1.3.1) (2026-11-17)
 
 

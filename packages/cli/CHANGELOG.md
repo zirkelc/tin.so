@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/zirkelc/tin.so/compare/cli-v1.3.1...cli-v1.4.0) (2026-11-17)
+
+
+### Features
+
+* let the theme decide if a window can be without its frame ([b2bd66d](https://github.com/zirkelc/tin.so/commit/b2bd66d50a98029cb3bf7ac0e97172f01343a9fa))
+
 ## [1.3.1](https://github.com/zirkelc/tin.so/compare/cli-v1.3.0...cli-v1.3.1) (2026-11-17)
 
 
