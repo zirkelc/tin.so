@@ -1564,7 +1564,16 @@ describe("zoom", () => {
     await mountApp();
     await window.tin.setSpec({ windows: [{ panes: [{ title: "plans.ts", code }] }] });
     const value = page.getByTitle("Show the image at 100%");
-    await expect.poll(() => value.element().textContent?.includes("%")).toBe(true);
+    // The zoom fits the new image first, so the value counts only after it stops changing
+    let last = "";
+    await expect
+      .poll(() => {
+        const now = value.element().textContent ?? "";
+        const stable = now.includes("%") && now === last;
+        last = now;
+        return stable;
+      })
+      .toBe(true);
     const before = value.element().textContent!;
     await page.getByRole("textbox", { name: "Code of window 1, pane 1" }).click();
 
