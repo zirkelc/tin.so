@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/zirkelc/tin.so/compare/web-v1.5.0...web-v1.6.0) (2026-11-17)
+
+
+### Features
+
+* **web:** undo and redo ([f2e8bc9](https://github.com/zirkelc/tin.so/commit/f2e8bc9ae49b7effd2f6c162132d5ef416f9f719))
+
 ## [1.5.0](https://github.com/zirkelc/tin.so/compare/web-v1.4.0...web-v1.5.0) (2026-11-17)
 
 
