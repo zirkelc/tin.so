@@ -544,17 +544,18 @@ export function WindowEditor(props: {
     <div className="window-editor">
       <div className="field">
         <span className="field-label">
-          <HelpTerm help="Window draws an editor window around the code. Without it, the image shows only the code. Tabs adds a tab with the file name above each pane.">
-            Frame
-          </HelpTerm>
+          <HelpTerm help="Tabs adds a tab with the file name above each pane.">Frame</HelpTerm>
         </span>
         <div className="parts">
-          <PartToggle
-            label="Window"
-            icon={<FrameIcon />}
-            pressed={frame}
-            onChange={(frame) => onChange({ ...window, frame })}
-          />
+          {/* A window shows its frame. Only a window without one, from an older link, can get it back. */}
+          {!frame && (
+            <PartToggle
+              label="Window"
+              icon={<FrameIcon />}
+              pressed={false}
+              onChange={() => onChange({ ...window, frame: true })}
+            />
+          )}
           <PartToggle
             label="Tabs"
             icon={<TabsIcon />}

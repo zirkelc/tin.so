@@ -1389,6 +1389,20 @@ describe("format code", () => {
   });
 });
 
+describe("frame", () => {
+  test("should not offer to turn off the window of a window with a frame", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "a" }] }] });
+
+    // Assert
+    await expect.element(page.getByRole("button", { name: "Tabs", exact: true })).toBeVisible();
+    expect(page.getByRole("button", { name: "Window", exact: true }).elements().length).toBe(0);
+  });
+});
+
 describe("help", () => {
   test("should underline a help term only while the side panel has the pointer or the focus", async () => {
     // Arrange
@@ -1410,7 +1424,7 @@ describe("help", () => {
     ["Padding", /space between the windows and the edge/],
     ["Mode", /dark or the light colors/],
     ["Opacity", /transparent background/],
-    ["Frame", /editor window around the code/],
+    ["Frame", /tab with the file name/],
     ["Style", /title bar has its own color/],
     ["Tab icon", /icon on the tab of this pane/],
   ])("should explain the setting %s", async (label, help) => {
