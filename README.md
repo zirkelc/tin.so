@@ -136,7 +136,6 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 - A solid title bar, with its own color and a line below it. The title, the controls and the style of the title bar are together in its own box in the window settings.
 - Gray window controls, or red, yellow and green as in macOS.
 - A tab for each pane, with the file name and the icon of the language or any icon from a list.
-- Each theme decides if a window can go away. The editor themes always show the window: the image ignores `frame: false` for them, and the editor and the CLI show a warning.
 - Edit the titles and the file names directly in the image.
 
 ### Code
