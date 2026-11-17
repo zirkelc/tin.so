@@ -34,6 +34,8 @@ export type Theme = {
   /** The Shiki theme by mode that colors the code, in place of the token colors of the syntax */
   textmate: Partial<Record<Mode, string>>;
   syntax: { light?: Syntax; dark?: Syntax };
+  /** true when the theme can show the code without a window around it (frame: false) */
+  frameless?: boolean;
 };
 
 /** The colors of the window of an editor theme */

@@ -14,6 +14,7 @@ import {
   layout,
   readImageSpec,
   renderScene,
+  type Scene,
   SPEC_SCHEMA_URL,
   SpecError,
   specJsonSchema,
@@ -190,7 +191,8 @@ const WINDOW_ARGS = defineArgs({
   frame: {
     type: "boolean",
     description: "Put the code in a window (default)",
-    negativeDescription: "No window: the code goes directly on the background",
+    negativeDescription:
+      "No window: the code goes directly on the background, for a theme that allows it. The editor themes always show the window",
   },
   controls: {
     type: "enum",
@@ -532,6 +534,7 @@ async function renderCommand(values: RenderValues, io: Io) {
     );
 
   const scene = await layout(spec);
+  warn(scene, io);
   const image = await renderScene(scene, {
     format,
     scale,
@@ -562,6 +565,11 @@ async function renderCommand(values: RenderValues, io: Io) {
   io.stdout(`Edit: ${link}\n`);
 }
 
+/** Writes the settings of the spec that the image ignores to stderr */
+function warn(scene: Scene, io: Io) {
+  for (const warning of scene.warnings) io.stderr(`Warning: ${warning.path}: ${warning.message}\n`);
+}
+
 /**
  * Prints the editor link. Without --json, stdout gets the link before the copy and the open, so
  * the link is in the output also when one of them fails. The notes about them go to stderr, so
@@ -569,7 +577,7 @@ async function renderCommand(values: RenderValues, io: Io) {
  */
 async function linkCommand(values: LinkValues, io: Io) {
   const { spec } = await buildSpec(values, io);
-  await layout(spec);
+  warn(await layout(spec), io);
   const link = await createLink(spec, appUrl(io));
   if (!values.json) io.stdout(`${link}\n`);
   if (values.copy) {

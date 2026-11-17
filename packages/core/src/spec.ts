@@ -249,7 +249,7 @@ const PaneSchema = v.strictObject({
 const WindowSchema = v.strictObject({
   frame: describe(
     v.optional(v.boolean(), true),
-    "Draw the window. false puts the code directly on the background, without title bar and tabs",
+    "Draw the window. false puts the code directly on the background, without title bar and tabs, for a theme that allows it. The editor themes always show the window",
   ),
   titleBar: describe(
     v.optional(v.union([v.boolean(), v.literal("solid")]), true),

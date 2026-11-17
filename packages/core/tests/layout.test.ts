@@ -1,6 +1,16 @@
-import { describe, expect, test } from "vite-plus/test";
+import { describe, expect, onTestFinished, test } from "vite-plus/test";
 import { cellCount, layout, normalizeCode } from "../src/layout.ts";
 import { SpecError } from "../src/spec.ts";
+import { DEFAULT_THEME, getTheme } from "../src/themes/index.ts";
+
+/** Lets the default theme show windows without a frame for one test, as a theme that allows them */
+function allowWindowsWithoutFrame() {
+  const theme = getTheme(DEFAULT_THEME);
+  theme.frameless = true;
+  onTestFinished(() => {
+    delete theme.frameless;
+  });
+}
 
 // The error of a layout that must fail
 async function layoutError(input: unknown): Promise<SpecError> {
@@ -74,6 +84,9 @@ describe("layout", () => {
   });
 
   test("should give a window without a frame the same padding on all sides", async () => {
+    // Arrange
+    allowWindowsWithoutFrame();
+
     // Act
     const scene = await layout({
       padding: 16,
@@ -91,6 +104,9 @@ describe("layout", () => {
   });
 
   test("should not stretch a stacked window without a frame", async () => {
+    // Arrange
+    allowWindowsWithoutFrame();
+
     // Act
     const scene = await layout({
       windows: [
@@ -105,6 +121,9 @@ describe("layout", () => {
   });
 
   test("should ignore the size of a pane when it is the only pane of its window", async () => {
+    // Arrange
+    allowWindowsWithoutFrame();
+
     // Act
     const scene = await layout({
       windows: [{ frame: false, split: "column", panes: [{ code: "x", size: 71 }] }],
@@ -428,6 +447,9 @@ describe("window parts", () => {
   });
 
   test("should draw no title bar and no tabs without a frame", async () => {
+    // Arrange
+    allowWindowsWithoutFrame();
+
     // Act
     const scene = await layout({
       windows: [{ frame: false, tabs: true, panes: [{ title: "a.ts", code: "a" }] }],
@@ -980,5 +1002,36 @@ describe("space above the code", () => {
     expect(solid.height).toBe(transparent.height);
     expect(firstLine(solid)).toBe(firstLine(transparent));
     expect(firstLine(transparent)).toBe(50);
+  });
+});
+
+describe("windows without a frame", () => {
+  test("should keep the frame of a window when the theme does not allow a window without one", async () => {
+    // Act
+    const scene = await layout({
+      theme: "nord",
+      windows: [{ frame: false, panes: [{ code: "a" }] }],
+    });
+
+    // Assert
+    expect(scene.windows[0]!.frame).toBe(true);
+    expect(scene.warnings).toEqual([
+      {
+        path: "windows.0.frame",
+        message: "The theme Nord always shows the window, so the image ignores frame: false.",
+      },
+    ]);
+  });
+
+  test("should give no warning for a window without a frame when the theme allows it", async () => {
+    // Arrange
+    allowWindowsWithoutFrame();
+
+    // Act
+    const scene = await layout({ windows: [{ frame: false, panes: [{ code: "a" }] }] });
+
+    // Assert
+    expect(scene.windows[0]!.frame).toBe(false);
+    expect(scene.warnings).toEqual([]);
   });
 });

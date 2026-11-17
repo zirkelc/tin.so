@@ -153,6 +153,26 @@ describe("render", () => {
     expect(io.output()).toContain("Edit: https://example.com/#spec=");
   });
 
+  test("should warn about a setting that the theme ignores", async () => {
+    // Arrange
+    const io = createIo(
+      JSON.stringify({
+        $schema: SPEC_SCHEMA_URL,
+        theme: "nord",
+        windows: [{ frame: false, panes: [{ code: "a" }] }],
+      }),
+    );
+
+    // Act
+    const code = await main(["render", "-", "-o", "out.svg"], io);
+
+    // Assert
+    expect(code).toBe(0);
+    expect(io.errors()).toBe(
+      "Warning: windows.0.frame: The theme Nord always shows the window, so the image ignores frame: false.\n",
+    );
+  });
+
   test("should let options override the spec", async () => {
     // Arrange
     await writeFile(

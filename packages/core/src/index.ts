@@ -53,6 +53,7 @@ export {
   type PaneBox,
   type Rect,
   type Scene,
+  type SpecWarning,
   type TextMetrics,
   type WindowBox,
 } from "./layout.ts";

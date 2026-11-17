@@ -10,6 +10,7 @@ import {
   type Scene,
   SpecError,
   type SpecInput,
+  type SpecWarning,
   type Theme,
   THEMES,
   themeBackground,
@@ -530,9 +531,14 @@ export function WindowEditor(props: {
   selectedPopover?: PopoverRef;
   onSelectPopover: (popover: PopoverRef | undefined) => void;
   onHoverPopover: (popover: PopoverRef | undefined) => void;
+  /** true when the theme can show a window without its frame */
+  frameless: boolean;
+  /** The settings of this window that the image ignores */
+  warnings: Array<SpecWarning>;
 }) {
   const { window, onChange } = props;
-  const frame = window.frame ?? true;
+  // A theme without windows that have no frame shows the frame of every window
+  const frame = (window.frame ?? true) || !props.frameless;
   const titleBar = window.titleBar ?? true;
   const updatePane = (index: number, pane: PaneInput) =>
     onChange({ ...window, panes: window.panes.map((old, i) => (i === index ? pane : old)) });
@@ -547,13 +553,12 @@ export function WindowEditor(props: {
           <HelpTerm help="Tabs adds a tab with the file name above each pane.">Frame</HelpTerm>
         </span>
         <div className="parts">
-          {/* A window shows its frame. Only a window without one, from an older link, can get it back. */}
-          {!frame && (
+          {props.frameless && (
             <PartToggle
               label="Window"
               icon={<FrameIcon />}
-              pressed={false}
-              onChange={() => onChange({ ...window, frame: true })}
+              pressed={frame}
+              onChange={(frame) => onChange({ ...window, frame })}
             />
           )}
           <PartToggle
@@ -564,6 +569,11 @@ export function WindowEditor(props: {
             onChange={(tabs) => onChange({ ...window, tabs })}
           />
         </div>
+        {props.warnings.map((warning) => (
+          <div key={warning.path} className="notice" role="status">
+            <span>{warning.message}</span>
+          </div>
+        ))}
       </div>
       <div className="title-bar-editor" role="group" aria-label="Title bar">
         <div className="switches">

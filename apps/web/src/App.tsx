@@ -356,6 +356,10 @@ export function App() {
                     key={selectedIndex}
                     window={selectedWindow}
                     lineNumbers={spec.lineNumbers ?? false}
+                    frameless={rendered?.scene.theme.frameless ?? false}
+                    warnings={(rendered?.scene.warnings ?? []).filter((warning) =>
+                      warning.path.startsWith(`windows.${selectedIndex}.`),
+                    )}
                     onChange={(window) =>
                       update((current) => updateWindow(current, selectedIndex, () => window))
                     }

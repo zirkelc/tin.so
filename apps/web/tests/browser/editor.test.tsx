@@ -1401,6 +1401,27 @@ describe("frame", () => {
     await expect.element(page.getByRole("button", { name: "Tabs", exact: true })).toBeVisible();
     expect(page.getByRole("button", { name: "Window", exact: true }).elements().length).toBe(0);
   });
+
+  test("should explain that the theme keeps the window of a window without a frame", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await window.tin.setSpec({
+      theme: "nord",
+      windows: [{ frame: false, panes: [{ title: "a.ts", code: "a" }] }],
+    });
+
+    // Assert
+    await expect
+      .element(
+        page.getByText(
+          "The theme Nord always shows the window, so the image ignores frame: false.",
+        ),
+      )
+      .toBeVisible();
+    expect(page.getByRole("button", { name: "Window", exact: true }).elements().length).toBe(0);
+  });
 });
 
 describe("help", () => {

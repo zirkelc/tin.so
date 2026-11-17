@@ -66,7 +66,7 @@ tin main.ts plans.toml --tabs --no-title-bar -o plans.png
 tin worker.ts main.ts --windows --theme tokyo-night -o worker.png
 ```
 
-Common options: `--theme <id>` (`tin themes` lists them), `--mode light`, `--line-numbers`, `--padding 32`, `--background "#1e1e2e"` (a color, `#from,#to` for a gradient, or a CSS gradient such as `"linear-gradient(135deg, #2e1065, #a78bfa)"`), `--background-opacity 0.5` or `--no-background` (transparent), `--aspect-ratio 16:9` (X and YouTube; `1.91:1` for LinkedIn and Open Graph, `1:1`, `4:5`, `9:16`), `--tabs`, `--no-title-bar`, `--no-frame` (code without a window), `--controls color` (red, yellow and green window dots). `tin --help` lists all options. An unknown or misspelled option is an error that names the closest option, so a typo does not go unnoticed.
+Common options: `--theme <id>` (`tin themes` lists them), `--mode light`, `--line-numbers`, `--padding 32`, `--background "#1e1e2e"` (a color, `#from,#to` for a gradient, or a CSS gradient such as `"linear-gradient(135deg, #2e1065, #a78bfa)"`), `--background-opacity 0.5` or `--no-background` (transparent), `--aspect-ratio 16:9` (X and YouTube; `1.91:1` for LinkedIn and Open Graph, `1:1`, `4:5`, `9:16`), `--tabs`, `--no-title-bar`, `--controls color` (red, yellow and green window dots). `tin --help` lists all options. An unknown or misspelled option is an error that names the closest option, so a typo does not go unnoticed.
 
 ## Composed image
 

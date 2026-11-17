@@ -149,6 +149,13 @@ export type WindowBox = Rect & {
   dividers: Array<{ x1: number; y1: number; x2: number; y2: number }>;
 };
 
+/** A setting of the spec that the image ignores, with the reason */
+export type SpecWarning = {
+  /** The path of the setting in the spec, such as "windows.0.frame" */
+  path: string;
+  message: string;
+};
+
 export type Scene = {
   width: number;
   height: number;
@@ -170,6 +177,8 @@ export type Scene = {
   text: TextMetrics;
   popoverText: TextMetrics;
   windows: Array<WindowBox>;
+  /** The settings of the spec that the image ignores */
+  warnings: Array<SpecWarning>;
 };
 
 /** Number of terminal cells of a character: 2 for wide characters such as CJK and most emoji */
@@ -262,7 +271,7 @@ type PaneDraft = Omit<PaneBox, keyof Rect | "code" | "tab" | "annotations" | "cl
   annotations: Array<AnnotationDraft>;
 };
 
-type SceneBase = Omit<Scene, "windows" | "width" | "height">;
+type SceneBase = Omit<Scene, "windows" | "width" | "height" | "warnings">;
 
 type WindowDraft = {
   spec: WindowSpec;
@@ -874,8 +883,21 @@ function checkImageSize(width: number, height: number): void {
 
 /** Validates the spec, highlights the code and places every element of the image */
 export async function layout(input: unknown, options: LayoutOptions = {}): Promise<Scene> {
-  const spec = parseSpec(input);
-  const theme = getTheme(spec.theme);
+  const parsed = parseSpec(input);
+  const theme = getTheme(parsed.theme);
+  // A theme without windows that have no frame shows the window of each window
+  const warnings: Array<SpecWarning> = [];
+  const spec = {
+    ...parsed,
+    windows: parsed.windows.map((window, index) => {
+      if (window.frame || theme.frameless) return window;
+      warnings.push({
+        path: `windows.${index}.frame`,
+        message: `The theme ${theme.name} always shows the window, so the image ignores frame: false.`,
+      });
+      return { ...window, frame: true };
+    }),
+  };
   const mode = resolveMode(theme, spec.mode);
   const font = resolveFont(spec);
   const frame = DEFAULT_FRAME;
@@ -1033,5 +1055,6 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
     width: Math.ceil(width),
     height: Math.ceil(height),
     windows,
+    warnings,
   };
 }

@@ -49,18 +49,18 @@ Only `windows`, `panes` and `code` are required, but always add `"$schema"`. Lea
 
 **Window** (each item of `windows`)
 
-| Field             | Default        | What it does                                                                                                 |
-| ----------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |
-| `panes`           | required       | the panes, from 1 to 20                                                                                      |
-| `split`           | `row`          | panes side by side (`row`) or below each other (`column`)                                                    |
-| `titleBar`        | `true`         | the title bar with the three window dots and the title; `"solid"` gives it its own color and a line below it |
-| `tabs`            | `false`        | a tab with the language icon and the file name above each pane                                               |
-| `frame`           | `true`         | `false` puts the code directly on the background                                                             |
-| `controls`        | `gray`         | `color` gives red, yellow and green window dots                                                              |
-| `background`      | the theme      | a hex color for the window in place of the theme color                                                       |
-| `title`           | the pane title | the title in the title bar                                                                                   |
-| `width`, `height` | fit            | a fixed window size in px                                                                                    |
-| `x`, `y`          | none           | a fixed place in the image (see the rules)                                                                   |
+| Field             | Default        | What it does                                                                                                                                            |
+| ----------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `panes`           | required       | the panes, from 1 to 20                                                                                                                                 |
+| `split`           | `row`          | panes side by side (`row`) or below each other (`column`)                                                                                               |
+| `titleBar`        | `true`         | the title bar with the three window dots and the title; `"solid"` gives it its own color and a line below it                                            |
+| `tabs`            | `false`        | a tab with the language icon and the file name above each pane                                                                                          |
+| `frame`           | `true`         | `false` puts the code directly on the background, for a theme that allows it. The editor themes always show the window, and the CLI warns about `false` |
+| `controls`        | `gray`         | `color` gives red, yellow and green window dots                                                                                                         |
+| `background`      | the theme      | a hex color for the window in place of the theme color                                                                                                  |
+| `title`           | the pane title | the title in the title bar                                                                                                                              |
+| `width`, `height` | fit            | a fixed window size in px                                                                                                                               |
+| `x`, `y`          | none           | a fixed place in the image (see the rules)                                                                                                              |
 
 **Pane** (each item of `panes`)
 

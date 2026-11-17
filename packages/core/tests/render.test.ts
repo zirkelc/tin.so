@@ -1,11 +1,20 @@
 import { readdir, readFile } from "node:fs/promises";
-import { describe, expect, test } from "vite-plus/test";
+import { describe, expect, onTestFinished, test } from "vite-plus/test";
 import { layout } from "../src/layout.ts";
 import { readImageSpec } from "../src/metadata.ts";
 import { render, renderScene } from "../src/node.ts";
 import { toSvg } from "../src/svg.ts";
 import { BACKGROUNDS, themeBackground } from "../src/backgrounds.ts";
-import { resolveMode, THEMES } from "../src/themes/index.ts";
+import { DEFAULT_THEME, getTheme, resolveMode, THEMES } from "../src/themes/index.ts";
+
+/** Lets the default theme show windows without a frame for one test, as a theme that allows them */
+function allowWindowsWithoutFrame() {
+  const theme = getTheme(DEFAULT_THEME);
+  theme.frameless = true;
+  onTestFinished(() => {
+    delete theme.frameless;
+  });
+}
 
 const FIXTURES = new URL("./fixtures/", import.meta.url);
 const fixtures = (await readdir(FIXTURES))
@@ -209,6 +218,7 @@ describe("metadata", () => {
 describe("window-less", () => {
   test("should draw the code without window, shadow and border", async () => {
     // Arrange
+    allowWindowsWithoutFrame();
     const scene = await layout({ windows: [{ frame: false, panes: [{ code: "x" }] }] });
 
     // Act
