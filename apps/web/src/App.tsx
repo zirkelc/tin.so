@@ -159,6 +159,16 @@ export function App() {
     }
   }, []);
 
+  // A new image counts as opened, so that the preview fits it into the window once
+  const [opened, setOpened] = useState(0);
+  const openSpec = useCallback(
+    (next: SpecInput) => {
+      setOpened((count) => count + 1);
+      return showSpec(next);
+    },
+    [showSpec],
+  );
+
   // A function update applies to the newest spec, also when it runs after an async step
   const update = useCallback(
     (next: SpecUpdate) =>
@@ -167,19 +177,19 @@ export function App() {
   );
 
   useEffect(() => {
-    installApi({ getSpec: () => specRef.current, setSpec: showSpec });
+    installApi({ getSpec: () => specRef.current, setSpec: openSpec });
     // A link with an invalid spec opens the default spec
     void readSpecFromUrl().then((fromUrl) =>
-      showSpec(fromUrl ?? DEFAULT_SPEC).catch(() => {
+      openSpec(fromUrl ?? DEFAULT_SPEC).catch(() => {
         if (!fromUrl) return;
-        void showSpec(DEFAULT_SPEC).catch(() => {});
+        void openSpec(DEFAULT_SPEC).catch(() => {});
         flash("The link has an invalid spec, so the default image shows", "error", LINK_ERROR_TIME);
       }),
     );
     const onHashChange = () => void readSpecFromUrl().then((fromUrl) => fromUrl && update(fromUrl));
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
-  }, [showSpec, update, flash]);
+  }, [openSpec, update, flash]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -201,7 +211,7 @@ export function App() {
       event.preventDefault();
       void readImageSpec(file).then((fromImage) => {
         if (!fromImage) return flash(`${file.name} has no tin.so spec`, "error");
-        showSpec(fromImage as SpecInput).then(
+        openSpec(fromImage as SpecInput).then(
           () => {
             setSelected({ windows: [0] });
             flash(`Opened ${file.name}`);
@@ -216,7 +226,7 @@ export function App() {
       window.removeEventListener("dragover", onDragOver);
       window.removeEventListener("drop", onDrop);
     };
-  }, [showSpec, flash]);
+  }, [openSpec, flash]);
 
   const exportImage = async (format: ImageFormat) => {
     const spec = withoutMissingParts(specRef.current);
@@ -469,6 +479,7 @@ export function App() {
         <Preview
           rendered={rendered}
           spec={spec}
+          opened={opened}
           stale={issues.length > 0}
           selected={selection}
           onSelect={setSelected}

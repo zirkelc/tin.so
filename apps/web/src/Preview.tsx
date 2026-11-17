@@ -1714,6 +1714,8 @@ export function Preview(props: {
   hovered?: number;
   /** The popover that the pointer is on in the list of popovers */
   hoveredPopover?: HoveredPopover;
+  /** Counts the images that were opened. A new count fits the next image into the window. */
+  opened?: number;
 }) {
   const [stageRef, stage] = useSize<HTMLDivElement>();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -1818,7 +1820,24 @@ export function Preview(props: {
           ),
         )
       : 1;
-  const zoom = userZoom ?? fitZoom;
+  // The zoom that fits stays while edits change the size of the image, so that the image really
+  // gets larger or smaller on the screen. It fits again for a new image and a new canvas size.
+  const [fitted, setFitted] = useState<number>();
+  const fitNext = useRef(true);
+  useEffect(() => {
+    fitNext.current = true;
+  }, [props.opened]);
+  useEffect(() => {
+    if (!rendered || !fitNext.current) return;
+    fitNext.current = false;
+    setFitted(fitZoom);
+    // Only a new rendered image after an open fits it, not every size change
+  }, [rendered]);
+  useEffect(() => {
+    if (rendered) setFitted(fitZoom);
+  }, [stage.width, stage.height]);
+  // While a fit is pending, the new image shows at once at the zoom that fits it
+  const zoom = userZoom ?? (fitNext.current ? fitZoom : (fitted ?? fitZoom));
   const closeMenu = useCallback(() => setMenu(undefined), []);
   const popover = props.selected?.popover;
   const windows = props.selected && !popover ? props.selected.windows : [];
@@ -2245,9 +2264,12 @@ export function Preview(props: {
           <button
             type="button"
             className="tool zoom-value"
-            aria-pressed={userZoom === undefined}
+            aria-pressed={userZoom === undefined && fitted === fitZoom}
             title="Fit the image into the window"
-            onClick={() => setUserZoom(undefined)}
+            onClick={() => {
+              setUserZoom(undefined);
+              setFitted(fitZoom);
+            }}
           >
             Fit
           </button>

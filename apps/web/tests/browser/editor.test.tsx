@@ -1338,6 +1338,26 @@ describe("format code", () => {
   });
 });
 
+describe("zoom", () => {
+  test("should keep the zoom when an edit makes the image larger", async () => {
+    // Arrange
+    const code = `export const plans = ["free", "pro", "team", "enterprise", "custom"] as const satisfies Array<string>;`;
+    await mountApp();
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "plans.ts", code }] }] });
+    const value = page.getByTitle("Show the image at 100%");
+    await expect.poll(() => value.element().textContent?.includes("%")).toBe(true);
+    const before = value.element().textContent!;
+    await page.getByRole("textbox", { name: "Code of window 1, pane 1" }).click();
+
+    // Act
+    await page.getByRole("button", { name: "Add a pane to the right" }).click();
+
+    // Assert
+    await expect.poll(() => window.tin.getSpec().windows[0]?.panes.length).toBe(2);
+    await expect.poll(() => value.element().textContent, { timeout: 2_000 }).toBe(before);
+  });
+});
+
 describe("canvas pan", () => {
   const zoomIn = async () => {
     await mountApp();

@@ -56,6 +56,7 @@ An image can show more than one file. Split a window into panes, put several win
 - Duplicate windows with ⌘D, and copy and paste them with ⌘C and ⌘V, also from one browser tab to another.
 - A toolbar above the selected windows and the right-click menus give the actions for each window.
 - Zoom in and out, or fit the image to the screen. To move around a zoomed image, pick the hand tool at the bottom left (H) and drag. Space with a drag and a drag with the middle mouse button also move the image.
+- The zoom stays while you edit. When a window, a pane or a popover makes the image larger or smaller, the image really gets larger or smaller on the screen. The editor fits a new image to the screen, and Fit does it again.
 - A pane is as wide as its code. A popover can lie over the next pane, and a wider window gives it more room.
 - The Fit button in the window toolbar gives the window and its panes the size of the code again.
 - Point to the divider between two panes, or drag it, to see the size of each pane in pixels and in percent of the window.
