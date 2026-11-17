@@ -742,6 +742,30 @@ function extent(windows: Array<WindowBox>): { right: number; bottom: number } {
   };
 }
 
+/** The edges of the windows and of their popovers */
+function bounds(windows: Array<WindowBox>): {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+} {
+  const boxes: Array<Rect> = windows.flatMap((window) => [
+    window,
+    ...window.panes.flatMap((pane) => pane.annotations.map((annotation) => annotation.box)),
+  ]);
+  if (boxes.length === 0) return { left: 0, top: 0, right: 0, bottom: 0 };
+  return {
+    left: Math.min(...boxes.map((box) => box.x)),
+    top: Math.min(...boxes.map((box) => box.y)),
+    right: Math.max(...boxes.map((box) => box.x + box.width)),
+    bottom: Math.max(...boxes.map((box) => box.y + box.height)),
+  };
+}
+
+function withoutPopovers(window: WindowBox): WindowBox {
+  return { ...window, panes: window.panes.map((pane) => ({ ...pane, annotations: [] })) };
+}
+
 function shiftRect<RECT extends Rect>(rect: RECT, dx: number, dy: number): RECT {
   return { ...rect, x: rect.x + dx, y: rect.y + dy };
 }
@@ -891,12 +915,13 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
     }),
   );
 
-  // Popovers can reach outside of their window, and the image grows to show them
-  const flowExtent = extent(flow);
-  const fixedExtent = extent([...fixed.values()]);
+  // The padding is around the windows. Popovers can reach into it and outside of their window,
+  // and the image grows only when a popover would leave it.
+  const windowsExtent = extent([...flow, ...fixed.values()].map(withoutPopovers));
+  const allExtent = extent([...flow, ...fixed.values()]);
   const natural = {
-    width: Math.max(flowExtent.right, fixedExtent.right) + spec.padding,
-    height: Math.max(flowExtent.bottom, fixedExtent.bottom) + spec.padding,
+    width: Math.max(windowsExtent.right + spec.padding, allExtent.right),
+    height: Math.max(windowsExtent.bottom + spec.padding, allExtent.bottom),
   };
 
   // A set size is the size of the image, and the image cuts off what is outside of it
@@ -921,9 +946,34 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
   }
   checkImageSize(width, height);
 
-  // The windows that follow direction and gap stay centered when the image size or ratio changes
-  const dx = (width - natural.width) / 2;
-  const dy = (height - natural.height) / 2;
+  // The windows that follow direction and gap stay centered when the image size or ratio changes.
+  // Their popovers do not count for the center, so a window stays in place while its popover moves.
+  // The windows move only as far as needed to keep their padding and their popovers in the image.
+  const own = bounds(flow.map(withoutPopovers));
+  const all = bounds(flow);
+  const center = (
+    size: number,
+    naturalSize: number,
+    windowsEnd: number,
+    edges: { start: number; end: number; popoverStart: number; popoverEnd: number },
+  ) => {
+    const min = Math.max(spec.padding - edges.start, -edges.popoverStart);
+    const max = Math.min(size - spec.padding - edges.end, size - edges.popoverEnd);
+    if (min > max) return (size - naturalSize) / 2;
+    return Math.min(max, Math.max(min, (size - windowsEnd - spec.padding) / 2));
+  };
+  const dx = center(width, natural.width, windowsExtent.right, {
+    start: own.left,
+    end: own.right,
+    popoverStart: all.left,
+    popoverEnd: all.right,
+  });
+  const dy = center(height, natural.height, windowsExtent.bottom, {
+    start: own.top,
+    end: own.bottom,
+    popoverStart: all.top,
+    popoverEnd: all.bottom,
+  });
   const shifted = flow.map((window) => shiftWindow(window, dx, dy));
   const windows = drafts.map((_, index) => fixed.get(index) ?? shifted.shift()!);
 

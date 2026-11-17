@@ -328,7 +328,7 @@ const SpecV1Schema = v.pipe(
     ),
     padding: describe(
       v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(256)), 64),
-      "Space around the windows in px",
+      "Space around the windows in px. Popovers can reach into it, up to the edge of the image",
     ),
     font: describe(v.optional(v.picklist(CODE_FONT_IDS)), "Code font (default: JetBrains Mono)"),
     lineNumbers: describe(v.optional(v.boolean()), "Show line numbers in all panes"),

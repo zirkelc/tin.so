@@ -244,7 +244,27 @@ describe("annotations", () => {
 
     // Assert
     const { box } = scene.windows[0]!.panes[0]!.annotations[0]!;
-    expect(scene.height).toBe(Math.ceil(box.y + box.height + 32));
+    expect(scene.height).toBe(Math.ceil(box.y + box.height));
+  });
+
+  test("should not grow the image for a popover inside the padding", async () => {
+    // Arrange
+    const spec = (annotations: Array<Record<string, unknown>>) => ({
+      padding: 64,
+      windows: [{ panes: [{ code: "const a = 1;\nconst b = 2;", annotations }] }],
+    });
+    const before = await layout(spec([]));
+
+    // Act
+    const scene = await layout(spec([{ line: 2, match: "b", code: "number" }]));
+
+    // Assert
+    const { box } = scene.windows[0]!.panes[0]!.annotations[0]!;
+    expect(box.y + box.height).toBeGreaterThan(scene.windows[0]!.y + scene.windows[0]!.height);
+    expect({ width: scene.width, height: scene.height }).toEqual({
+      width: before.width,
+      height: before.height,
+    });
   });
 
   test("should reject a match that is not in the line", async () => {
@@ -633,6 +653,45 @@ describe("popover place and size", () => {
     const box = scene.windows[0]!.panes[0]!.annotations[0]!.box;
     const old = before.windows[0]!.panes[0]!.annotations[0]!.box;
     expect({ x: box.x, y: box.y }).toEqual({ x: old.x + 30, y: old.y - 10 });
+  });
+
+  describe("in an image with an aspect ratio", () => {
+    const code =
+      'export const plans = ["free", "pro", "team", "enterprise"] as const satisfies Array<string>;\nexport type Plan = (typeof plans)[number];';
+    const wide = (offsetY: number) => ({
+      aspectRatio: "16:9",
+      padding: 32,
+      windows: [
+        {
+          panes: [
+            {
+              code,
+              annotations: [{ line: 1, match: "plans", code: "a long type of plans", offsetY }],
+            },
+          ],
+        },
+      ],
+    });
+
+    test("should keep the window in place when its popover moves down", async () => {
+      // Arrange
+      const before = await layout(wide(0));
+
+      // Act
+      const scene = await layout(wide(30));
+
+      // Assert
+      expect(scene.windows[0]!.y).toBe(before.windows[0]!.y);
+    });
+
+    test("should move the window only as far as the popover needs to reach the edge of the image", async () => {
+      // Act
+      const scene = await layout(wide(200));
+
+      // Assert
+      const box = scene.windows[0]!.panes[0]!.annotations[0]!.box;
+      expect(box.y + box.height).toBeCloseTo(scene.height, 0);
+    });
   });
 
   test("should give the popover the size of the spec and cut off its code", async () => {

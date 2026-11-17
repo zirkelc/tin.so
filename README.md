@@ -74,6 +74,7 @@ A popover points to a word in the code and looks like the hover card of an edito
 - Select code and right-click: the selection stays, so the menu acts on the selected text.
 - A popover has its own code and language.
 - Move and resize a popover. Double-click it to put it back below its word.
+- A popover can reach into the padding of the image, up to its edge. The image grows only when a popover goes past the edge, and the window keeps its place while you move its popover.
 
 ### Highlights, styles and colors
 
