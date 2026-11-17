@@ -142,10 +142,17 @@ const AnnotationSchema = v.strictObject({
     v.optional(v.picklist(ANNOTATION_TYPES), "popover"),
     "Kind of the annotation. popover is a card below the text, as the hover card of an editor",
   ),
-  line: describe(v.pipe(v.number(), v.integer(), v.minValue(1)), "Line of the anchor, from 1"),
+  line: describe(
+    v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
+    "Line that the popover is below, from 1. The popover moves with its line when the code changes. Without line, x and y place it",
+  ),
   match: describe(
-    v.pipe(v.string(), v.minLength(1)),
-    "Text in the line that the popover points to",
+    v.optional(v.pipe(v.string(), v.minLength(1))),
+    "Text in the line that the popover starts below. It must be in the line (default: the column)",
+  ),
+  column: describe(
+    v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
+    "Column in the line that the popover starts below, from 1 (default: 1). match takes its place when it is set",
   ),
   occurrence: describe(
     v.optional(v.pipe(v.number(), v.integer(), v.minValue(1)), 1),
@@ -166,6 +173,14 @@ const AnnotationSchema = v.strictObject({
   offsetY: describe(
     v.optional(position(), 0),
     `Moves the popover down (negative: up) from its place below the text, in px, from -${SPEC_LIMITS.position} to ${SPEC_LIMITS.position}`,
+  ),
+  x: describe(
+    v.optional(position()),
+    `Fixed place of the popover from the left edge of the code area of its pane, in px, from -${SPEC_LIMITS.position} to ${SPEC_LIMITS.position}. With x or y, the popover stays at its place and does not move with its line. The image does not grow for it`,
+  ),
+  y: describe(
+    v.optional(position()),
+    `Fixed place of the popover from the top edge of the code area of its pane, in px, from -${SPEC_LIMITS.position} to ${SPEC_LIMITS.position}. With x or y, the popover stays at its place and does not move with its line. The image does not grow for it`,
   ),
   width: describe(size(40), "Width of the popover in px (default: fit the code)"),
   height: describe(size(32), "Height of the popover in px (default: fit the code)"),

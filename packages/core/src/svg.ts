@@ -256,8 +256,13 @@ function renderWindow(parent: FrameContext, window: WindowBox, index: number, ou
   if (window.header) out.push(DEFAULT_FRAME.header(context, window));
 
   window.panes.forEach((pane, i) => renderPane(scene, pane, `pane-${index}-${i}`, out));
-  // One line below the title bar, for the tabs that follow it or for a title bar of its own
-  if (window.header && (window.solidTitleBar || window.panes.some((pane) => pane.tab))) {
+  // One line below the title bar, for the tabs that follow it, for a title bar of its own, or for
+  // panes side by side, so that the lines between the panes end at a line
+  const sideBySide = window.dividers.some((divider) => divider.x1 === divider.x2);
+  if (
+    window.header &&
+    (window.solidTitleBar || sideBySide || window.panes.some((pane) => pane.tab))
+  ) {
     const y = window.header.y + window.header.height - 0.5;
     out.push(
       `<line ${attrs({ x1: window.header.x, y1: y, x2: window.header.x + window.header.width, y2: y, stroke: scene.frame.divider })}/>`,

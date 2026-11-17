@@ -71,7 +71,7 @@ Only `windows`, `panes` and `code` are required, but always add `"$schema"`. Lea
 | `language`    | `auto`        | a Shiki language id or alias, `text`, or `ansi` for terminal output with color codes; `tin languages` lists them. With `auto`, code with color codes is `ansi` |
 | `highlight`   | `[]`          | lines to highlight, from 1: `[3]`, `[2, "5-7"]`, or with a color: `[{ "lines": "5-7", "color": "#f85149" }]`                                                   |
 | `marks`       | `[]`          | styles and colors on parts of a line (see below)                                                                                                               |
-| `annotations` | `[]`          | popovers below a word (see below)                                                                                                                              |
+| `annotations` | `[]`          | popovers below a line or a word (see below)                                                                                                                    |
 | `icon`        | `auto`        | the tab icon: `auto`, `file`, `none` or an icon id                                                                                                             |
 | `lineNumbers` | image setting | line numbers for this pane only                                                                                                                                |
 | `size`        | fit           | the pane width in a row split, or its height in a column split, in px                                                                                          |
@@ -84,18 +84,21 @@ Only `windows`, `panes` and `code` are required, but always add `"$schema"`. Lea
 
 Use several marks on the same text to combine them, for example one with `"style": "strong"` and one with `"color"`.
 
-**Popover** (each item of `annotations`): it points to the text `match` in line `line`, like the hover card of an editor. The popover draws no line below the word. To mark the word, add a mark on it, for example `{ "line": 2, "match": "user", "style": "underline" }`.
+**Popover** (each item of `annotations`): a card below a line, like the hover card of an editor. It starts below the text `match` in line `line`, or below column `column` of that line. It moves with its line when the code changes. With `x` or `y`, it has a fixed place in its pane instead. The popover draws no line below the word. To mark the word, add a mark on it, for example `{ "line": 2, "match": "user", "style": "underline" }`.
 
-| Field                         | Default               | What it does                                                                                                                   |
-| ----------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `type`                        | `popover`             | the kind of annotation; `popover` is the only kind today                                                                       |
-| `line`, `match`, `occurrence` | required, required, 1 | the word that the popover points to                                                                                            |
-| `code`                        | required              | the content, for example a type                                                                                                |
-| `language`                    | the pane language     | the language of the popover code                                                                                               |
-| `offsetX`, `offsetY`          | `0`                   | moves the popover from its place below the word, in px                                                                         |
-| `width`, `height`             | fit                   | a fixed popover size in px                                                                                                     |
-| `marks`                       | `[]`                  | marks on the popover code; `line` counts the lines of the popover code                                                         |
-| `background`                  | raised window color   | a hex color for the popover; without it, the popover is a little lighter than the window in dark mode and darker in light mode |
+| Field                 | Default             | What it does                                                                                                                                   |
+| --------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`                | `popover`           | the kind of annotation; `popover` is the only kind today                                                                                       |
+| `line`                | none                | the line that the popover is below, from 1; without `line` or with `x` or `y`, the popover has a fixed place                                   |
+| `match`, `occurrence` | none, 1             | the text in the line that the popover starts below; it must be in the line                                                                     |
+| `column`              | 1                   | the column in the line that the popover starts below, from 1, when there is no `match`                                                         |
+| `x`, `y`              | none                | a fixed place in px from the top left of the code area of the pane; the popover then stays there, and the image cuts off what is outside of it |
+| `code`                | required            | the content, for example a type                                                                                                                |
+| `language`            | the pane language   | the language of the popover code                                                                                                               |
+| `offsetX`, `offsetY`  | `0`                 | moves the popover from its place below the line, in px                                                                                         |
+| `width`, `height`     | fit                 | a fixed popover size in px                                                                                                                     |
+| `marks`               | `[]`                | marks on the popover code; `line` counts the lines of the popover code                                                                         |
+| `background`          | raised window color | a hex color for the popover; without it, the popover is a little lighter than the window in dark mode and darker in light mode                 |
 
 ## Recipes
 

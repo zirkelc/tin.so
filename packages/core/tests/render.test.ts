@@ -48,6 +48,23 @@ describe("toSvg", () => {
     expect(svg).toContain("&#60;a&#62;.html");
   });
 
+  test("should draw a line below the title bar of a window with panes side by side and no tabs", async () => {
+    // Arrange
+    const scene = await layout({
+      windows: [{ split: "row", panes: [{ code: "a" }, { code: "b" }] }],
+    });
+    const header = scene.windows[0]!.header!;
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    const y = String(header.y + header.height - 0.5);
+    expect(svg).toContain(
+      `<line x1="${header.x}" y1="${y}" x2="${header.x + header.width}" y2="${y}"`,
+    );
+  });
+
   test("should place every character on the cell grid", async () => {
     // Arrange
     const scene = await layout({

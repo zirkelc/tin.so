@@ -88,6 +88,8 @@ export type AnnotationBox = {
   clipped: boolean;
   /** The background of the popover from the spec */
   background?: string;
+  /** true for a popover with a fixed place in the pane, which does not change the image size */
+  fixed?: true;
 };
 
 export type PaneBox = Rect & {
@@ -241,9 +243,8 @@ function resolveFont(spec: Spec): CodeFont {
 type Size = { width: number; height: number };
 
 type AnnotationDraft = {
-  line: number;
-  column: number;
-  cells: number;
+  /** The anchor below a line, or the fixed place in the code area of the pane */
+  at: { line: number; column: number; cells: number } | { place: { x: number; y: number } };
   lines: Array<HighlightedLine>;
   /** The size that fits the code */
   natural: Size;
@@ -346,6 +347,31 @@ function applyMarks(
   });
 }
 
+/**
+ * Where a popover goes: below its match or column in its line, or at its fixed place. A popover
+ * with x or y, or without a line, has a fixed place, which is the top left of the code area by default.
+ */
+function annotationAnchor(
+  annotation: AnnotationSpec,
+  lines: Array<HighlightedLine>,
+  path: string,
+): AnnotationDraft["at"] {
+  const { line } = annotation;
+  if (annotation.x !== undefined || annotation.y !== undefined || line === undefined) {
+    return { place: { x: annotation.x ?? 0, y: annotation.y ?? 0 } };
+  }
+  if (annotation.match !== undefined) {
+    const { text, index } = findMatch(
+      lines,
+      { ...annotation, line, match: annotation.match },
+      path,
+    );
+    return { line, column: textCells(text.slice(0, index)), cells: textCells(annotation.match) };
+  }
+  if (!lines[line - 1]) throw new SpecError([`${path}.line: the pane has no line ${line}`]);
+  return { line, column: (annotation.column ?? 1) - 1, cells: 0 };
+}
+
 async function draftAnnotation(
   annotation: AnnotationSpec,
   lines: Array<HighlightedLine>,
@@ -353,7 +379,7 @@ async function draftAnnotation(
   path: string,
   scene: SceneBase,
 ): Promise<AnnotationDraft> {
-  const { text, index } = findMatch(lines, annotation, path);
+  const at = annotationAnchor(annotation, lines, path);
 
   const language = annotation.language ? resolveLanguage(annotation.language) : paneLanguage;
   const popoverLines = applyMarks(
@@ -373,12 +399,8 @@ async function draftAnnotation(
     height: POPOVER.paddingY * 2 + popoverLines.length * POPOVER.lineHeight,
   };
 
-  const column = textCells(text.slice(0, index));
-  const cells = textCells(annotation.match);
   return {
-    line: annotation.line,
-    column,
-    cells,
+    at,
     lines: popoverLines,
     natural,
     size: { width: annotation.width ?? natural.width, height: annotation.height ?? natural.height },
@@ -592,19 +614,31 @@ function placePane(pane: PaneDraft, rect: Rect, text: TextMetrics): PaneBox {
     ...(pane.tabbed && { tab: { x: rect.x, y: rect.y, width: rect.width, height: tabHeight } }),
     code,
     clipped: code.width < codeSize.width || code.height < codeSize.height,
-    // The popover starts below the anchor, aligned with its first character
+    // The popover starts below the anchor, aligned with its first character. A popover with a
+    // fixed place has its anchor at its own top left corner.
     annotations: annotations.map((annotation) => {
-      const x = code.x + pane.gutter + annotation.column * text.cellWidth;
-      const y = code.y + pane.codeTop + annotation.line * text.lineHeight;
+      const { at } = annotation;
+      const anchor =
+        "place" in at
+          ? { x: code.x + at.place.x, y: code.y + at.place.y, width: 0 }
+          : {
+              x: code.x + pane.gutter + at.column * text.cellWidth,
+              y: code.y + pane.codeTop + at.line * text.lineHeight,
+              width: at.cells * text.cellWidth,
+            };
+      const box =
+        "place" in at
+          ? { x: anchor.x, y: anchor.y }
+          : {
+              x: anchor.x + annotation.offset.x,
+              y: anchor.y + POPOVER.offset + annotation.offset.y,
+            };
       return {
-        anchor: { x, y, width: annotation.cells * text.cellWidth },
-        box: {
-          x: x + annotation.offset.x,
-          y: y + POPOVER.offset + annotation.offset.y,
-          ...annotation.size,
-        },
+        anchor,
+        box: { ...box, ...annotation.size },
         lines: annotation.lines,
         ...(annotation.background && { background: annotation.background }),
+        ...("place" in at && { fixed: true as const }),
         clipped:
           annotation.size.width < annotation.natural.width ||
           annotation.size.height < annotation.natural.height,
@@ -762,6 +796,16 @@ function bounds(windows: Array<WindowBox>): {
   };
 }
 
+function withoutFixedPopovers(window: WindowBox): WindowBox {
+  return {
+    ...window,
+    panes: window.panes.map((pane) => ({
+      ...pane,
+      annotations: pane.annotations.filter((annotation) => !annotation.fixed),
+    })),
+  };
+}
+
 function withoutPopovers(window: WindowBox): WindowBox {
   return { ...window, panes: window.panes.map((pane) => ({ ...pane, annotations: [] })) };
 }
@@ -916,9 +960,11 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
   );
 
   // The padding is around the windows. Popovers can reach into it and outside of their window,
-  // and the image grows only when a popover would leave it.
-  const windowsExtent = extent([...flow, ...fixed.values()].map(withoutPopovers));
-  const allExtent = extent([...flow, ...fixed.values()]);
+  // and the image grows only when a popover below its line would leave it. A popover with a fixed
+  // place never changes the image, which cuts off what of it is outside.
+  const placed = [...flow, ...fixed.values()];
+  const windowsExtent = extent(placed.map(withoutPopovers));
+  const allExtent = extent(placed.map(withoutFixedPopovers));
   const natural = {
     width: Math.max(windowsExtent.right + spec.padding, allExtent.right),
     height: Math.max(windowsExtent.bottom + spec.padding, allExtent.bottom),
@@ -948,9 +994,10 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
 
   // The windows that follow direction and gap stay centered when the image size or ratio changes.
   // Their popovers do not count for the center, so a window stays in place while its popover moves.
-  // The windows move only as far as needed to keep their padding and their popovers in the image.
+  // The windows move only as far as needed to keep their padding and the popovers below their
+  // lines in the image.
   const own = bounds(flow.map(withoutPopovers));
-  const all = bounds(flow);
+  const all = bounds(flow.map(withoutFixedPopovers));
   const center = (
     size: number,
     naturalSize: number,

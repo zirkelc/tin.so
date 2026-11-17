@@ -247,6 +247,40 @@ describe("annotations", () => {
     expect(scene.height).toBe(Math.ceil(box.y + box.height));
   });
 
+  test("should keep the image size for a popover with a place below the image", async () => {
+    // Arrange
+    const spec = (annotations: Array<Record<string, unknown>>) => ({
+      windows: [{ panes: [{ code: "const a = 1;", annotations }] }],
+    });
+    const before = await layout(spec([]));
+
+    // Act
+    const scene = await layout(spec([{ line: 1, x: 0, y: 300, code: "number" }]));
+
+    // Assert
+    expect({ width: scene.width, height: scene.height }).toEqual({
+      width: before.width,
+      height: before.height,
+    });
+  });
+
+  test("should keep the image size for a popover with a place right of the image", async () => {
+    // Arrange
+    const spec = (annotations: Array<Record<string, unknown>>) => ({
+      windows: [{ panes: [{ code: "const a = 1;", annotations }] }],
+    });
+    const before = await layout(spec([]));
+
+    // Act
+    const scene = await layout(spec([{ line: 1, x: 400, y: 0, code: "number" }]));
+
+    // Assert
+    expect({ width: scene.width, height: scene.height }).toEqual({
+      width: before.width,
+      height: before.height,
+    });
+  });
+
   test("should not grow the image for a popover inside the padding", async () => {
     // Arrange
     const spec = (annotations: Array<Record<string, unknown>>) => ({
@@ -278,6 +312,63 @@ describe("annotations", () => {
 
     // Assert
     await expect(result).rejects.toThrow(SpecError);
+  });
+});
+
+describe("popovers without a match", () => {
+  const scene = (annotation: Record<string, unknown>, code = "const a = b;\n  const c = a;") =>
+    layout({
+      padding: 32,
+      windows: [
+        { titleBar: false, panes: [{ code, annotations: [{ code: "x", ...annotation }] }] },
+      ],
+    });
+
+  test("should place a popover with only a line below the start of that line", async () => {
+    // Act
+    const result = await scene({ line: 2 });
+
+    // Assert
+    const pane = result.windows[0]!.panes[0]!;
+    const { box } = pane.annotations[0]!;
+    expect(box.x).toBeCloseTo(pane.code.x + 16);
+    expect(box.y).toBe(pane.code.y + 16 + 2 * 21 + 6);
+  });
+
+  test("should place a popover at the column of its line", async () => {
+    // Act
+    const result = await scene({ line: 2, column: 9 });
+
+    // Assert
+    const pane = result.windows[0]!.panes[0]!;
+    expect(pane.annotations[0]!.box.x).toBeCloseTo(pane.code.x + 16 + 8 * result.text.cellWidth);
+  });
+
+  test("should keep a popover with a place in the pane there when lines come before it", async () => {
+    // Arrange
+    const before = await scene({ line: 2, x: 120, y: 30 });
+
+    // Act
+    const result = await scene({ line: 3, x: 120, y: 30 }, "// new\nconst a = b;\n  const c = a;");
+
+    // Assert
+    const pane = result.windows[0]!.panes[0]!;
+    const old = before.windows[0]!.panes[0]!;
+    expect({
+      x: pane.annotations[0]!.box.x - pane.code.x,
+      y: pane.annotations[0]!.box.y - pane.code.y,
+    }).toEqual({ x: 120, y: 30 });
+    expect(pane.annotations[0]!.box.y - pane.code.y).toBe(old.annotations[0]!.box.y - old.code.y);
+  });
+
+  test("should place a popover without a line in a pane without code", async () => {
+    // Act
+    const result = await scene({}, "");
+
+    // Assert
+    const pane = result.windows[0]!.panes[0]!;
+    const { box } = pane.annotations[0]!;
+    expect({ x: box.x, y: box.y }).toEqual({ x: pane.code.x, y: pane.code.y });
   });
 });
 
@@ -691,6 +782,27 @@ describe("popover place and size", () => {
       // Assert
       const box = scene.windows[0]!.panes[0]!.annotations[0]!.box;
       expect(box.y + box.height).toBeCloseTo(scene.height, 0);
+    });
+
+    test("should keep the window in place when a popover with a place reaches past the edge of the image", async () => {
+      // Arrange
+      const fixed = (y: number) => {
+        const spec = wide(0);
+        const pane = spec.windows[0]!.panes[0]!;
+        return {
+          ...spec,
+          windows: [
+            { panes: [{ ...pane, annotations: [{ line: 1, x: 0, y, code: "a long type" }] }] },
+          ],
+        };
+      };
+      const before = await layout(fixed(0));
+
+      // Act
+      const scene = await layout(fixed(400));
+
+      // Assert
+      expect(scene.windows[0]!.y).toBe(before.windows[0]!.y);
     });
   });
 
