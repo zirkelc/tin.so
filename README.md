@@ -140,7 +140,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 
 - Type the code directly in the image.
 - Syntax highlighting with Shiki for all its languages. The language comes from the file name, or you select it: the popular languages are at the top, and the search also finds other names, such as "bash" for Shell.
-- Terminal output with its color codes, in the terminal colors of the theme. Code with color codes gets the language Terminal Output (`ansi`) by itself, for example from `oxlint --color | tin`.
+- Terminal output with its color codes, in the terminal colors of the theme. Code with color codes gets the language Terminal Output (`ansi`) by itself, for example from `FORCE_COLOR=1 npx oxlint | tin` or `git diff --color | tin`. Most tools turn their colors off in a pipe, so the variable or the flag turns them on again.
 - An example for each of the 242 languages.
 - Format the code with Prettier, for JavaScript, TypeScript, JSON, CSS, HTML, Markdown, YAML and more.
 - Edit the full spec as JSON, with each problem shown while you type.

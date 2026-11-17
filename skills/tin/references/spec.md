@@ -213,7 +213,7 @@ Use several marks on the same text to combine them, for example one with `"style
 }
 ```
 
-To show the real output of a tool, run it with colors and pipe it: `oxlint --color | tin -o lint.png`. The CLI reads the color codes as `ansi`.
+To show the real output of a tool, turn its colors on and pipe it: `FORCE_COLOR=1 npx oxlint -f default | tin -o lint.png`, or `git diff --color | tin -o diff.png`. The CLI reads the color codes as `ansi`. See "Terminal output with colors" in the skill.
 
 **An image for a post on X**: add `"aspectRatio": "16:9"` at the top level. Use `"1.91:1"` for LinkedIn and link previews, `"4:5"` for an Instagram post, and `"9:16"` for a story.
 

@@ -43,6 +43,20 @@ git show HEAD:src/app.py | tin --title app.py -o app.png
 
 Text on stdin is plain code, also JSON such as a `package.json`. Only a spec with the tin `"$schema"` is read as a spec (see [Composed image](#composed-image)). `--code 'x = 1'` gives a short snippet as text, without stdin.
 
+### Terminal output with colors
+
+tin keeps the colors of terminal output: text with color codes gets the language Terminal Output (`ansi`), drawn in the terminal colors of the theme. Most tools turn their colors off when their output goes into a pipe, so turn them on for the command that you pipe:
+
+```bash
+# Most Node.js tools (oxlint, vitest, eslint, tsc) read FORCE_COLOR
+FORCE_COLOR=1 npx oxlint -f default | tin -o lint.png
+
+# git ignores FORCE_COLOR and needs its own flag
+git diff --color | tin -o diff.png
+```
+
+Without the variable or the flag, the image shows the output with no colors. Some tools print a short format with no colors when a coding agent runs them: oxlint prints one line per problem, and `-f default` gives its normal format with the code frames.
+
 Use a heredoc for code from the chat. `echo '...'` is fine for one line without single quotes. For several lines, a heredoc is safer than `echo` or `printf`, which handle `\n` and backslashes differently in each shell.
 
 Give files directly to show them. Each file becomes a pane in one window, side by side. `--windows` puts each file in its own window, below each other, and `--direction row` puts the windows side by side.
