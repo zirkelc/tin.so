@@ -50,6 +50,17 @@ export function formatWidth(aspectRatio: string | undefined): number {
   return 60;
 }
 
+// Formatted code gets at least this many columns, also in a narrow pane
+const MIN_FORMAT_WIDTH = 40;
+
+/**
+ * The line width of formatted code in a pane with space for the given number of columns. The code
+ * stays inside the pane, so that formatting does not make the pane or its window larger.
+ */
+export function paneFormatWidth(columns: number, aspectRatio: string | undefined): number {
+  return Math.min(formatWidth(aspectRatio), Math.max(MIN_FORMAT_WIDTH, columns));
+}
+
 export function canFormat(language: string): boolean {
   return language in FORMATTERS;
 }

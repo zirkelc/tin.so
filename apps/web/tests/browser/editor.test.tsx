@@ -1280,6 +1280,58 @@ describe("pane sizes", () => {
   });
 });
 
+describe("format code", () => {
+  test("should keep the lines within the width of the pane", async () => {
+    // Arrange
+    const code = 'const user = {\n  id: 1,\n  name: "Ada",\n  email: "ada@example.com",\n};';
+    await mountApp();
+    await window.tin.setSpec({
+      windows: [
+        {
+          panes: [
+            { title: "a.ts", code: "const a=1" },
+            { title: "user.ts", code },
+          ],
+        },
+      ],
+    });
+
+    // Act
+    await page.getByRole("button", { name: "Format the code (⇧⌥F)" }).click();
+
+    // Assert
+    await expect.poll(() => window.tin.getSpec().windows[0]?.panes[0]?.code).toBe("const a = 1;");
+    expect(window.tin.getSpec().windows[0]?.panes[1]?.code).toBe(code);
+  });
+
+  test("should break the lines that are wider than a pane with a fixed size", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({
+      windows: [
+        {
+          panes: [
+            { title: "a.ts", code: "const a = 1;", size: 300 },
+            {
+              title: "user.ts",
+              code: 'const user = { id: 1, name: "Ada", email: "ada@example.com" };',
+              size: 300,
+            },
+          ],
+        },
+      ],
+    });
+
+    // Act
+    await page.getByRole("button", { name: "Format the code (⇧⌥F)" }).click();
+
+    // Assert
+    await expect
+      .poll(() => window.tin.getSpec().windows[0]?.panes[1]?.code)
+      .toBe('const user = {\n  id: 1,\n  name: "Ada",\n  email: "ada@example.com",\n};');
+  });
+});
+
 describe("canvas pan", () => {
   const zoomIn = async () => {
     await mountApp();

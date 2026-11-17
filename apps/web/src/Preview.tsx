@@ -24,7 +24,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { canFormat, formatCode, formatWidth } from "./format.ts";
+import { canFormat, formatCode, paneFormatWidth } from "./format.ts";
 import {
   AlignBottomIcon,
   AlignCenterIcon,
@@ -452,7 +452,7 @@ function CodeEditor(
   const formatPane = (pane: PaneInput) => {
     const language = paneLanguage(pane);
     if (!canFormat(language)) return;
-    formatCode(pane.code, language, formatWidth(spec.aspectRatio)).then(
+    formatCode(pane.code, language, formatWidthOf(spec, scene, windowIndex, paneIndex)).then(
       (code) => setFormatted(pane.code, code),
       () => {},
     );
@@ -1198,7 +1198,7 @@ function WindowEditors(
             <Tool
               label="Format the code (⇧⌥F)"
               disabled={!formattable}
-              onClick={() => formatPanes(spec, [windowIndex], onChange)}
+              onClick={() => formatPanes(spec, rendered.scene, [windowIndex], onChange)}
             >
               <FormatIcon />
             </Tool>
@@ -1293,9 +1293,24 @@ function fitWindow({ width: _width, height: _height, ...window }: WindowInput): 
   return { ...window, panes: window.panes.map(({ size: _size, ...pane }) => pane) };
 }
 
+/** The line width for formatted code: the columns that fit in the code area of the pane now */
+function formatWidthOf(
+  spec: SpecInput,
+  scene: Scene,
+  windowIndex: number,
+  paneIndex: number,
+): number {
+  const pane = scene.windows[windowIndex]?.panes[paneIndex];
+  const columns = pane
+    ? Math.floor((pane.code.width - pane.gutter - EDITOR_PADDING) / scene.text.cellWidth)
+    : Infinity;
+  return paneFormatWidth(columns, spec.aspectRatio);
+}
+
 /** Formats the code of the panes that have a formatter. Code that does not parse stays as it is. */
 export function formatPanes(
   spec: SpecInput,
+  scene: Scene,
   windowIndexes: Array<number>,
   onChange: (update: SpecUpdate) => void,
 ) {
@@ -1303,7 +1318,7 @@ export function formatPanes(
     spec.windows[windowIndex]?.panes.forEach((pane, paneIndex) => {
       const language = paneLanguage(pane);
       if (!canFormat(language)) return;
-      formatCode(pane.code, language, formatWidth(spec.aspectRatio)).then(
+      formatCode(pane.code, language, formatWidthOf(spec, scene, windowIndex, paneIndex)).then(
         (code) =>
           onChange((current) =>
             updatePane(current, windowIndex, paneIndex, (next) =>
@@ -1375,7 +1390,7 @@ function windowItems(actions: Actions, windowIndex: number): Array<MenuItem> {
     {
       label: "Format code of the window",
       disabled: !formattable,
-      onSelect: () => formatPanes(spec, [windowIndex], onChange),
+      onSelect: () => formatPanes(spec, scene, [windowIndex], onChange),
     },
     {
       label: "Remove window",
@@ -1492,6 +1507,7 @@ const highlightPreviews = new WeakMap<object, { highlight: PaneInput["highlight"
 
 function codeItems(
   spec: SpecInput,
+  scene: Scene,
   windowIndex: number,
   code: NonNullable<Menu["code"]>,
   onChange: (update: SpecUpdate) => void,
@@ -1580,7 +1596,11 @@ function codeItems(
       shortcut: "⇧⌥F",
       disabled: !canFormat(language),
       onSelect: () =>
-        void formatCode(pane.code, language, formatWidth(spec.aspectRatio)).then(
+        void formatCode(
+          pane.code,
+          language,
+          formatWidthOf(spec, scene, windowIndex, code.paneIndex),
+        ).then(
           (code) => update((next) => withFormattedCode(next, pane.code, code)),
           () => {},
         ),
@@ -1597,7 +1617,7 @@ function menuItems(actions: Actions, menu: Menu): Array<MenuItem> {
   const window = windowItems(actions, windowIndex);
   if (!menu.code) return window;
   return [
-    ...codeItems(actions.spec, windowIndex, menu.code, actions.onChange),
+    ...codeItems(actions.spec, actions.scene, windowIndex, menu.code, actions.onChange),
     "separator",
     ...window.slice(-2),
   ];
