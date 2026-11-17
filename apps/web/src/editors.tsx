@@ -29,7 +29,7 @@ import {
 import { jsonTokens } from "./json-tokens.ts";
 import { registerRegularFaces } from "./renderer.ts";
 import { AUTO_LANGUAGE, iconOptions, LANGUAGE_OPTIONS } from "./options.tsx";
-import { insertSpaces } from "./Preview.tsx";
+import { indentOnTab } from "./Preview.tsx";
 import { Select, type SelectOption } from "./select.tsx";
 import {
   fitToPadding,
@@ -874,7 +874,7 @@ export function JsonEditor(props: { spec: SpecInput; onChange: (spec: SpecInput)
           autoComplete="off"
           value={text}
           onChange={(event) => change(event.target.value)}
-          onKeyDown={(event) => insertSpaces(event, change)}
+          onKeyDown={(event) => indentOnTab(event, change)}
           onScroll={(event) => {
             const highlight = highlightRef.current;
             if (!highlight) return;

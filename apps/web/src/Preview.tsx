@@ -239,17 +239,60 @@ function changeLayer(
   onSelect(index);
 }
 
-/** Inserts two spaces for the Tab key, so that the editor keeps the focus */
-export function insertSpaces(
+const INDENT = "  ";
+
+/**
+ * Indents with the Tab key, so that the editor keeps the focus: two spaces at the caret, or two
+ * spaces before each selected line. Shift+Tab removes up to two spaces before each line.
+ */
+export function indentOnTab(
   event: KeyboardEvent<HTMLTextAreaElement>,
   onChange: (code: string) => void,
 ) {
-  if (event.key !== "Tab" || event.shiftKey) return;
+  if (event.key !== "Tab") return;
   event.preventDefault();
   const target = event.currentTarget;
+  const { selectionStart: start, selectionEnd: end, value } = target;
+  if (!event.shiftKey && start === end) {
+    replaceSelection(target, INDENT, onChange);
+    return;
+  }
+  // The lines of the selection; a selection that ends at the start of a line leaves that line out
+  const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+  const last = end > start && value[end - 1] === "\n" ? end - 1 : end;
+  const found = value.indexOf("\n", last);
+  const lineEnd = found === -1 ? value.length : found;
+  const lines = value.slice(lineStart, lineEnd).split("\n");
+  const changed = lines.map((line) =>
+    event.shiftKey ? line.replace(/^( {1,2}|\t)/, "") : line === "" ? line : INDENT + line,
+  );
+  const text = changed.join("\n");
+  if (text === lines.join("\n")) return;
+  const firstShift = changed[0]!.length - lines[0]!.length;
+  const nextStart = Math.max(lineStart, start + firstShift);
+  const nextEnd = start === end ? nextStart : end + text.length - (lineEnd - lineStart);
+  target.setSelectionRange(lineStart, lineEnd);
+  replaceSelection(target, text, onChange);
+  requestAnimationFrame(() => target.setSelectionRange(nextStart, nextEnd));
+}
+
+/**
+ * Replaces the selection as typed text: the change goes into the undo history of the field, and
+ * the field reports it as input. A browser without that command gets the new code directly.
+ */
+function replaceSelection(
+  target: HTMLTextAreaElement,
+  text: string,
+  onChange: (code: string) => void,
+) {
   const { selectionStart, selectionEnd, value } = target;
-  onChange(`${value.slice(0, selectionStart)}  ${value.slice(selectionEnd)}`);
-  requestAnimationFrame(() => target.setSelectionRange(selectionStart + 2, selectionStart + 2));
+  const done = text
+    ? document.execCommand("insertText", false, text)
+    : document.execCommand("delete");
+  if (done) return;
+  onChange(value.slice(0, selectionStart) + text + value.slice(selectionEnd));
+  const caret = selectionStart + text.length;
+  requestAnimationFrame(() => target.setSelectionRange(caret, caret));
 }
 
 function useSize<ELEMENT extends HTMLElement>() {
@@ -402,7 +445,7 @@ function CodeEditor(
       return;
     }
     if (applyMarkShortcut(event, updateMarks)) return;
-    insertSpaces(event, setCode);
+    indentOnTab(event, setCode);
   };
 
   const formatPane = (pane: PaneInput) => {
@@ -558,7 +601,7 @@ function PopoverCodeField(props: {
         }}
         onChange={(event) => setCode(event.target.value, event.target.selectionStart)}
         onKeyDown={(event) => {
-          if (!applyMarkShortcut(event, onChange)) insertSpaces(event, setCode);
+          if (!applyMarkShortcut(event, onChange)) indentOnTab(event, setCode);
         }}
         onScroll={(event) => {
           event.currentTarget.scrollTop = 0;

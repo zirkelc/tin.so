@@ -119,6 +119,56 @@ describe("preview", () => {
   });
 });
 
+describe("tab key", () => {
+  const CODE = "if (ok) {\nreturn 1;\nreturn 2;\n}";
+
+  // Opens a pane with the code and selects the two return lines
+  async function selectReturnLines(code = CODE) {
+    await mountApp();
+    await window.tin.setSpec({ ...DEFAULT_SPEC, windows: [{ panes: [{ code }] }] });
+    await expect.element(codeField(1)).toHaveValue(code);
+    const field = codeField(1).element() as HTMLTextAreaElement;
+    field.focus();
+    const start = code.indexOf("return 1");
+    field.setSelectionRange(start, code.indexOf("}", start));
+  }
+
+  test("should indent the selected lines", async () => {
+    // Arrange
+    await selectReturnLines();
+
+    // Act
+    await userEvent.keyboard("{Tab}");
+
+    // Assert
+    await expect.element(codeField(1)).toHaveValue("if (ok) {\n  return 1;\n  return 2;\n}");
+  });
+
+  test("should bring back the code with undo after an indent", async () => {
+    // Arrange
+    await selectReturnLines();
+    await userEvent.keyboard("{Tab}");
+    await expect.element(codeField(1)).toHaveValue("if (ok) {\n  return 1;\n  return 2;\n}");
+
+    // Act
+    await userEvent.keyboard("{ControlOrMeta>}z{/ControlOrMeta}");
+
+    // Assert
+    await expect.element(codeField(1)).toHaveValue(CODE);
+  });
+
+  test("should outdent the selected lines with Shift+Tab", async () => {
+    // Arrange
+    await selectReturnLines("if (ok) {\n  return 1;\n  return 2;\n}");
+
+    // Act
+    await userEvent.keyboard("{Shift>}{Tab}{/Shift}");
+
+    // Assert
+    await expect.element(codeField(1)).toHaveValue(CODE);
+  });
+});
+
 describe("links", () => {
   test("should open the spec of a link", async () => {
     // Arrange
