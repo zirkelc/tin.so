@@ -1389,6 +1389,56 @@ describe("format code", () => {
   });
 });
 
+describe("undo", () => {
+  const padding = () => window.tin.getSpec().padding;
+
+  test("should undo and redo a change with the keyboard", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ padding: 64, windows: [{ panes: [{ code: "a" }] }] });
+    await page.getByRole("radio", { name: "32", exact: true }).click();
+    await expect.poll(padding).toBe(32);
+
+    // Act
+    await userEvent.keyboard("{ControlOrMeta>}z{/ControlOrMeta}");
+    await expect.poll(padding).toBe(64);
+    await userEvent.keyboard("{ControlOrMeta>}{Shift>}z{/Shift}{/ControlOrMeta}");
+
+    // Assert
+    await expect.poll(padding).toBe(32);
+  });
+
+  test("should undo a change with the undo button", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({ padding: 64, windows: [{ panes: [{ code: "a" }] }] });
+    await page.getByRole("radio", { name: "32", exact: true }).click();
+    await expect.poll(padding).toBe(32);
+
+    // Act
+    await page.getByRole("button", { name: "Undo" }).click();
+
+    // Assert
+    await expect.poll(padding).toBe(64);
+    await expect.element(page.getByRole("button", { name: "Redo" })).toBeEnabled();
+  });
+
+  test("should record no step for a theme that only showed as a preview", async () => {
+    // Arrange
+    await mountApp();
+    await themeTrigger().click();
+    await page.getByRole("option", { name: "Nord", exact: true }).hover();
+    await expect.poll(() => window.tin.getSpec().theme).toBe("nord");
+
+    // Act
+    await page.getByRole("button", { name: "Close" }).click();
+
+    // Assert
+    await expect.poll(() => window.tin.getSpec().theme).not.toBe("nord");
+    await expect.element(page.getByRole("button", { name: "Undo" })).toBeDisabled();
+  });
+});
+
 describe("frame", () => {
   test("should not offer to turn off the window of a window with a frame", async () => {
     // Arrange

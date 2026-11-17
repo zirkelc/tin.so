@@ -165,6 +165,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 - Copy a link that opens the same image in the editor.
 - The link holds the image in the URL fragment, so it never goes to a server.
 - The address bar always holds the current image, so a reload or a bookmark keeps it.
+- Undo and redo every change of the image with the buttons at the bottom right or with ⌘Z and ⇧⌘Z. A drag or a typed word is one step, and a theme preview is none.
 
 ### Keyboard shortcuts
 
@@ -173,6 +174,7 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 | ⌘B, ⌘I, ⌘U, ⌘⇧X  | Bold, italic, underline, strikethrough                                                      |
 | ⇧⌥F              | Format the code                                                                             |
 | ⌥-click          | Highlight a line                                                                            |
+| ⌘Z, ⇧⌘Z          | Undo and redo a change of the image. In a text field, they undo and redo the typing         |
 | ⌘A, Esc          | Select all windows, clear the selection                                                     |
 | ⌘D               | Duplicate the selected window                                                               |
 | ⌘C, ⌘V           | Copy and paste windows                                                                      |

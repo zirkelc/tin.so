@@ -10,6 +10,7 @@ import {
 import { type ComponentType, useCallback, useEffect, useRef, useState } from "react";
 import { AboutDialog, isTyping } from "./about.tsx";
 import { installApi, markApiReady } from "./api.ts";
+import { SpecHistory } from "./history.ts";
 import { JsonEditor, Settings, WindowEditor, WindowList } from "./editors.tsx";
 import {
   BackIcon,
@@ -160,22 +161,54 @@ export function App() {
     }
   }, []);
 
-  // A new image counts as opened, so that the preview fits it into the window once
+  // The undo history of the spec, and whether its buttons can go back and forward
+  const historyRef = useRef(new SpecHistory(DEFAULT_SPEC));
+  const [steps, setSteps] = useState({ canUndo: false, canRedo: false });
+  const syncSteps = useCallback(() => {
+    const { canUndo, canRedo } = historyRef.current;
+    setSteps((current) =>
+      current.canUndo === canUndo && current.canRedo === canRedo ? current : { canUndo, canRedo },
+    );
+  }, []);
+
+  // A new image counts as opened, so that the preview fits it into the window once. It starts a
+  // new undo history.
   const [opened, setOpened] = useState(0);
   const openSpec = useCallback(
     (next: SpecInput) => {
       setOpened((count) => count + 1);
+      historyRef.current.reset(next);
+      syncSteps();
       return showSpec(next);
     },
-    [showSpec],
+    [showSpec, syncSteps],
   );
 
   // A function update applies to the newest spec, also when it runs after an async step
   const update = useCallback(
-    (next: SpecUpdate) =>
-      void showSpec(typeof next === "function" ? next(specRef.current) : next).catch(() => {}),
-    [showSpec],
+    (change: SpecUpdate) => {
+      const next = typeof change === "function" ? change(specRef.current) : change;
+      historyRef.current.change(next, performance.now());
+      syncSteps();
+      void showSpec(next).catch(() => {});
+    },
+    [showSpec, syncSteps],
   );
+
+  // A preview shows a spec without a step in the undo history
+  const preview = useCallback((next: SpecInput) => void showSpec(next).catch(() => {}), [showSpec]);
+
+  const undo = useCallback(() => {
+    const previous = historyRef.current.undo();
+    syncSteps();
+    if (previous) void showSpec(previous).catch(() => {});
+  }, [showSpec, syncSteps]);
+
+  const redo = useCallback(() => {
+    const next = historyRef.current.redo();
+    syncSteps();
+    if (next) void showSpec(next).catch(() => {});
+  }, [showSpec, syncSteps]);
 
   useEffect(() => {
     installApi({ getSpec: () => specRef.current, setSpec: openSpec });
@@ -194,11 +227,20 @@ export function App() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "?" && !isTyping(event.target)) setAbout(true);
+      if (isTyping(event.target)) return;
+      if (event.key === "?") setAbout(true);
+      // A text field keeps its own undo. Elsewhere the keys undo and redo changes of the image.
+      if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key === "z" || (key === "y" && event.ctrlKey)) {
+        event.preventDefault();
+        if (key === "y" || event.shiftKey) redo();
+        else undo();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [undo, redo]);
 
   // An image file that this app made carries its spec, so a drop opens it again
   useEffect(() => {
@@ -333,7 +375,7 @@ export function App() {
             <JsonEditor spec={spec} onChange={update} />
           ) : (
             <>
-              <Settings spec={spec} scene={rendered?.scene} onChange={update} />
+              <Settings spec={spec} scene={rendered?.scene} onChange={update} onPreview={preview} />
               <WindowList
                 windows={spec.windows}
                 // A selected popover keeps its window open, but the list shows only windows as selected
@@ -496,6 +538,10 @@ export function App() {
           onCopyImage={(windowIndexes) => void copyImage(windowIndexes)}
           hovered={hovered}
           hoveredPopover={hoveredPopover}
+          canUndo={steps.canUndo}
+          canRedo={steps.canRedo}
+          onUndo={undo}
+          onRedo={redo}
         />
       </main>
     </div>

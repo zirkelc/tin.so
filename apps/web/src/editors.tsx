@@ -124,8 +124,10 @@ export function Settings(props: {
   /** The rendered image */
   scene: Scene | undefined;
   onChange: (spec: SpecInput) => void;
+  /** Shows a spec for a preview, which is no step in the undo history */
+  onPreview: (spec: SpecInput) => void;
 }) {
-  const { spec, onChange } = props;
+  const { spec, onChange, onPreview } = props;
   const theme = THEMES.find((theme) => theme.id === (spec.theme ?? DEFAULT_THEME));
   const singleMode = theme && (!theme.syntax.light || !theme.syntax.dark);
   const positioned = isPositioned(spec);
@@ -159,12 +161,12 @@ export function Settings(props: {
         options={themeOptions(spec.mode ?? "dark")}
         onPreview={(theme) => {
           if (theme === undefined) {
-            if (previewBase.current) onChange(previewBase.current);
+            if (previewBase.current) onPreview(previewBase.current);
             previewBase.current = undefined;
             return;
           }
           previewBase.current ??= spec;
-          onChange(withTheme(previewBase.current, theme));
+          onPreview(withTheme(previewBase.current, theme));
         }}
         onChange={(theme) => {
           const base = previewBase.current ?? spec;
@@ -237,12 +239,12 @@ export function Settings(props: {
         onOpen={loadFontNames}
         onPreview={(font) => {
           if (font === undefined) {
-            if (fontBase.current) onChange(fontBase.current);
+            if (fontBase.current) onPreview(fontBase.current);
             fontBase.current = undefined;
             return;
           }
           fontBase.current ??= spec;
-          onChange({ ...fontBase.current, font: font || undefined });
+          onPreview({ ...fontBase.current, font: font || undefined });
         }}
         onChange={(font) => {
           const base = fontBase.current ?? spec;

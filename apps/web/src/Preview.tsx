@@ -45,6 +45,8 @@ import {
   MinusIcon,
   PlusIcon,
   PointerIcon,
+  RedoIcon,
+  UndoIcon,
   SamePanesIcon,
   SendToBackIcon,
   SplitColumnIcon,
@@ -1724,6 +1726,10 @@ export function Preview(props: {
   hoveredPopover?: HoveredPopover;
   /** Counts the images that were opened. A new count fits the next image into the window. */
   opened?: number;
+  canUndo?: boolean;
+  canRedo?: boolean;
+  onUndo?: () => void;
+  onRedo?: () => void;
 }) {
   const [stageRef, stage] = useSize<HTMLDivElement>();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -2232,6 +2238,33 @@ export function Preview(props: {
         )}
       </div>
       <div className="zoom-controls">
+        {props.onUndo && props.onRedo && (
+          <>
+            <div className="control-group" role="group" aria-label="History">
+              <button
+                type="button"
+                className="tool"
+                aria-label="Undo"
+                title="Undo (⌘Z)"
+                disabled={!props.canUndo}
+                onClick={props.onUndo}
+              >
+                <UndoIcon />
+              </button>
+              <button
+                type="button"
+                className="tool"
+                aria-label="Redo"
+                title="Redo (⇧⌘Z)"
+                disabled={!props.canRedo}
+                onClick={props.onRedo}
+              >
+                <RedoIcon />
+              </button>
+            </div>
+            <span className="tool-separator" />
+          </>
+        )}
         <div className="control-group" role="group" aria-label="Tool">
           <Tool label="Select (V)" pressed={tool === "select"} onClick={() => setTool("select")}>
             <PointerIcon />

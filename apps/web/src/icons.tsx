@@ -19,6 +19,20 @@ function Glyph(props: { children: ReactNode }) {
   );
 }
 
+export const UndoIcon = () => (
+  <Glyph>
+    <path d="M5.5 3.5 2.5 6.5l3 3" />
+    <path d="M2.5 6.5h7a3.5 3.5 0 0 1 0 7H7" />
+  </Glyph>
+);
+
+export const RedoIcon = () => (
+  <Glyph>
+    <path d="m10.5 3.5 3 3-3 3" />
+    <path d="M13.5 6.5h-7a3.5 3.5 0 0 0 0 7H9" />
+  </Glyph>
+);
+
 export const FrameIcon = () => (
   <Glyph>
     <rect x="2" y="2.5" width="12" height="11" rx="2.5" />

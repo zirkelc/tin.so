@@ -18,6 +18,7 @@ export const SHORTCUTS: Array<{ action: string; keys: Array<string> }> = [
   { action: "Resize, double-click to fit", keys: ["Drag an edge"] },
   { action: "Select windows", keys: ["Drag the background"] },
   { action: "Add to the selection", keys: ["⇧", "click"] },
+  { action: "Undo, redo", keys: ["⌘", "Z", "⇧", "⌘", "Z"] },
   { action: "Select all", keys: ["⌘", "A"] },
   { action: "Select none", keys: ["Esc"] },
   { action: "Duplicate the window", keys: ["⌘", "D"] },
