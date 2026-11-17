@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.0](https://github.com/zirkelc/tin.so/compare/web-v1.4.0...web-v1.5.0) (2026-11-17)
+
+
+### Features
+
+* let the theme decide if a window can be without its frame ([b2bd66d](https://github.com/zirkelc/tin.so/commit/b2bd66d50a98029cb3bf7ac0e97172f01343a9fa))
+* **web:** keep the window of a window on ([4cfa048](https://github.com/zirkelc/tin.so/commit/4cfa048ddb45f25f803a5faf51875818ce91ba34))
+* **web:** popovers without a selection, and help texts for settings ([b70b919](https://github.com/zirkelc/tin.so/commit/b70b919fade0b9e2584f767454c546879fb6d583))
+
+
+### Tests
+
+* **web:** wait for the first zoom fit before the zoom test reads the zoom ([c5ccd2a](https://github.com/zirkelc/tin.so/commit/c5ccd2ac156c9fa0e5261a20e2c21161ad5403c3))
+
 ## [1.4.0](https://github.com/zirkelc/tin.so/compare/web-v1.3.0...web-v1.4.0) (2026-11-17)
 
 
