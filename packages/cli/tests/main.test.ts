@@ -199,6 +199,8 @@ describe("render", () => {
       "radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), #0b0820",
       "radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), #0b0820",
     ],
+    ["ambient-halo", "ambient-halo"],
+    ["ambient-code", "ambient-code"],
   ])("should set the background %s", async (value, expected) => {
     // Arrange
     await writeFile(join(cwd, "a.ts"), "const a = 1;");
@@ -1031,7 +1033,7 @@ describe("themes", () => {
       lines
         .find((line) => line.startsWith("nord "))
         ?.trim()
-        .endsWith("dark"),
+        .endsWith("dark/light"),
     ).toBe(true);
   });
 

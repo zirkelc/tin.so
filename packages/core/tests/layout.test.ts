@@ -184,18 +184,6 @@ describe("layout", () => {
     // Assert
     expect(scene.windows[0]!.panes.map((pane) => pane.language)).toEqual(["toml", "python"]);
   });
-
-  test("should force the only mode of a theme", async () => {
-    // Act
-    const scene = await layout({
-      theme: "nord",
-      mode: "light",
-      windows: [{ panes: [{ code: "x" }] }],
-    });
-
-    // Assert
-    expect(scene.mode).toBe("dark");
-  });
 });
 
 describe("annotations", () => {
@@ -228,6 +216,31 @@ describe("annotations", () => {
     expect(annotation!.anchor.y).toBe(pane.code.y + 16 + 2 * 21);
     expect(annotation!.box.y).toBe(annotation!.anchor.y + 6);
     expect(annotation!.lines.length).toBe(1);
+  });
+
+  test("should keep the padding of the spec at the sides of a popover, and 4 px less above and below its code", async () => {
+    // Arrange
+    const spec = {
+      windows: [
+        {
+          panes: [
+            {
+              code: "const a = b;",
+              annotations: [{ line: 1, match: "a", code: "const a: number", padding: 8 }],
+            },
+          ],
+        },
+      ],
+    };
+
+    // Act
+    const scene = await layout(spec);
+
+    // Assert
+    const annotation = scene.windows[0]!.panes[0]!.annotations[0]!;
+    expect(annotation.box.width).toBeCloseTo(2 * 8 + 15 * scene.popoverText.cellWidth);
+    expect(annotation.box.height).toBe(2 * 4 + 20);
+    expect(annotation.padding).toEqual({ x: 8, y: 4 });
   });
 
   test("should pick the given occurrence of the match", async () => {

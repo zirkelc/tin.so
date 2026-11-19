@@ -1,6 +1,6 @@
 # @tin.so/core
 
-Renders code images from a JSON spec, to SVG and PNG. One image can show several snippets: windows next to each other or below each other, panes in a window, and popovers that point to a word. It has 14 editor themes such as GitHub, Dracula, Nord and Catppuccin, backgrounds as CSS gradients, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media.
+Renders code images from a JSON spec, to SVG and PNG. One image can show several snippets: windows next to each other or below each other, panes in a window, and popovers that point to a word. It has 11 editor themes such as GitHub, Dracula, Nord and Catppuccin, backgrounds as CSS gradients, line highlights, text styles and colors, tabs with file icons, and fixed aspect ratios for social media.
 
 The pipeline is `spec → Shiki tokens → layout → SVG → PNG` and needs no browser. The layout puts every character on a monospace grid with the metrics of the bundled fonts, and [resvg](https://github.com/linebender/resvg) (WebAssembly) rasterizes the SVG. The same code runs in Node and in the browser.
 
@@ -67,11 +67,11 @@ A spec is JSON with the image settings, its windows, the panes of each window, a
 }
 ```
 
-| Level  | Fields                                                                                                                                                                      |
-| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Image  | `theme`, `mode`, `background`, `backgroundOpacity`, `padding`, `font`, `lineNumbers`, `direction`, `gap`, `aspectRatio`, `width`, `height`, `windows`                       |
-| Window | `panes`, `split`, `titleBar`, `tabs`, `frame`, `controls`, `background`, `title`, `width`, `height`, `x`, `y`                                                               |
-| Pane   | `code`, `title`, `language`, `highlight`, `marks` (bold, italic, colors, highlighter fills), `annotations` (popovers, with an optional `background`), `icon`, `lineNumbers` |
+| Level  | Fields                                                                                                                                                                                    |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Image  | `theme`, `mode`, `background`, `backgroundOpacity`, `padding`, `font`, `lineNumbers`, `direction`, `gap`, `aspectRatio`, `width`, `height`, `windows`                                     |
+| Window | `panes`, `split`, `titleBar`, `tabs`, `frame`, `controls`, `background`, `title`, `width`, `height`, `x`, `y`                                                                             |
+| Pane   | `code`, `title`, `language`, `highlight`, `marks` (bold, italic, colors, highlighter fills), `annotations` (popovers, with an optional `background` and `padding`), `icon`, `lineNumbers` |
 
 The full spec, with a description, a default and the limits of each field, is the JSON Schema at [`https://tin.so/schema/v1.json`](https://tin.so/schema/v1.json). `specJsonSchema()` gives the same schema.
 

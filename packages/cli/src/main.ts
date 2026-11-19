@@ -3,11 +3,14 @@ import { readdir, readFile, writeFile } from "node:fs/promises";
 import { basename, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  AMBIENT_BACKGROUNDS,
+  AMBIENT_ENABLED,
   CODE_FONT_IDS,
   CODE_FONTS,
   createLink,
   DEFAULT_APP_URL,
   DEFAULT_THEME,
+  isAmbientBackground,
   isCssBackground,
   isSpecSchemaUrl,
   LANGUAGE_IDS,
@@ -159,7 +162,7 @@ const IMAGE_ARGS = defineArgs({
     type: "string",
     valueHint: "css",
     description:
-      'Background: "theme" (default), "transparent", a hex color, "#from,#to" for a gradient, or a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)"',
+      'Background: "theme" (default), "transparent", a hex color, "#from,#to" for a gradient, a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)", or an ambient background from the colors of the image: ambient-theme, ambient-code, ambient-blur, ambient-halo, ambient-spotlight, ambient-stage',
     negativeDescription: "Transparent background",
   },
   "background-opacity": {
@@ -303,13 +306,14 @@ function toBackground(
   if (value === undefined || typeof value === "boolean" || transparent)
     return { backgroundOpacity };
   if (value === "theme") return { background: null, backgroundOpacity };
-  if (isCssBackground(value)) return { background: value, backgroundOpacity };
+  if (isCssBackground(value) || (AMBIENT_ENABLED && isAmbientBackground(value)))
+    return { background: value, backgroundOpacity };
   const colors = value.split(",").map((color) => color.trim());
   if (colors.length === 2 && colors.every((color) => HEX.test(color))) {
     return { background: `linear-gradient(140deg, ${colors[0]}, ${colors[1]})`, backgroundOpacity };
   }
   throw new UsageError(
-    `Unknown background "${value}". Use theme, transparent, a hex color such as #1e1e2e, #from,#to for a gradient, or a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)".`,
+    `Unknown background "${value}". Use theme, transparent, a hex color such as #1e1e2e, #from,#to for a gradient, a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)", or an ambient background: ${AMBIENT_BACKGROUNDS.join(", ")}.`,
   );
 }
 

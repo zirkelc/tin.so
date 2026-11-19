@@ -4,6 +4,7 @@ import { layout } from "../src/layout.ts";
 import { readImageSpec } from "../src/metadata.ts";
 import { render, renderScene } from "../src/node.ts";
 import { toSvg } from "../src/svg.ts";
+import { AMBIENT_BACKGROUNDS } from "../src/ambient.ts";
 import { BACKGROUNDS, themeBackground } from "../src/backgrounds.ts";
 import { DEFAULT_THEME, getTheme, resolveMode, THEMES } from "../src/themes/index.ts";
 
@@ -339,21 +340,6 @@ describe("theme frames", () => {
     expect(toSvg(dark)).toContain('fill="#002b36"');
   });
 
-  test("should use the dark window of an editor theme with only a dark mode", async () => {
-    // Act
-    const scene = await layout({
-      theme: "nord",
-      mode: "light",
-      windows: [{ panes: [{ code: "x" }] }],
-    });
-
-    // Assert
-    expect(scene.mode).toBe("dark");
-    expect(scene.frame.background).toBe("#2e3440");
-    expect(scene.frame.lineNumber).toBe("#4c566a");
-    expect(scene.frame.title).toBe("#d8dee9");
-  });
-
   test.each([
     { theme: "dracula", background: "#fffbeb", keyword: "#a3144d" },
     { theme: "tokyo-night", background: "#e6e7ed", keyword: "#65359d" },
@@ -603,13 +589,29 @@ describe("image background", () => {
   });
 
   test.each([
-    { mode: "dark", base: "#0d1117", glow: "#1f6feb" },
-    { mode: "light", base: "#fdfcfb", glow: "#ffd6a5" },
-  ] as const)(
-    "should draw the background preset of the theme in the mode $mode by default",
-    async ({ mode, base, glow }) => {
+    ["catppuccin", "dark", "lavender"],
+    ["dracula", "dark", "dracula"],
+    ["one-dark", "light", "ocean"],
+    ["vscode", "light", "azure"],
+    ["solarized", "light", "lemon"],
+    ["github", "light", "strawberry"],
+    ["dracula", "light", "flamingo"],
+  ] as const)("should give the theme %s in the mode %s the background %s", (id, mode, preset) => {
+    // Arrange
+    const theme = THEMES.find((theme) => theme.id === id)!;
+
+    // Act
+    const result = themeBackground(theme, mode);
+
+    // Assert
+    expect(result?.id).toBe(preset);
+  });
+
+  test.each([{ theme: "vscode", mode: "dark", base: "#0d1117", glow: "#1f6feb" }] as const)(
+    "should draw the background preset of the theme $theme in the mode $mode by default",
+    async ({ theme, mode, base, glow }) => {
       // Arrange
-      const scene = await layout({ theme: "vscode", mode, windows });
+      const scene = await layout({ theme, mode, windows });
 
       // Act
       const svg = toSvg(scene);
@@ -632,23 +634,75 @@ describe("image background", () => {
     expect(svg).toContain('stop-color="#8957e5"');
   });
 
-  test("should have the Canvas background preset", () => {
+  test("should order the gradients by hue, from light to dark in each hue", () => {
     // Act
-    const preset = BACKGROUNDS.find((preset) => preset.id === "canvas");
+    const ids = BACKGROUNDS.filter((preset) => preset.kind === "gradient").map(
+      (preset) => preset.id,
+    );
 
     // Assert
-    expect(preset?.css).toBe("radial-gradient(at 50% 0%, #1f6feb 0px, transparent 60%), #0d1117");
+    expect(ids).toEqual([
+      "pewter",
+      "carbon",
+      "strawberry",
+      "coral",
+      "merlot",
+      "peach",
+      "wildfire",
+      "ember",
+      "honey",
+      "bronze",
+      "lemon",
+      "sunflower",
+      "mustard",
+      "pistachio",
+      "lime-soda",
+      "moss",
+      "sage",
+      "emerald",
+      "jade",
+      "mint",
+      "lagoon",
+      "aurora",
+      "aqua",
+      "turquoise",
+      "deep-sea",
+      "ice",
+      "azure",
+      "primer",
+      "nordic",
+      "periwinkle",
+      "ocean",
+      "twilight",
+      "lavender",
+      "violet-pop",
+      "copilot",
+      "dracula",
+      "plum",
+      "flamingo",
+      "dusk",
+    ]);
   });
 
-  test("should draw the background preset of the only mode of a theme", async () => {
-    // Arrange
-    const scene = await layout({ theme: "synthwave-84", mode: "light", windows });
-
+  test("should order the meshes by hue, from light to dark in each hue", () => {
     // Act
-    const svg = toSvg(scene);
+    const ids = BACKGROUNDS.filter((preset) => preset.kind === "mesh").map((preset) => preset.id);
 
     // Assert
-    expect(svg).toContain('stop-color="#ff6ec7"');
+    expect(ids).toEqual([
+      "mesh-magma",
+      "mesh-apricot",
+      "mesh-citrus",
+      "mesh-meadow",
+      "mesh-forest",
+      "mesh-tide",
+      "mesh-glacier",
+      "mesh-midnight",
+      "mesh-lilac",
+      "mesh-orchid",
+      "mesh-nebula",
+      "mesh-petal",
+    ]);
   });
 
   test("should leave the image transparent at the opacity 0", async () => {
@@ -660,8 +714,7 @@ describe("image background", () => {
   });
 });
 
-// The ambient backgrounds are not enabled yet
-describe.skip("ambient backgrounds", () => {
+describe("ambient backgrounds", () => {
   const windows = [
     { panes: [{ language: "typescript", code: 'const greeting = "hello world";' }] },
   ];
@@ -669,22 +722,64 @@ describe.skip("ambient backgrounds", () => {
   test.each([
     {
       mode: "dark",
-      css: "radial-gradient(at 0% 0%, #d96961 0px, transparent 55%), radial-gradient(at 100% 100%, #8cb6d9 0px, transparent 50%), radial-gradient(at 100% 0%, #b38fd9 0px, transparent 45%), #080b0f",
+      css: "radial-gradient(ellipse 70% 90% at 15% 20%, #a9544f 0%, transparent 100%), radial-gradient(ellipse 70% 90% at 85% 80%, #6e8fab 0%, transparent 100%), radial-gradient(ellipse 60% 70% at 80% 15%, #776193 0%, transparent 100%), #080b0f",
     },
     {
       mode: "light",
-      css: "radial-gradient(at 0% 0%, #e5858c 0px, transparent 55%), radial-gradient(at 100% 100%, #788dad 0px, transparent 50%), radial-gradient(at 100% 0%, #ba9fed 0px, transparent 45%), #f5f5f5",
+      css: "radial-gradient(ellipse 70% 90% at 15% 20%, #dc6c74 0%, transparent 100%), radial-gradient(ellipse 70% 90% at 85% 80%, #5c759a 0%, transparent 100%), radial-gradient(ellipse 60% 70% at 80% 15%, #b69ae9 0%, transparent 100%), #f5f5f5",
     },
-  ] as const)("should make a mesh of the theme colors in the mode $mode", async ({ mode, css }) => {
-    // Arrange
-    const expected = await layout({ theme: "github", mode, background: css, windows });
+  ] as const)(
+    "should make soft glows of the theme colors in the mode $mode",
+    async ({ mode, css }) => {
+      // Arrange
+      const expected = await layout({ theme: "github", mode, background: css, windows });
 
-    // Act
-    const scene = await layout({ theme: "github", mode, background: "ambient-theme", windows });
+      // Act
+      const scene = await layout({ theme: "github", mode, background: "ambient-theme", windows });
 
+      // Assert
+      expect(scene.customBackground).toEqual(expected.customBackground);
+    },
+  );
+
+  test("should list the ambient backgrounds of the code first, then the halos", () => {
     // Assert
-    expect(scene.customBackground).toEqual(expected.customBackground);
+    expect(AMBIENT_BACKGROUNDS).toEqual([
+      "ambient-theme",
+      "ambient-code",
+      "ambient-blur",
+      "ambient-halo",
+      "ambient-spotlight",
+      "ambient-stage",
+    ]);
   });
+
+  test.each([
+    {
+      background: "ambient-halo",
+      css: "radial-gradient(at 50% 0%, #d96961 0px, transparent 60%), #080b0f",
+    },
+    {
+      background: "ambient-spotlight",
+      css: "radial-gradient(ellipse 60% 62% at 50% 50%, #d96961 0%, #663534 55%, transparent 100%), #080b0f",
+    },
+    {
+      background: "ambient-stage",
+      css: "radial-gradient(ellipse 48% 95% at 50% 0%, #d96961 0%, #663534 50%, transparent 100%), radial-gradient(ellipse 60% 40% at 50% 100%, #663534 0%, transparent 100%), #080b0f",
+    },
+  ] as const)(
+    "should make a halo of the main theme color for $background",
+    async ({ background, css }) => {
+      // Arrange
+      const expected = await layout({ theme: "github", background: css, windows });
+
+      // Act
+      const scene = await layout({ theme: "github", background, windows });
+
+      // Assert
+      expect(scene.customBackground).toEqual(expected.customBackground);
+    },
+  );
 
   test("should put the color that the code uses most in the first corner", async () => {
     // Arrange
@@ -699,8 +794,8 @@ describe.skip("ambient backgrounds", () => {
     const svg = toSvg(scene);
 
     // Assert
-    // The string color #a5d6ff of the theme, 15 % darker
-    expect(svg).toContain('stop-color="#8cb6d9"');
+    // The string color #a5d6ff of the theme, 35 % of the way to the dark base
+    expect(svg).toContain('stop-color="#6e8fab"');
     expect(scene.frame.backdrop).toEqual({ from: "#080b0f", to: "#080b0f" });
   });
 

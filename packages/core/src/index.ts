@@ -81,6 +81,7 @@ export {
   ANNOTATION_TYPES,
   MARK_STYLES,
   parseSpec,
+  POPOVER_PADDING,
   SPEC_LIMITS,
   SpecError,
   SpecSchema,

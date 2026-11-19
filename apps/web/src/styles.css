@@ -491,41 +491,6 @@ textarea.code {
   font-size: 12px;
 }
 
-.parts {
-  display: flex;
-  gap: 6px;
-}
-
-.part {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 0 8px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--panel-raised);
-  color: var(--text-muted);
-  font-size: 11px;
-}
-
-.part svg {
-  width: 18px;
-  height: 18px;
-}
-
-.part[aria-pressed="true"] {
-  border-color: rgba(255, 255, 255, 0.18);
-  background: var(--pressed);
-  color: var(--text);
-}
-
-.part:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
 .pane-editor {
   display: flex;
   flex-direction: column;
@@ -1155,6 +1120,7 @@ button.icon {
 
 .segmented {
   display: flex;
+  min-width: 0;
   padding: 2px;
   border: 1px solid var(--border);
   border-radius: 7px;
@@ -1167,11 +1133,15 @@ button.icon {
   justify-content: center;
   gap: 6px;
   flex: 1;
-  padding: 4px 8px;
+  /* The buttons share the width of the control and never push it past the edge of the panel */
+  min-width: 0;
+  padding: 4px 6px;
+  overflow: hidden;
   border-radius: 5px;
   background: transparent;
   color: var(--text-muted);
   font-size: 12px;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -1974,10 +1944,13 @@ button.compact {
   flex: 1;
 }
 
-.popover-position {
+/* A value that the image changes, such as a size, with the button that resets it */
+.value-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
+  min-height: 28px;
   font-size: 13px;
 }
 
@@ -2086,9 +2059,32 @@ button.compact {
 .background-panel-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 6px;
   font-size: 14px;
   font-weight: 600;
+}
+
+.background-panel-header > span {
+  flex: 1;
+}
+
+/* The button of the custom color: a small outlined button that stays pressed while the picker shows */
+.background-custom {
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.background-custom:hover,
+.background-custom[aria-pressed="true"] {
+  border-color: var(--text-muted);
+  color: var(--text);
 }
 
 .background-opacity {
@@ -2121,47 +2117,44 @@ button.compact {
 
 .background-swatches {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px 8px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
   max-height: 420px;
   margin: -4px;
   padding: 4px;
   overflow-y: auto;
 }
 
-/* A tile shows the background with a small window of the theme on it, and the name under it */
+/* The solid colors: smaller square tiles in six columns */
+.background-palette {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+/* A preset is a tile of the background itself, with the name in the tooltip */
 .background-swatch {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
   padding: 0;
   border: 0;
   background: none;
-  color: var(--text-muted);
-  font: inherit;
-  font-size: 11px;
   cursor: pointer;
 }
 
 .background-swatch-canvas {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   aspect-ratio: 16 / 10;
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: inset 0 0 0 1px var(--border);
 }
 
-.background-swatch[aria-pressed="true"] {
-  color: var(--text);
+.background-palette .background-swatch-canvas {
+  aspect-ratio: 1;
 }
 
-/* The tile under the mouse or the keyboard focus, which the image shows as a preview */
 .background-swatch:focus-visible {
   outline: none;
 }
 
+/* The tile under the mouse or the keyboard focus, which the image shows as a preview */
 .background-swatch:hover .background-swatch-canvas,
 .background-swatch:focus-visible .background-swatch-canvas {
   box-shadow:
@@ -2169,35 +2162,11 @@ button.compact {
     0 0 0 4px var(--text-muted);
 }
 
-.background-swatch:hover,
-.background-swatch:focus-visible {
-  color: var(--text);
-}
-
-.background-swatch:hover .background-swatch-canvas {
-  transform: translateY(-1px);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .background-swatch-canvas {
-    transition:
-      box-shadow 0.12s ease,
-      transform 0.12s ease;
-  }
-}
-
 /* The chosen tile keeps its ring, also under the mouse or the focus */
 .background-swatch[aria-pressed="true"] .background-swatch-canvas {
   box-shadow:
     0 0 0 2px var(--panel),
-    0 0 0 4px var(--selection);
-}
-
-.background-swatch-name {
-  overflow: hidden;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    0 0 0 4px var(--text);
 }
 
 .background-preview-window {
@@ -2255,18 +2224,32 @@ button.compact {
 .background-ambient-preview {
   overflow: hidden;
   aspect-ratio: 3 / 2;
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: inset 0 0 0 1px var(--border);
 }
 
+.background-ambient-option:focus-visible {
+  outline: none;
+}
+
+/* The same rings as the other background tiles: under the mouse or the focus, and chosen */
+.background-ambient-option:hover,
+.background-ambient-option:focus-visible,
 .background-ambient-option[aria-pressed="true"] {
   color: var(--text);
+}
+
+.background-ambient-option:hover .background-ambient-preview,
+.background-ambient-option:focus-visible .background-ambient-preview {
+  box-shadow:
+    0 0 0 2px var(--panel),
+    0 0 0 4px var(--text-muted);
 }
 
 .background-ambient-option[aria-pressed="true"] .background-ambient-preview {
   box-shadow:
     0 0 0 2px var(--panel),
-    0 0 0 4px var(--selection);
+    0 0 0 4px var(--text);
 }
 
 /* The color picker: saturation from left to right, brightness from bottom to top */

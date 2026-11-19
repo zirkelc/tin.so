@@ -6,6 +6,7 @@ import {
   languageName,
   type Mode,
   parseSpec,
+  POPOVER_PADDING,
   resolveMode,
   type Scene,
   SpecError,
@@ -17,16 +18,8 @@ import {
 } from "@tin.so/core";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { BackgroundPicker, PreviewWindow, themePreview } from "./background-picker.tsx";
-import { Field, HelpTerm, Segmented, Switch } from "./controls.tsx";
-import {
-  ChevronIcon,
-  CloseIcon,
-  FrameIcon,
-  PlusIcon,
-  SplitColumnIcon,
-  SplitRowIcon,
-  TabsIcon,
-} from "./icons.tsx";
+import { Field, Segmented, Switch, ValueRow } from "./controls.tsx";
+import { ChevronIcon, CloseIcon, PlusIcon, SplitColumnIcon, SplitRowIcon } from "./icons.tsx";
 import { jsonTokens } from "./json-tokens.ts";
 import { registerRegularFaces } from "./renderer.ts";
 import { AUTO_LANGUAGE, iconOptions, LANGUAGE_OPTIONS } from "./options.tsx";
@@ -52,6 +45,8 @@ import {
 import { DEFAULT_SPEC } from "./state.ts";
 
 const PADDINGS = [16, 32, 64, 128];
+// The space in a popover between its edge and its code, in px
+const POPOVER_PADDINGS = [6, 12, 18, 24];
 const AUTO = "auto" as const;
 /** The window color and the colors that the theme gives code most, as a row of dots */
 function ThemePalette(props: { theme: Theme; mode: Mode }) {
@@ -298,27 +293,6 @@ function languageOptions(auto: string): Array<SelectOption<string>> {
   );
 }
 
-function PartToggle(props: {
-  label: string;
-  pressed: boolean;
-  disabled?: boolean;
-  icon: ReactNode;
-  onChange: (pressed: boolean) => void;
-}) {
-  return (
-    <button
-      type="button"
-      className="part"
-      aria-pressed={props.pressed}
-      disabled={props.disabled}
-      onClick={() => props.onChange(!props.pressed)}
-    >
-      {props.icon}
-      {props.label}
-    </button>
-  );
-}
-
 // The code of the default image counts as an example, so that a new language replaces it
 const DEFAULT_CODES = DEFAULT_SPEC.windows.flatMap((window) =>
   window.panes.map((pane) => pane.code),
@@ -550,33 +524,48 @@ export function WindowEditor(props: {
 
   return (
     <div className="window-editor">
-      <div className="field">
-        <span className="field-label">
-          <HelpTerm help="Tabs adds a tab with the file name above each pane.">Frame</HelpTerm>
-        </span>
-        <div className="parts">
-          {props.frameless && (
-            <PartToggle
-              label="Window"
-              icon={<FrameIcon />}
-              pressed={frame}
-              onChange={(frame) => onChange({ ...window, frame })}
-            />
-          )}
-          <PartToggle
-            label="Tabs"
-            icon={<TabsIcon />}
-            pressed={frame && (window.tabs ?? false)}
-            disabled={!frame}
-            onChange={(tabs) => onChange({ ...window, tabs })}
+      <ValueRow
+        label="Size"
+        value={
+          sized
+            ? `${window.width ?? "auto"} × ${window.height ?? "auto"}`
+            : paneSized
+              ? "Auto, pane sizes set"
+              : "Auto"
+        }
+        help="Auto: the window fits its code. Drag the corner of the window or a divider in the image to set a size."
+        action={{
+          label: "Fit",
+          title: "Make the window and its panes fit the code again",
+          disabled: !sized && !paneSized,
+          onClick: () => {
+            const { width: _width, height: _height, ...rest } = window;
+            onChange({ ...rest, panes: window.panes.map(({ size: _size, ...pane }) => pane) });
+          },
+        }}
+      />
+      <div className="switches">
+        {props.frameless && (
+          <Switch
+            label="Window"
+            help="Off puts the code directly on the background, without a window."
+            checked={frame}
+            onChange={(frame) => onChange({ ...window, frame })}
           />
-        </div>
-        {props.warnings.map((warning) => (
-          <div key={warning.path} className="notice" role="status">
-            <span>{warning.message}</span>
-          </div>
-        ))}
+        )}
+        <Switch
+          label="Tabs"
+          help="Adds a tab with the file name above each pane."
+          checked={frame && (window.tabs ?? false)}
+          disabled={!frame}
+          onChange={(tabs) => onChange({ ...window, tabs })}
+        />
       </div>
+      {props.warnings.map((warning) => (
+        <div key={warning.path} className="notice" role="status">
+          <span>{warning.message}</span>
+        </div>
+      ))}
       <div className="title-bar-editor" role="group" aria-label="Title bar">
         <div className="switches">
           <Switch
@@ -651,26 +640,6 @@ export function WindowEditor(props: {
           ]}
           onChange={(split) => onChange({ ...window, split })}
         />
-      )}
-      {(sized || paneSized) && (
-        <div className="notice">
-          <span>
-            {sized
-              ? `Size ${window.width ?? "auto"} × ${window.height ?? "auto"}`
-              : "Pane sizes are set"}
-            . Drag the corner or a divider in the image to change it.
-          </span>
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => {
-              const { width: _width, height: _height, ...rest } = window;
-              onChange({ ...rest, panes: window.panes.map(({ size: _size, ...pane }) => pane) });
-            }}
-          >
-            Fit
-          </button>
-        </div>
       )}
       {window.panes.map((pane, index) => (
         <PaneEditor
@@ -809,23 +778,60 @@ function PopoverEditor(props: {
   const { annotation, onChange } = props;
   const detached = isDetached(annotation);
   const moved = (annotation.offsetX ?? 0) !== 0 || (annotation.offsetY ?? 0) !== 0 || detached;
-  const position = !detached ? (
-    <HelpTerm help="The popover is below this line and moves with it when lines come before it or go away.">
-      Attached to line {annotation.line}
-    </HelpTerm>
-  ) : (
-    <HelpTerm
-      help={
-        annotation.line === undefined
-          ? "The popover has a fixed place in the pane, from the top left of the code. It does not follow the code."
-          : "You moved the popover, so it stays at this place in the pane and does not follow the code. Attach it to its line to make it follow the line again."
+  const position = !detached
+    ? {
+        text: `Line ${annotation.line}`,
+        help: "The popover is below this line and moves with it when lines come before it or go away.",
       }
-    >
-      Free at {Math.round(annotation.x ?? 0)}, {Math.round(annotation.y ?? 0)}
-    </HelpTerm>
-  );
+    : {
+        text: `Free at ${Math.round(annotation.x ?? 0)}, ${Math.round(annotation.y ?? 0)}`,
+        help:
+          annotation.line === undefined
+            ? "The popover has a fixed place in the pane, from the top left of the code. It does not follow the code."
+            : "You moved the popover, so it stays at this place in the pane and does not follow the code. Attach it to its line to make it follow the line again.",
+      };
+  const sized = annotation.width !== undefined || annotation.height !== undefined;
   return (
     <div className="popover-editor" role="group" aria-label="Selected popover">
+      <ValueRow
+        label="Size"
+        value={sized ? `${annotation.width ?? "auto"} × ${annotation.height ?? "auto"}` : "Auto"}
+        help="Auto: the popover fits its code. Drag the corner of the popover in the image to set a size."
+        action={{
+          label: "Fit",
+          title: "Make the popover fit its code again",
+          disabled: !sized,
+          onClick: () => {
+            const { width: _width, height: _height, ...rest } = annotation;
+            onChange(rest);
+          },
+        }}
+      />
+      <ValueRow
+        label="Position"
+        value={position.text}
+        help={position.help}
+        action={{
+          label: "Attach",
+          title:
+            annotation.line === undefined
+              ? "The popover has no line to attach to"
+              : `Attach the popover to line ${annotation.line} again, so that it moves with the code`,
+          disabled: !moved || annotation.line === undefined,
+          onClick: () => onChange(attachToLine(annotation)),
+        }}
+      />
+      <Segmented
+        label="Padding"
+        help="The space between the edge of the popover and its code."
+        value={annotation.padding ?? POPOVER_PADDING}
+        options={POPOVER_PADDINGS.map((padding) => ({ value: padding, label: padding }))}
+        onChange={(padding) => {
+          // The default padding is not in the spec
+          const { padding: _padding, ...rest } = annotation;
+          onChange(padding === POPOVER_PADDING ? rest : { ...rest, padding });
+        }}
+      />
       <Select
         label="Language"
         searchable
@@ -835,21 +841,6 @@ function PopoverEditor(props: {
           onChange({ ...annotation, language: language === AUTO_LANGUAGE ? undefined : language })
         }
       />
-      <div className="field">
-        <span className="field-label">Position</span>
-        <div className="popover-position">
-          <span>{position}</span>
-          <button
-            type="button"
-            className="secondary"
-            disabled={!moved || annotation.line === undefined}
-            title="Attach the popover to its line again, so that it moves with the code"
-            onClick={() => onChange(attachToLine(annotation))}
-          >
-            {annotation.line === undefined ? "Attach to line" : `Attach to line ${annotation.line}`}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

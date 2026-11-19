@@ -282,7 +282,8 @@ const grid = cells
 const themes = `<svg xmlns="http://www.w3.org/2000/svg" width="${gridWidth}" height="${gridHeight}" viewBox="0 0 ${gridWidth} ${gridHeight}">${grid}</svg>`;
 await writeFile(new URL("themes.png", OUT), await svgToPng(themes, fonts.values(), { scale: 1 }));
 
-// The background presets as small tiles, in the order of the editor
+// The background presets as small tiles, in the order of the editor. A tile shows only the
+// background: the scene of a tile has no window.
 const TILE = 96;
 const TILE_GAP = 8;
 const PER_ROW = 16;
@@ -297,11 +298,11 @@ const tiles = await Promise.all(
       width: 160,
       height: 100,
       padding: 0,
-      windows: [{ frame: false, panes: [{ code: " " }] }],
+      windows: [{ panes: [{ code: " " }] }],
     });
     const x = (index % PER_ROW) * (TILE + TILE_GAP);
     const y = Math.floor(index / PER_ROW) * (TILE * 0.625 + TILE_GAP);
-    return `<clipPath id="tile-${index}"><rect x="${x}" y="${y}" width="${TILE}" height="${TILE * 0.625}" rx="8"/></clipPath><g clip-path="url(#tile-${index})">${nested(toSvg(scene), x, y, TILE, TILE * 0.625)}</g>`;
+    return `<clipPath id="tile-${index}"><rect x="${x}" y="${y}" width="${TILE}" height="${TILE * 0.625}" rx="8"/></clipPath><g clip-path="url(#tile-${index})">${nested(toSvg({ ...scene, windows: [] }), x, y, TILE, TILE * 0.625)}</g>`;
   }),
 );
 const backgrounds = `<svg xmlns="http://www.w3.org/2000/svg" width="${tilesWidth}" height="${tilesHeight}" viewBox="0 0 ${tilesWidth} ${tilesHeight}">${tiles.join("")}</svg>`;

@@ -313,8 +313,8 @@ function renderPopover(
   }
   lines.forEach((line, index) => {
     const origin = {
-      x: box.x + POPOVER.paddingX,
-      y: box.y + POPOVER.paddingY + index * POPOVER.lineHeight,
+      x: box.x + annotation.padding.x,
+      y: box.y + annotation.padding.y + index * POPOVER.lineHeight,
     };
     renderLine(scene, line, origin, scene.popoverText, out);
   });

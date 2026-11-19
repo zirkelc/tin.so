@@ -6,7 +6,6 @@ import {
   measureCodeText,
   measureUiText,
   type PaneBox,
-  POPOVER,
   type Scene,
   type SpecInput,
   TAB_HEADER,
@@ -648,7 +647,7 @@ function PopoverEditors(
       const index = indexes[visibleIndex]!;
       const annotationSpec = paneSpec.annotations?.[index];
       const code = annotationSpec?.code ?? "";
-      const { box } = annotation;
+      const { box, padding } = annotation;
       const label = `popover ${index + 1} of window ${windowIndex + 1}, pane ${paneIndex + 1}`;
 
       const updateAnnotation = (change: (annotation: Annotation) => Annotation | undefined) =>
@@ -716,12 +715,12 @@ function PopoverEditors(
             code={code}
             popover={annotationSpec}
             style={{
-              left: box.x + POPOVER.paddingX,
-              top: box.y + POPOVER.paddingY,
-              width: Math.max(box.width - POPOVER.paddingX * 2, text.cellWidth * 4),
+              left: box.x + padding.x,
+              top: box.y + padding.y,
+              width: Math.max(box.width - padding.x * 2, text.cellWidth * 4),
               height: Math.min(
                 Math.max(1, code.split("\n").length) * text.lineHeight,
-                Math.max(text.lineHeight, box.height - POPOVER.paddingY * 2),
+                Math.max(text.lineHeight, box.height - padding.y * 2),
               ),
             }}
             scene={scene}

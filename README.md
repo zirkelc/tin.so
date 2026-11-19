@@ -23,7 +23,7 @@
   <img alt="Two files in one window, with a popover that shows the type of a variable and a highlighted line" src="docs/images/hero.png" width="860">
 </p>
 
-tin.so makes images of code that show more than one snippet: split panes, stacked windows and popovers that point to a word. Highlight lines, give any part of the code a style or a color, and pick one of 14 editor themes and a background. People use the [web editor](https://tin.so), and agents use the [CLI](#cli) and the [agent skill](#agent-skill). Both use the same renderer, so they make the same image without a server or a browser.
+tin.so makes images of code that show more than one snippet: split panes, stacked windows and popovers that point to a word. Highlight lines, give any part of the code a style or a color, and pick one of 11 editor themes and a background. People use the [web editor](https://tin.so), and agents use the [CLI](#cli) and the [agent skill](#agent-skill). Both use the same renderer, so they make the same image without a server or a browser.
 
 ## Web editor
 
@@ -73,7 +73,7 @@ A popover points to a word in the code and looks like the hover card of an edito
 - Right-click a line and choose "Add popover". Select a word first to start the popover below it. A pane without code can have a popover too.
 - "Add popover" also underlines the word with a text style. Change it in the style panel like any other style, for example to a wavy line or to another color, or clear it.
 - Select code and right-click: the selection stays, so the menu acts on the selected text.
-- A popover has its own code and language.
+- A popover has its own code and language, and its own padding between its edge and its code.
 - A popover belongs to its line, not to the text in it: it moves with its line when you edit the code, and it stays when the text below it changes.
 - Move and resize a popover. A popover that you move stays at its place in the pane. Double-click it, or choose "Attach to line" in its menu, to attach it to its line again.
 - A popover can reach into the padding of the image, up to its edge. The image grows only when a popover below its line goes past the edge. A popover that you moved never changes the image, which cuts off what is outside of it. The window keeps its place while you move its popover.
@@ -100,20 +100,21 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 ### Themes
 
 <p align="center">
-  <img alt="The same function in all 14 themes" src="docs/images/themes.png" width="860">
+  <img alt="The same function in all 11 themes" src="docs/images/themes.png" width="860">
 </p>
 
-- 14 themes of code editors: Ayu, Catppuccin, Dracula, GitHub, Material, Night Owl, Nord, One Dark, Rosé Pine, Solarized, SynthWave '84, Tokyo Night, Vitesse and VS Code. The code has the exact colors of the original theme. Most themes have a dark and a light variant, and the mode switch selects one.
+- 11 themes of code editors: Ayu, Catppuccin, Dracula, GitHub, Night Owl, Nord, One Dark, Solarized, Tokyo Night, Vitesse and VS Code. The code has the exact colors of the original theme. Each theme has a dark and a light variant, and the mode switch selects one. Nord's light variant is Nord Light by huytd.
 - Point to a theme, a background or a font in its list to see it on the image at once.
 - 9 code fonts: JetBrains Mono, Geist Mono, IBM Plex Mono, Fira Code, Roboto Mono, Commit Mono, Space Mono, Source Code Pro and Google Sans Code.
 
 ### Backgrounds
 
 <p align="center">
-  <img alt="The 57 background presets: colors, gradients and meshes" src="docs/images/backgrounds.png" width="860">
+  <img alt="The background presets: gradients, meshes and solid colors" src="docs/images/backgrounds.png" width="860">
 </p>
 
-- 57 presets of colors, gradients and meshes, a color picker, and your own CSS linear or radial gradients.
+- 39 gradients, 12 meshes (soft color spots on a base color), 42 solid colors (six neutrals and twelve hues, each light, vivid and dark), a color picker, and your own CSS linear or radial gradients.
+- Ambient backgrounds in the colors of the image: soft glows of the theme colors or of the colors that the code uses most, a blurred copy of the code, or a glow of the main theme color: a round halo from the top, a spotlight behind the window, or a stage light from the top.
 - An opacity slider, down to a transparent image.
 - Padding around the windows.
 
@@ -318,7 +319,6 @@ TODO (not shown on GitHub)
 - VS Code extension: make a code image of the selected code, with the file name and the language of the editor.
 - PWA: install the web editor as an app, with offline use and the share target for code and images.
 - Hidden watermark: a weak pattern in the pixels of a PNG that marks it as made with tin.so (about 32 bits: a marker and a version, no user or image ID). Phase 1 survives JPEG at the same size (8×8 DCT blocks, repeated bits, a `tin detect` command and a check on drop in the editor), about 1 to 2 days. Phase 2 survives scaling, cropping and screenshots (a sync pattern or a scale search), about a week, with an open result. Risk: noise or banding in the smooth gradients and flat panels of code images. The privacy notice must mention it. A cheap alternative is an optional visible "tin.so" text in a corner.
-- Ambient backgrounds: the spec values "ambient-blur" (a blurred and larger copy of the code behind the window, about 260 ms for each export), "ambient-code" (a mesh of the 3 colors that cover the most characters of the code) and "ambient-theme" (a mesh of the keyword, string, function and constant colors of the theme). The renderer, its tests and the Ambient tab of the background panel are done. To enable them, set `AMBIENT_ENABLED` to true in `packages/core/src/ambient.ts`, unskip the ambient tests of the renderer and the editor, move the keywords to the accepted list of the spec tests, add them to the description of `background` in the spec, and update spec.md, SKILL.md and the Features list. Open question: keep both meshes, or only one of them.
 - Branding: upload a logo image and move it in the image, for example a company logo in a corner. The spec keeps its position and size.
 - Saved preferences: the web editor and the CLI keep the last theme, mode, background, font and other image settings as local state, so a user does not have to give them again. The editor keeps them in the browser storage (it keeps only the export format now). The CLI keeps them in a config file, for example `~/.config/tin/config.json`, with a command to show and reset them. A value in a spec or an option always comes first. Open question: does the CLI save the values of each run, or only the values that `tin config set` writes, so that the output of an agent does not change from one run to the next?
 -->

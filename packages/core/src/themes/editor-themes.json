@@ -212,50 +212,6 @@
     }
   },
   {
-    "id": "material",
-    "name": "Material",
-    "background": {
-      "from": "#89ddff",
-      "to": "#82aaff"
-    },
-    "textmate": {
-      "dark": "material-theme",
-      "light": "material-theme-lighter"
-    },
-    "window": {
-      "dark": {
-        "background": "#263238",
-        "title": "#eeffff",
-        "lineNumber": "#465a64",
-        "divider": "#263238"
-      },
-      "light": {
-        "background": "#fafafa",
-        "title": "#90a4ae",
-        "lineNumber": "#cfd8dc",
-        "divider": "#fafafa"
-      }
-    },
-    "syntax": {
-      "dark": {
-        "foreground": "#eeffff",
-        "keyword": "#89ddff",
-        "string": "#c3e88d",
-        "function": "#82aaff",
-        "comment": "#546e7a",
-        "highlight": "#00000050"
-      },
-      "light": {
-        "foreground": "#90a4ae",
-        "keyword": "#39adb5",
-        "string": "#91b859",
-        "function": "#6182b8",
-        "comment": "#90a4ae",
-        "highlight": "#ccd7da50"
-      }
-    }
-  },
-  {
     "id": "night-owl",
     "name": "Night Owl",
     "background": {
@@ -307,7 +263,8 @@
       "to": "#8fbcbb"
     },
     "textmate": {
-      "dark": "nord"
+      "dark": "nord",
+      "light": "nord-light"
     },
     "window": {
       "dark": {
@@ -315,6 +272,12 @@
         "title": "#d8dee9",
         "lineNumber": "#4c566a",
         "divider": "#3b425200"
+      },
+      "light": {
+        "background": "#eceff4",
+        "title": "#2f363d",
+        "lineNumber": "#1b1f234d",
+        "divider": "#e1e4e8"
       }
     },
     "syntax": {
@@ -325,6 +288,14 @@
         "function": "#88c0d0",
         "comment": "#616e88",
         "highlight": "#3b4252"
+      },
+      "light": {
+        "foreground": "#24292e",
+        "keyword": "#0d7579",
+        "string": "#509546",
+        "function": "#0d7579",
+        "comment": "#748599",
+        "highlight": "#f6f8fa"
       }
     }
   },
@@ -373,50 +344,6 @@
     }
   },
   {
-    "id": "rose-pine",
-    "name": "Rosé Pine",
-    "background": {
-      "from": "#31748f",
-      "to": "#ebbcba"
-    },
-    "textmate": {
-      "dark": "rose-pine",
-      "light": "rose-pine-dawn"
-    },
-    "window": {
-      "dark": {
-        "background": "#191724",
-        "title": "#908caa",
-        "lineNumber": "#908caa",
-        "divider": "#00000000"
-      },
-      "light": {
-        "background": "#faf4ed",
-        "title": "#797593",
-        "lineNumber": "#797593",
-        "divider": "#00000000"
-      }
-    },
-    "syntax": {
-      "dark": {
-        "foreground": "#e0def4",
-        "keyword": "#31748f",
-        "string": "#f6c177",
-        "function": "#ebbcba",
-        "comment": "#6e6a86",
-        "highlight": "#6e6a861a"
-      },
-      "light": {
-        "foreground": "#575279",
-        "keyword": "#286983",
-        "string": "#ea9d34",
-        "function": "#d7827e",
-        "comment": "#9893a5",
-        "highlight": "#6e6a860d"
-      }
-    }
-  },
-  {
     "id": "solarized",
     "name": "Solarized",
     "background": {
@@ -454,34 +381,6 @@
         "function": "#268bd2",
         "comment": "#93a1a1",
         "highlight": "#eee8d5"
-      }
-    }
-  },
-  {
-    "id": "synthwave-84",
-    "name": "SynthWave '84",
-    "background": {
-      "from": "#fede5d",
-      "to": "#36f9f6"
-    },
-    "textmate": {
-      "dark": "synthwave-84"
-    },
-    "window": {
-      "dark": {
-        "background": "#262335",
-        "lineNumber": "#ffffff73",
-        "divider": "#241b2f00"
-      }
-    },
-    "syntax": {
-      "dark": {
-        "foreground": "#ffffff",
-        "keyword": "#fede5d",
-        "string": "#ff8b39",
-        "function": "#36f9f6",
-        "comment": "#848bbd",
-        "highlight": "#ffffff20"
       }
     }
   },

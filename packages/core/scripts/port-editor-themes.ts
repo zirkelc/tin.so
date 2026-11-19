@@ -49,9 +49,14 @@ const FAMILIES: Array<Family> = [
     background: { from: "#bd93f9", to: "#ff79c6" },
   },
   { id: "github", name: "GitHub", dark: "github-dark-default", light: "github-light-default" },
-  { id: "material", name: "Material", dark: "material-theme", light: "material-theme-lighter" },
   { id: "night-owl", name: "Night Owl", dark: "night-owl", light: "night-owl-light" },
-  { id: "nord", name: "Nord", dark: "nord", background: { from: "#5e81ac", to: "#8fbcbb" } },
+  {
+    id: "nord",
+    name: "Nord",
+    dark: "nord",
+    light: "nord-light",
+    background: { from: "#5e81ac", to: "#8fbcbb" },
+  },
   {
     id: "one-dark",
     name: "One Dark",
@@ -59,7 +64,6 @@ const FAMILIES: Array<Family> = [
     light: "one-light",
     background: { from: "#61afef", to: "#c678dd" },
   },
-  { id: "rose-pine", name: "Rosé Pine", dark: "rose-pine", light: "rose-pine-dawn" },
   {
     id: "solarized",
     name: "Solarized",
@@ -67,7 +71,6 @@ const FAMILIES: Array<Family> = [
     light: "solarized-light",
     background: { from: "#b58900", to: "#cb4b16" },
   },
-  { id: "synthwave-84", name: "SynthWave '84", dark: "synthwave-84" },
   {
     id: "tokyo-night",
     name: "Tokyo Night",
@@ -107,6 +110,19 @@ const VENDORED: Record<string, Vendored> = {
     displayName: "Tokyo Night Light",
     convert: (text) => {
       const theme = JSON.parse(stripJsonComments(text));
+      return { colors: theme.colors, tokenColors: theme.tokenColors };
+    },
+  },
+  "nord-light": {
+    repo: "huytd/vscode-nord-light",
+    commit: "e858587a296240dac51692e003d357a8a935ef50",
+    file: "themes/Nord Light-color-theme.json",
+    licenseFile: "LICENSE",
+    license: "MIT",
+    displayName: "Nord Light",
+    convert: (text) => {
+      // The file has trailing commas, which JSON does not allow
+      const theme = JSON.parse(stripJsonComments(text).replace(/,(\s*[}\]])/g, "$1"));
       return { colors: theme.colors, tokenColors: theme.tokenColors };
     },
   },
@@ -164,7 +180,9 @@ function joinAlpha(value: unknown): unknown {
 }
 
 async function fetchGitHub(repo: string, commit: string, path: string): Promise<string> {
-  const response = await fetch(`https://raw.githubusercontent.com/${repo}/${commit}/${path}`);
+  const response = await fetch(
+    `https://raw.githubusercontent.com/${repo}/${commit}/${encodeURI(path)}`,
+  );
   if (!response.ok) throw new Error(`Failed to fetch ${repo}/${path}: ${response.status}`);
   return response.text();
 }

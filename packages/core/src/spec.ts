@@ -5,7 +5,7 @@ import { AUTO_ICON, ICON_IDS, NO_ICON } from "./icons/index.ts";
 import { IMPLICIT_SPEC_VERSION, schemaVersion, withoutExtensions } from "./migrate.ts";
 import { AMBIENT_ENABLED, isAmbientBackground } from "./ambient.ts";
 import { isCssBackground } from "./gradient.ts";
-import { DEFAULT_THEME, THEME_IDS } from "./themes/index.ts";
+import { DEFAULT_THEME, RETIRED_THEMES, THEME_IDS } from "./themes/index.ts";
 
 const LINE_RANGE = /^\d+(-\d+)?$/;
 const RATIO = /^\d+(\.\d+)?:\d+(\.\d+)?$/;
@@ -29,7 +29,19 @@ export const SPEC_LIMITS = {
   position: 8_192,
   // The largest width or height of the image, a window, a pane or a popover, in px
   size: 8_192,
+  // The largest space between the edge of a popover and its code, in px
+  popoverPadding: 64,
 } as const;
+
+// The space between the edge of a popover and its code at the left and right, when the spec does not
+// set it. Above and below the code the space is smaller, because the line height adds space there.
+export const POPOVER_PADDING = 18;
+export const POPOVER_LINE_SPACE = 4;
+
+/** The space between the edge of a popover and its code, from the padding of the spec */
+export function popoverPadding(padding: number = POPOVER_PADDING): { x: number; y: number } {
+  return { x: padding, y: Math.max(0, padding - POPOVER_LINE_SPACE) };
+}
 
 const LANGUAGE_HINT = 'Run "tin languages" to list the ids, or use "auto" or "text"';
 
@@ -184,6 +196,10 @@ const AnnotationSchema = v.strictObject({
   ),
   width: describe(size(40), "Width of the popover in px (default: fit the code)"),
   height: describe(size(32), "Height of the popover in px (default: fit the code)"),
+  padding: describe(
+    v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(SPEC_LIMITS.popoverPadding))),
+    `Space between the edge of the popover and its code at the left and right, in px, from 0 to ${SPEC_LIMITS.popoverPadding} (default: ${POPOVER_PADDING}). Above and below the code the space is ${POPOVER_LINE_SPACE} px smaller, because the line height adds space there`,
+  ),
   marks: describe(
     v.optional(list(MarkWithEffectSchema, SPEC_LIMITS.marksPerPane, "marks"), []),
     `Text styles and colors on parts of a line of the popover code, as in a pane. At most ${SPEC_LIMITS.marksPerPane}`,
@@ -335,7 +351,7 @@ const SpecV1Schema = v.pipe(
           ),
         ),
       ),
-      'Background of the image: a color such as "#1e1e2e", or a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)" (default: the background of the theme in the mode). A gradient can be linear-gradient or radial-gradient, with layers separated by commas and a color as the last layer, such as "radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), #0b0820". For a transparent image, set backgroundOpacity to 0',
+      'Background of the image: a color such as "#1e1e2e", or a CSS gradient such as "linear-gradient(135deg, #2e1065, #a78bfa)" (default: the background of the theme in the mode). A gradient can be linear-gradient or radial-gradient, with layers separated by commas and a color as the last layer, such as "radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), #0b0820". For a transparent image, set backgroundOpacity to 0. Ambient backgrounds take their colors from the image: "ambient-theme" (soft glows of the theme colors), "ambient-code" (soft glows of the colors that the code uses most), "ambient-halo" (a round glow of the main theme color from the top center), "ambient-spotlight" (a glow in the middle, behind the windows), "ambient-stage" (a beam of light from the top), "ambient-blur" (a blurred copy of the code behind the window)',
     ),
     backgroundOpacity: describe(
       v.optional(v.pipe(v.number(), v.minValue(0), v.maxValue(1)), 1),
@@ -470,8 +486,16 @@ function checkSupported(version: number, path: string): number {
  * validates the spec with the schema of its version and changes it to the latest version. Throws a
  * SpecError that lists every issue.
  */
+// A spec that names a retired theme opens with the theme that takes its place
+function withCurrentTheme(input: unknown): unknown {
+  if (typeof input !== "object" || input === null || !("theme" in input)) return input;
+  const { theme } = input as { theme: unknown };
+  if (typeof theme !== "string" || !Object.hasOwn(RETIRED_THEMES, theme)) return input;
+  return { ...input, theme: RETIRED_THEMES[theme] };
+}
+
 export function parseSpec(input: unknown): Spec {
-  const cleaned = withoutExtensions(input);
+  const cleaned = withCurrentTheme(withoutExtensions(input));
   const version = readVersion(cleaned);
   const result = v.safeParse(SPEC_SCHEMAS[version]!, cleaned);
   if (!result.success) throw new SpecError(result.issues.map(formatIssue));

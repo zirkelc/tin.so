@@ -5,13 +5,15 @@ export function Switch(props: {
   label: string;
   /** A name for screen readers when the visible label is not unique on the page */
   ariaLabel?: string;
+  /** An explanation of the setting, which shows when the pointer is on the label */
+  help?: string;
   checked: boolean;
   disabled?: boolean;
   onChange: (checked: boolean) => void;
 }) {
   return (
     <label className="switch-field">
-      <span>{props.label}</span>
+      <span>{props.help ? <HelpTerm help={props.help}>{props.label}</HelpTerm> : props.label}</span>
       <button
         type="button"
         role="switch"
@@ -54,6 +56,35 @@ export function Segmented<VALUE extends string | number>(props: {
             {option.label}
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A setting that the image changes, such as a size: its value with an explanation, and a button that
+ * resets it. The button is disabled while there is nothing to reset.
+ */
+export function ValueRow(props: {
+  label: string;
+  value: ReactNode;
+  help: string;
+  action: { label: string; title: string; disabled: boolean; onClick: () => void };
+}) {
+  return (
+    <div className="field">
+      <span className="field-label">{props.label}</span>
+      <div className="value-row">
+        <HelpTerm help={props.help}>{props.value}</HelpTerm>
+        <button
+          type="button"
+          className="secondary compact"
+          title={props.action.title}
+          disabled={props.action.disabled}
+          onClick={props.action.onClick}
+        >
+          {props.action.label}
+        </button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test";
 import { composite, oklabLightness } from "../src/color.ts";
-import { getFrameColors, resolveMode, THEMES } from "../src/themes/index.ts";
+import { getFrameColors, getTheme, resolveMode, THEMES } from "../src/themes/index.ts";
 
 const MODES = ["dark", "light"] as const;
 const PAIRS = THEMES.flatMap((theme) =>
@@ -55,5 +55,33 @@ describe("getFrameColors", () => {
 
     // Assert
     expect(frame.highlight).toBe("#44475a");
+  });
+});
+
+describe("resolveMode", () => {
+  test("should force the only mode of a theme", () => {
+    // Arrange
+    const nord = getTheme("nord");
+    const theme = { ...nord, syntax: { dark: nord.syntax.dark } };
+
+    // Act
+    const mode = resolveMode(theme, "light");
+
+    // Assert
+    expect(mode).toBe("dark");
+  });
+});
+
+describe("Nord", () => {
+  test("should have a light mode", () => {
+    // Arrange
+    const theme = getTheme("nord");
+
+    // Act
+    const mode = resolveMode(theme, "light");
+
+    // Assert
+    expect(mode).toBe("light");
+    expect(theme.window?.light?.background).toBe("#eceff4");
   });
 });

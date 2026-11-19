@@ -33,18 +33,6 @@ export const RedoIcon = () => (
   </Glyph>
 );
 
-export const FrameIcon = () => (
-  <Glyph>
-    <rect x="2" y="2.5" width="12" height="11" rx="2.5" />
-  </Glyph>
-);
-
-export const TabsIcon = () => (
-  <Glyph>
-    <path d="M2 13.5v-9a2 2 0 0 1 2-2h3l1.5 2.5H12a2 2 0 0 1 2 2v6.5z" />
-  </Glyph>
-);
-
 export const SplitRowIcon = () => (
   <Glyph>
     <rect x="2" y="2.5" width="12" height="11" rx="2.5" />

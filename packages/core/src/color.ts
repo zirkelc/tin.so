@@ -75,11 +75,14 @@ export function withContrast(color: string, background: string, minimum: number)
   const back = toOklab(rgba(background));
   const difference = front.l - back.l;
   if (Math.abs(difference) >= minimum) return opaque;
-  const step = (difference === 0 ? back.l < 0.5 : difference > 0) ? 1 : -1;
-  // The 8-bit channels of a hex color round the lightness, so the target moves on until it is met
-  for (let extra = 0; extra < 0.02; extra += 0.001) {
-    const result = hex(fromOklab({ ...front, l: back.l + step * (minimum + extra) }));
-    if (Math.abs(toOklab(rgba(result)).l - back.l) >= minimum) return result;
+  const preferred = (difference === 0 ? back.l < 0.5 : difference > 0) ? 1 : -1;
+  // A window near white or near black has no room on one side, so the other side is the fallback
+  for (const step of [preferred, -preferred]) {
+    // The 8-bit channels of a hex color round the lightness, so the target moves on until it is met
+    for (let extra = 0; extra < 0.02; extra += 0.001) {
+      const result = hex(fromOklab({ ...front, l: back.l + step * (minimum + extra) }));
+      if (Math.abs(toOklab(rgba(result)).l - back.l) >= minimum) return result;
+    }
   }
-  return hex(fromOklab({ ...front, l: back.l + step * (minimum + 0.02) }));
+  return hex(fromOklab({ ...front, l: back.l + preferred * (minimum + 0.02) }));
 }

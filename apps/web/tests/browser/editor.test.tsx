@@ -436,13 +436,16 @@ describe("background", () => {
 
   test.each([
     ["Gradient", "Coral", CORAL],
-    ["Gradient", "Nebula", BACKGROUNDS.find((preset) => preset.id === "mesh-nebula")!.css],
-    ["Color", "Black", "#000000"],
+    ["Mesh", "Orchid", BACKGROUNDS.find((preset) => preset.id === "mesh-orchid")!.css],
+    ["Solid", "Black", "#000000"],
   ])("should set a background from the %s swatches", async (tab, name, expected) => {
     // Arrange
     await mountApp();
     await backgroundTrigger().click();
-    await page.getByRole("radio", { name: tab }).click();
+    await page
+      .getByRole("radiogroup", { name: "Kind of background" })
+      .getByRole("radio", { name: tab })
+      .click();
 
     // Act
     await page.getByRole("button", { name, exact: true }).click();
@@ -452,25 +455,25 @@ describe("background", () => {
     await expect.element(backgroundTrigger()).toHaveAttribute("aria-label", `Background: ${name}`);
   });
 
-  test("should show a window of the theme on each background tile", async () => {
+  test.each([
+    ["Light red", "#fecaca"],
+    ["Dark red", "#7f1d1d"],
+    ["Light cyan", "#a5f3fc"],
+    ["Dark indigo", "#312e81"],
+  ])("should offer the solid color %s", async (name, expected) => {
     // Arrange
     await mountApp();
-    const theme = THEMES.find((theme) => theme.id === DEFAULT_THEME)!;
-    const window = getFrameColors(theme, "dark").background;
+    await backgroundTrigger().click();
+    await page
+      .getByRole("radiogroup", { name: "Kind of background" })
+      .getByRole("radio", { name: "Solid" })
+      .click();
 
     // Act
-    await backgroundTrigger().click();
+    await page.getByRole("button", { name, exact: true }).click();
 
     // Assert
-    const tile = page.getByRole("button", { name: "Coral" });
-    await expect.element(tile).toBeVisible();
-    const preview = tile.element().querySelector<HTMLElement>(".background-preview-window")!;
-    const swatch = document.createElement("span");
-    swatch.style.background = window;
-    expect(preview.style.backgroundColor).toBe(swatch.style.backgroundColor);
-    expect(document.querySelectorAll(".background-swatch .background-preview-window").length).toBe(
-      document.querySelectorAll(".background-swatch").length,
-    );
+    await expect.poll(async () => (await specInUrl())?.background).toBe(expected);
   });
 
   test("should preview a background preset under the mouse and restore it after", async () => {
@@ -493,7 +496,7 @@ describe("background", () => {
 
   test("should move through the background presets with the arrow keys", async () => {
     // Arrange
-    const gradients = BACKGROUNDS.filter((preset) => preset.kind !== "color");
+    const gradients = BACKGROUNDS.filter((preset) => preset.kind === "gradient");
     const at = gradients.findIndex((preset) => preset.id === "coral");
     await mountApp();
     await backgroundTrigger().click();
@@ -506,6 +509,20 @@ describe("background", () => {
     const next = gradients[at + 1]!;
     await expect.poll(async () => (await specInUrl())?.background).toBe(next.css);
     expect(document.activeElement?.getAttribute("aria-label")).toBe(next.name);
+  });
+
+  test("should move one row of three gradients down with the arrow key", async () => {
+    // Arrange
+    const gradients = BACKGROUNDS.filter((preset) => preset.kind === "gradient");
+    await mountApp();
+    await backgroundTrigger().click();
+    page.getByRole("button", { name: gradients[0]!.name }).element().focus();
+
+    // Act
+    await userEvent.keyboard("{ArrowDown}");
+
+    // Assert
+    await expect.poll(async () => (await specInUrl())?.background).toBe(gradients[3]!.css);
   });
 
   test("should restore the background with Escape after an arrow key preview", async () => {
@@ -539,23 +556,13 @@ describe("background", () => {
     await expect.element(coral).toHaveAttribute("aria-pressed", "true");
   });
 
-  test("should not show the Ambient tab", async () => {
-    // Arrange
-    await mountApp();
-
-    // Act
-    await backgroundTrigger().click();
-
-    // Assert
-    await expect.element(page.getByRole("radio", { name: "Gradient" })).toBeVisible();
-    await expect.element(page.getByRole("radio", { name: "Ambient" })).not.toBeInTheDocument();
-  });
-
-  // The ambient backgrounds are not enabled yet
-  test.skip.each([
-    ["Blur", "ambient-blur", "Ambient blur"],
-    ["Code", "ambient-code", "Ambient code"],
+  test.each([
     ["Theme", "ambient-theme", "Ambient theme"],
+    ["Code", "ambient-code", "Ambient code"],
+    ["Halo", "ambient-halo", "Ambient halo"],
+    ["Spotlight", "ambient-spotlight", "Ambient spotlight"],
+    ["Stage", "ambient-stage", "Ambient stage"],
+    ["Blur", "ambient-blur", "Ambient blur"],
   ])("should set the ambient background %s", async (name, expected, label) => {
     // Arrange
     await mountApp();
@@ -629,11 +636,54 @@ describe("background", () => {
     expect((await specInUrl())?.background).toBe(CORAL);
   });
 
+  test.each(["Gradient", "Mesh"])(
+    "should show the %s tiles without a window of the theme",
+    async (tab) => {
+      // Arrange
+      await mountApp();
+      await backgroundTrigger().click();
+
+      // Act
+      await page
+        .getByRole("radiogroup", { name: "Kind of background" })
+        .getByRole("radio", { name: tab })
+        .click();
+
+      // Assert
+      await expect
+        .element(
+          page
+            .getByRole("button", { name: "Orchid" })
+            .or(page.getByRole("button", { name: "Coral" })),
+        )
+        .toBeVisible();
+      expect(document.querySelectorAll(".background-preview-window").length).toBe(0);
+    },
+  );
+
+  test("should order the kinds of background as gradient, mesh, ambient and solid", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await backgroundTrigger().click();
+
+    // Assert
+    const kinds = page.getByRole("radiogroup", { name: "Kind of background" }).getByRole("radio");
+    await expect.element(kinds.first()).toBeVisible();
+    expect(kinds.elements().map((kind) => kind.textContent)).toEqual([
+      "Gradient",
+      "Mesh",
+      "Ambient",
+      "Solid",
+    ]);
+  });
+
   test("should set a custom color from the RGB fields", async () => {
     // Arrange
     await mountApp();
     await backgroundTrigger().click();
-    await page.getByRole("radio", { name: "Custom" }).click();
+    await page.getByRole("button", { name: "Custom", exact: true }).click();
 
     // Act
     await userEvent.fill(page.getByRole("spinbutton", { name: "R" }), "17");
@@ -650,7 +700,7 @@ describe("background", () => {
     await mountApp();
     await window.tin.setSpec({ ...DEFAULT_SPEC, background: "#800000" });
     await backgroundTrigger().click();
-    await page.getByRole("radio", { name: "Custom" }).click();
+    await page.getByRole("button", { name: "Custom", exact: true }).click();
     const square = page.getByRole("slider", { name: "Saturation and brightness" });
     (square.element() as HTMLElement).focus();
 
@@ -679,7 +729,7 @@ describe("background", () => {
 
   test.each([
     ["dark", "primer"],
-    ["light", "daybreak"],
+    ["light", "azure"],
   ] as const)("should show the background preset of the theme in the mode %s", async (mode, id) => {
     // Arrange
     await mountApp();
@@ -960,9 +1010,54 @@ describe("popover list", () => {
     // Assert
     await expect
       .element(
-        page.getByRole("group", { name: "Selected popover" }).getByText("Attached to line 1"),
+        page.getByRole("group", { name: "Selected popover" }).getByText("Line 1", { exact: true }),
       )
       .toBeVisible();
+  });
+
+  test("should set the padding of the selected popover", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec(POPOVER_SPEC);
+    await page.getByRole("button", { name: "Popover plans, line 1" }).click();
+
+    // Act
+    await page
+      .getByRole("group", { name: "Selected popover" })
+      .getByRole("radio", { name: "12" })
+      .click();
+
+    // Assert
+    await expect
+      .poll(() => window.tin.getSpec().windows[0]?.panes[0]?.annotations?.[0]?.padding)
+      .toBe(12);
+  });
+
+  test("should make a popover with a size fit its code again", async () => {
+    // Arrange
+    await mountApp();
+    const [pane] = POPOVER_SPEC.windows[0]!.panes;
+    await window.tin.setSpec({
+      windows: [
+        {
+          panes: [
+            { ...pane!, annotations: [{ ...pane!.annotations![0]!, width: 300, height: 90 }] },
+          ],
+        },
+      ],
+    });
+    await page.getByRole("button", { name: "Popover plans, line 1" }).click();
+
+    // Act
+    await page
+      .getByRole("group", { name: "Selected popover" })
+      .getByRole("button", { name: "Fit" })
+      .click();
+
+    // Assert
+    await expect
+      .poll(() => window.tin.getSpec().windows[0]?.panes[0]?.annotations?.[0])
+      .toEqual({ line: 1, match: "plans", code: "type Plans = number" });
   });
 
   test("should explain what it means that a popover is attached to its line", async () => {
@@ -974,7 +1069,7 @@ describe("popover list", () => {
     // Act
     const term = page
       .getByRole("group", { name: "Selected popover" })
-      .getByText("Attached to line 1");
+      .getByText("Line 1", { exact: true });
 
     // Assert
     await expect.element(term).toHaveAccessibleDescription(/moves with it/);
@@ -1440,6 +1535,21 @@ describe("undo", () => {
 });
 
 describe("frame", () => {
+  test("should show the size of a window that fits its code", async () => {
+    // Arrange
+    await mountApp();
+
+    // Act
+    await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "a" }] }] });
+
+    // Assert
+    const size = page.getByText("Size", { exact: true }).element().nextElementSibling;
+    expect(size?.textContent).toBe("AutoFit");
+    await expect
+      .element(page.getByTitle("Make the window and its panes fit the code again"))
+      .toBeDisabled();
+  });
+
   test("should not offer to turn off the window of a window with a frame", async () => {
     // Arrange
     await mountApp();
@@ -1448,8 +1558,8 @@ describe("frame", () => {
     await window.tin.setSpec({ windows: [{ panes: [{ title: "a.ts", code: "a" }] }] });
 
     // Assert
-    await expect.element(page.getByRole("button", { name: "Tabs", exact: true })).toBeVisible();
-    expect(page.getByRole("button", { name: "Window", exact: true }).elements().length).toBe(0);
+    await expect.element(page.getByRole("switch", { name: "Tabs", exact: true })).toBeVisible();
+    expect(page.getByRole("switch", { name: "Window", exact: true }).elements().length).toBe(0);
   });
 
   test("should explain that the theme keeps the window of a window without a frame", async () => {
@@ -1470,7 +1580,7 @@ describe("frame", () => {
         ),
       )
       .toBeVisible();
-    expect(page.getByRole("button", { name: "Window", exact: true }).elements().length).toBe(0);
+    expect(page.getByRole("switch", { name: "Window", exact: true }).elements().length).toBe(0);
   });
 });
 
@@ -1495,7 +1605,7 @@ describe("help", () => {
     ["Padding", /space between the windows and the edge/],
     ["Mode", /dark or the light colors/],
     ["Opacity", /transparent background/],
-    ["Frame", /tab with the file name/],
+    ["Tabs", /tab with the file name/],
     ["Style", /title bar has its own color/],
     ["Tab icon", /icon on the tab of this pane/],
   ])("should explain the setting %s", async (label, help) => {

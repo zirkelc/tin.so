@@ -21,12 +21,13 @@ import THEME_PREVIEWS from "./theme-previews.json";
 
 export type Background = SpecInput["background"];
 
-type Tab = "gradient" | "color" | "custom" | "ambient";
+type Tab = "gradient" | "mesh" | "color" | "custom" | "ambient";
 
-// The Ambient tab stays hidden until the ambient backgrounds are enabled
+// The kinds of presets, as tabs. The Ambient tab stays hidden until the ambient backgrounds are
+// enabled. The custom color has its own button in the header of the panel.
 const TABS: Array<Tab> = AMBIENT_ENABLED
-  ? ["gradient", "color", "custom", "ambient"]
-  : ["gradient", "color", "custom"];
+  ? ["gradient", "mesh", "ambient", "color"]
+  : ["gradient", "mesh", "color"];
 
 type Rgb = { r: number; g: number; b: number };
 
@@ -35,19 +36,24 @@ type Hsv = { h: number; s: number; v: number };
 const CHECKERBOARD = "repeating-conic-gradient(#808080 0 25%, #c0c0c0 0 50%) 0 0 / 12px 12px";
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
-const GRADIENTS = BACKGROUNDS.filter((preset) => preset.kind !== "color");
+const GRADIENTS = BACKGROUNDS.filter((preset) => preset.kind === "gradient");
+const MESHES = BACKGROUNDS.filter((preset) => preset.kind === "mesh");
 const COLORS = BACKGROUNDS.filter((preset) => preset.kind === "color");
 
 // The names in the Ambient tab, and the names in the bar with "Ambient" before them
 const AMBIENT_NAMES: Record<AmbientBackground, string> = {
-  "ambient-blur": "Blur",
-  "ambient-code": "Code",
   "ambient-theme": "Theme",
+  "ambient-code": "Code",
+  "ambient-blur": "Blur",
+  "ambient-halo": "Halo",
+  "ambient-spotlight": "Spotlight",
+  "ambient-stage": "Stage",
 };
 
 const TAB_NAMES: Record<Tab, string> = {
   gradient: "Gradient",
-  color: "Color",
+  mesh: "Mesh",
+  color: "Solid",
   custom: "Custom",
   ambient: "Ambient",
 };
@@ -61,7 +67,7 @@ export function backgroundCss(
   if (background !== undefined && !isAmbientBackground(background)) return background;
   if (!theme) return CHECKERBOARD;
   // The renderer makes an ambient background from the image, so the bar shows the colors of the theme
-  if (background !== undefined) return ambientPreviewCss(theme, mode);
+  if (background !== undefined) return ambientPreviewCss(theme, mode, background);
   const preset = themeBackground(theme, resolveMode(theme, mode));
   return preset?.css ?? `linear-gradient(140deg, ${theme.background.from}, ${theme.background.to})`;
 }
@@ -78,7 +84,7 @@ function initialTab(background: Background): Tab {
   if (background === undefined) return "gradient";
   if (isAmbientBackground(background)) return "ambient";
   const preset = BACKGROUNDS.find((preset) => preset.css === background);
-  if (preset) return preset.kind === "color" ? "color" : "gradient";
+  if (preset) return preset.kind;
   return HEX.test(background) ? "custom" : "gradient";
 }
 
@@ -218,6 +224,15 @@ export function BackgroundPicker(props: {
         <div className="background-panel" role="dialog" aria-label="Background">
           <div className="background-panel-header">
             <span>Background</span>
+            <button
+              type="button"
+              className="background-custom"
+              aria-pressed={tab === "custom"}
+              title="A color of your own"
+              onClick={() => setTab("custom")}
+            >
+              Custom
+            </button>
             <button type="button" className="tool" aria-label="Close" onClick={closePanel}>
               <CloseIcon />
             </button>
@@ -241,20 +256,26 @@ export function BackgroundPicker(props: {
               <Swatches
                 presets={GRADIENTS}
                 value={committed}
-                theme={theme}
-                mode={mode}
                 onPreview={preview}
                 onPreviewEnd={endPreview}
                 onChange={choose}
               />
             </>
           )}
+          {tab === "mesh" && (
+            <Swatches
+              presets={MESHES}
+              value={committed}
+              onPreview={preview}
+              onPreviewEnd={endPreview}
+              onChange={choose}
+            />
+          )}
           {tab === "color" && (
             <Swatches
+              palette
               presets={COLORS}
               value={committed}
-              theme={theme}
-              mode={mode}
               onPreview={preview}
               onPreviewEnd={endPreview}
               onChange={choose}
@@ -273,7 +294,7 @@ export function BackgroundPicker(props: {
                   <span
                     className="background-ambient-preview"
                     style={{
-                      background: theme ? ambientPreviewCss(theme, mode) : CHECKERBOARD,
+                      background: theme ? ambientPreviewCss(theme, mode, ambient) : CHECKERBOARD,
                       filter: ambient === "ambient-blur" ? "blur(3px)" : undefined,
                     }}
                   />
@@ -348,20 +369,22 @@ export function PreviewWindow(props: { theme: Theme; mode: Mode }) {
   );
 }
 
-// The grid has two columns, so up and down move by two presets
-const SWATCH_COLUMNS = 2;
-const SWATCH_STEPS: Record<string, number> = {
+// The gradients and meshes are wide tiles in three columns. The solid colors are small tiles in
+// six columns: the six neutrals, then two hues in each row, each hue light, vivid and dark.
+const SWATCH_COLUMNS = 3;
+const PALETTE_COLUMNS = 6;
+const swatchSteps = (columns: number): Record<string, number> => ({
   ArrowLeft: -1,
   ArrowRight: 1,
-  ArrowUp: -SWATCH_COLUMNS,
-  ArrowDown: SWATCH_COLUMNS,
-};
+  ArrowUp: -columns,
+  ArrowDown: columns,
+});
 
 function Swatches(props: {
   presets: Array<BackgroundPreset>;
+  /** Small square tiles in more columns, for the solid colors */
+  palette?: boolean;
   value: Background;
-  theme: Theme | undefined;
-  mode: Mode;
   /** Shows a preset under the mouse at once */
   onPreview: (background: Background) => void;
   /** Restores the background from before when the mouse leaves the presets */
@@ -370,7 +393,7 @@ function Swatches(props: {
 }) {
   // The arrow keys move the focus through the grid and show the preset under the focus
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const step = SWATCH_STEPS[event.key];
+    const step = swatchSteps(props.palette ? PALETTE_COLUMNS : SWATCH_COLUMNS)[event.key];
     if (step === undefined) return;
     event.preventDefault();
     const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button")];
@@ -383,7 +406,7 @@ function Swatches(props: {
 
   return (
     <div
-      className="background-swatches"
+      className={props.palette ? "background-swatches background-palette" : "background-swatches"}
       onPointerLeave={props.onPreviewEnd}
       onKeyDown={onKeyDown}
       onBlur={(event) => {
@@ -408,10 +431,7 @@ function Swatches(props: {
           }}
           onClick={() => props.onChange(preset.css)}
         >
-          <span className="background-swatch-canvas" style={{ background: preset.css }}>
-            {props.theme && <PreviewWindow theme={props.theme} mode={props.mode} />}
-          </span>
-          <span className="background-swatch-name">{preset.name}</span>
+          <span className="background-swatch-canvas" style={{ background: preset.css }} />
         </button>
       ))}
     </div>

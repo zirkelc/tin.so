@@ -2,6 +2,7 @@ import { describe, expect, test } from "vite-plus/test";
 import { SPEC_SCHEMA_URL } from "../src/json-schema.ts";
 import { stampSpecVersion } from "../src/migrate.ts";
 import { expandLineRanges, LATEST_SPEC_VERSION, parseSpec, SpecError } from "../src/spec.ts";
+import { RETIRED_THEMES, THEME_IDS } from "../src/themes/index.ts";
 import PINNED_IDS from "./spec-ids-v1.json" with { type: "json" };
 
 const PANE = { code: "x" };
@@ -574,7 +575,20 @@ describe("pinned ids", () => {
     const spec = parseSpec({ theme, windows: [{ panes: [PANE] }] });
 
     // Assert
-    expect(spec.theme).toBe(theme);
+    expect(spec.theme).toBe(RETIRED_THEMES[theme] ?? theme);
+  });
+
+  test.each([
+    ["material", "nord"],
+    ["rose-pine", "catppuccin"],
+    ["synthwave-84", "dracula"],
+  ])("should open the retired theme %s as %s", (theme, replacement) => {
+    // Act
+    const spec = parseSpec({ theme, windows: [{ panes: [PANE] }] });
+
+    // Assert
+    expect(spec.theme).toBe(replacement);
+    expect(THEME_IDS.includes(theme)).toBe(false);
   });
 
   test.each(PINNED_IDS.fonts)("should accept the font %s", (font) => {
@@ -621,6 +635,12 @@ describe("image background", () => {
     [
       "radial-gradient(at 20% 20%, #7c3aed 0px, transparent 50%), radial-gradient(at 80% 10%, #db2777 0px, transparent 50%), #0b0820",
     ],
+    ["ambient-blur"],
+    ["ambient-code"],
+    ["ambient-theme"],
+    ["ambient-halo"],
+    ["ambient-spotlight"],
+    ["ambient-stage"],
   ])("should accept the background %j", (background) => {
     // Act
     const spec = parseSpec({ background, windows: [{ panes: [PANE] }] });
@@ -632,10 +652,8 @@ describe("image background", () => {
   test.each([
     ["red"],
     ["ambient"],
-    // The ambient backgrounds are not enabled yet
-    ["ambient-blur"],
-    ["ambient-code"],
-    ["ambient-theme"],
+    ["ambient-halo-top"],
+    ["ambient-halo-bottom"],
     [true],
     [false],
     [{ from: "#123456", to: "#abcdef" }],

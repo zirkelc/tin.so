@@ -17,7 +17,14 @@ import {
   languageName,
   resolveLanguage,
 } from "./highlight/index.ts";
-import { ambientBase, codeAmbientCss, isAmbientBackground, themeAmbientCss } from "./ambient.ts";
+import {
+  ambientBase,
+  codeAmbientCss,
+  haloAmbientCss,
+  isHaloBackground,
+  isAmbientBackground,
+  themeAmbientCss,
+} from "./ambient.ts";
 import { themeBackground } from "./backgrounds.ts";
 import { backgroundBaseColor, type CssBackground, parseBackground } from "./gradient.ts";
 import {
@@ -26,6 +33,7 @@ import {
   type MarkSpec,
   parseSpec,
   type PaneSpec,
+  popoverPadding,
   type Spec,
   SPEC_LIMITS,
   SpecError,
@@ -63,8 +71,6 @@ const DIVIDER = 1;
 export const POPOVER = {
   fontSize: 13,
   lineHeight: 20,
-  paddingX: 18,
-  paddingY: 14,
   radius: 12,
   offset: 6,
 };
@@ -84,6 +90,8 @@ export type AnnotationBox = {
   anchor: { x: number; y: number; width: number };
   box: Rect;
   lines: Array<HighlightedLine>;
+  /** The space between the edge of the popover and its code */
+  padding: { x: number; y: number };
   /** true when the popover is smaller than its code, so that it must cut the code off */
   clipped: boolean;
   /** The background of the popover from the spec */
@@ -259,6 +267,7 @@ type AnnotationDraft = {
   natural: Size;
   size: Size;
   offset: { x: number; y: number };
+  padding: { x: number; y: number };
   background?: string;
 };
 
@@ -403,9 +412,10 @@ async function draftAnnotation(
     path,
   );
   const columns = Math.max(0, ...popoverLines.map(lineCells));
+  const padding = popoverPadding(annotation.padding);
   const natural = {
-    width: POPOVER.paddingX * 2 + columns * scene.popoverText.cellWidth,
-    height: POPOVER.paddingY * 2 + popoverLines.length * POPOVER.lineHeight,
+    width: padding.x * 2 + columns * scene.popoverText.cellWidth,
+    height: padding.y * 2 + popoverLines.length * POPOVER.lineHeight,
   };
 
   return {
@@ -414,6 +424,7 @@ async function draftAnnotation(
     natural,
     size: { width: annotation.width ?? natural.width, height: annotation.height ?? natural.height },
     offset: { x: annotation.offsetX, y: annotation.offsetY },
+    padding,
     ...(annotation.background && { background: annotation.background }),
   };
 }
@@ -646,6 +657,7 @@ function placePane(pane: PaneDraft, rect: Rect, text: TextMetrics): PaneBox {
         anchor,
         box: { ...box, ...annotation.size },
         lines: annotation.lines,
+        padding: annotation.padding,
         ...(annotation.background && { background: annotation.background }),
         ...("place" in at && { fixed: true as const }),
         clipped:
@@ -910,11 +922,13 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
   const custom =
     ambient === "ambient-theme"
       ? parseBackground(themeAmbientCss(syntax, windowColor, mode))
-      : ambient
-        ? parseBackground(ambientBase(windowColor, mode))
-        : css
-          ? parseBackground(css)
-          : undefined;
+      : ambient && isHaloBackground(ambient)
+        ? parseBackground(haloAmbientCss(syntax, windowColor, mode, ambient))
+        : ambient
+          ? parseBackground(ambientBase(windowColor, mode))
+          : css
+            ? parseBackground(css)
+            : undefined;
   const baseColor = custom && backgroundBaseColor(custom);
 
   const base: SceneBase = {

@@ -67,6 +67,16 @@ export const THEMES = editorThemes as Array<Theme>;
 
 export const THEME_IDS = THEMES.map((theme) => theme.id);
 
+/**
+ * Themes that tin.so does not have any more, with the theme that takes their place. Links and
+ * images name them, so a spec with one of them opens with its replacement.
+ */
+export const RETIRED_THEMES: Record<string, string> = {
+  material: "nord",
+  "rose-pine": "catppuccin",
+  "synthwave-84": "dracula",
+};
+
 export const DEFAULT_THEME = "github";
 
 // The window of an editor theme has a thin border, because its background is opaque
