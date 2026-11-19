@@ -151,6 +151,7 @@ export function Settings(props: {
         label="Theme"
         searchable
         sticky
+        columns={3}
         // The chosen theme keeps the check mark while another one shows as a preview
         value={(previewBase.current ?? spec).theme ?? DEFAULT_THEME}
         options={themeOptions(spec.mode ?? "dark")}

@@ -1327,6 +1327,58 @@ button.icon {
   background: var(--border);
 }
 
+/* Options as tiles in a grid, as the ambient backgrounds: the picture, and the name below it */
+.select-popover ul.select-grid {
+  display: grid;
+  gap: 12px 8px;
+  padding: 10px;
+}
+
+.select-grid .select-option {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.select-grid .select-option .select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-grid .select-option.active {
+  background: none;
+  color: var(--text);
+}
+
+.select-grid .select-option[aria-selected="true"] {
+  color: var(--text);
+}
+
+.select-grid .theme-thumbnail {
+  width: auto;
+  aspect-ratio: 3 / 2;
+  border-radius: 6px;
+}
+
+/* The same rings as the background tiles: under the mouse or the keys, and chosen */
+.select-grid .select-option.active .theme-thumbnail {
+  box-shadow:
+    0 0 0 2px var(--panel-raised),
+    0 0 0 4px var(--text-muted);
+}
+
+.select-grid .select-option[aria-selected="true"] .theme-thumbnail {
+  box-shadow:
+    0 0 0 2px var(--panel-raised),
+    0 0 0 4px var(--text);
+}
+
 /* A theme in the list: its background with a small window in its colors */
 .theme-thumbnail {
   display: flex;

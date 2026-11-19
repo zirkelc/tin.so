@@ -34,6 +34,8 @@ export type SelectOption<VALUE extends string> = {
 
 const POPOVER_MIN_WIDTH = 220;
 const POPOVER_MAX_HEIGHT = 320;
+// A grid of tiles needs more height to show a few rows of them
+const GRID_POPOVER_MAX_HEIGHT = 480;
 const MARGIN = 8;
 
 /** An icon of the image renderer, as an inline SVG */
@@ -63,20 +65,20 @@ export function IconSvg(props: { icon: Icon | undefined }) {
 }
 
 /** Puts the popover below the trigger, or above it when there is more space there */
-function popoverPosition(trigger: HTMLElement): CSSProperties {
+function popoverPosition(trigger: HTMLElement, maxHeight: number): CSSProperties {
   const rect = trigger.getBoundingClientRect();
   const width = Math.max(rect.width, POPOVER_MIN_WIDTH);
   const left = Math.max(MARGIN, Math.min(rect.left, window.innerWidth - width - MARGIN));
   const below = window.innerHeight - rect.bottom - MARGIN;
   const above = rect.top - MARGIN;
-  if (below >= Math.min(POPOVER_MAX_HEIGHT, 200) || below >= above) {
-    return { left, width, top: rect.bottom + 4, maxHeight: Math.min(POPOVER_MAX_HEIGHT, below) };
+  if (below >= Math.min(maxHeight, 200) || below >= above) {
+    return { left, width, top: rect.bottom + 4, maxHeight: Math.min(maxHeight, below) };
   }
   return {
     left,
     width,
     bottom: window.innerHeight - rect.top + 4,
-    maxHeight: Math.min(POPOVER_MAX_HEIGHT, above),
+    maxHeight: Math.min(maxHeight, above),
   };
 }
 
@@ -103,6 +105,11 @@ export function Select<VALUE extends string>(props: {
   sticky?: boolean;
   /** Called when the list opens, for example to load what the options show */
   onOpen?: () => void;
+  /**
+   * Shows the options as tiles in this many columns, each with its thumbnail above its label. The
+   * arrow keys then move in the grid.
+   */
+  columns?: number;
   disabled?: boolean;
   onChange: (value: VALUE) => void;
 }) {
@@ -130,7 +137,12 @@ export function Select<VALUE extends string>(props: {
 
   const show = () => {
     if (props.disabled || !triggerRef.current) return;
-    setPosition(popoverPosition(triggerRef.current));
+    setPosition(
+      popoverPosition(
+        triggerRef.current,
+        props.columns ? GRID_POPOVER_MAX_HEIGHT : POPOVER_MAX_HEIGHT,
+      ),
+    );
     setQuery("");
     scrollToActive.current = true;
     setActive(Math.max(0, options.indexOf(selected!)));
@@ -185,9 +197,16 @@ export function Select<VALUE extends string>(props: {
   }, [open, active]);
 
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    const columns = props.columns ?? 1;
+    // In a grid, left and right move to the next tile, unless they move in the search text
+    const steps: Record<string, number> = {
+      ArrowDown: columns,
+      ArrowUp: -columns,
+      ...(columns > 1 && query === "" && { ArrowRight: 1, ArrowLeft: -1 }),
+    };
+    const step = steps[event.key];
+    if (step !== undefined) {
       event.preventDefault();
-      const step = event.key === "ArrowDown" ? 1 : -1;
       const next = Math.min(filtered.length - 1, Math.max(0, active + step));
       scrollToActive.current = true;
       setActive(next);
@@ -288,6 +307,10 @@ export function Select<VALUE extends string>(props: {
               id={listId}
               role="listbox"
               aria-label={props.label}
+              className={props.columns ? "select-grid" : undefined}
+              style={
+                props.columns ? { gridTemplateColumns: `repeat(${props.columns}, 1fr)` } : undefined
+              }
               onPointerLeave={() => props.onPreview?.(undefined)}
             >
               {filtered.map((option, index) => (
@@ -314,7 +337,9 @@ export function Select<VALUE extends string>(props: {
                     <span className="select-value" style={option.labelStyle}>
                       {option.label}
                     </span>
-                    {option.value === value && <span className="select-check">✓</span>}
+                    {option.value === value && !props.columns && (
+                      <span className="select-check">✓</span>
+                    )}
                   </div>
                 </li>
               ))}

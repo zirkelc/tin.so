@@ -212,7 +212,6 @@ describe("theme", () => {
     await expect.poll(async () => (await specInUrl())?.theme).toBe("nord");
     await expect.element(themeTrigger()).toHaveTextContent("Nord");
     await expect.element(page.getByRole("listbox", { name: "Theme" })).toBeVisible();
-    // The check mark of the chosen option is part of its name
     await expect
       .element(page.getByRole("option", { name: /^Nord/ }))
       .toHaveAttribute("aria-selected", "true");
@@ -329,6 +328,19 @@ describe("theme", () => {
     await expect.poll(async () => (await specInUrl())?.theme).toBe(DEFAULT_THEME);
     await expect.element(themeTrigger()).toHaveTextContent(themeName(DEFAULT_THEME)!);
     await expect.element(page.getByRole("listbox", { name: "Theme" })).not.toBeInTheDocument();
+  });
+
+  test("should preview the theme one row of three below with the arrow key", async () => {
+    // Arrange
+    await mountApp();
+    await themeTrigger().click();
+    const index = THEMES.findIndex((theme) => theme.id === DEFAULT_THEME);
+
+    // Act
+    await userEvent.keyboard("{ArrowDown}");
+
+    // Assert
+    await expect.poll(async () => (await specInUrl())?.theme).toBe(THEMES[index + 3]!.id);
   });
 
   test("should preview a theme under the mouse", async () => {
