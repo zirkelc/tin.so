@@ -34,6 +34,11 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # The browser tests of the web app run in Chromium. The Playwright image has Chromium and its
+    # system packages, so no run downloads them. Its tag is the Playwright version in the catalog of
+    # pnpm-workspace.yaml: another version does not find its browser.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6
@@ -43,9 +48,6 @@ jobs:
           cache: "pnpm"
       - name: Install
         run: pnpm install
-      # The browser tests of the web app run in Chromium
-      - name: Install Chromium
-        run: pnpm --filter @tin.so/web exec playwright install --with-deps chromium
       - name: Build
         run: pnpm exec vp run -r build
       - name: Test
