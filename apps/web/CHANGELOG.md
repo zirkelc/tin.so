@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.0](https://github.com/zirkelc/tin.so/compare/web-v1.6.0...web-v1.7.0) (2026-11-19)
+
+
+### Features
+
+* new backgrounds, ambient halos, Nord Light and popover padding ([349a45b](https://github.com/zirkelc/tin.so/commit/349a45bac3cc952b60bf6e6b6dbf62b29e35e840))
+* **web:** show the themes as a grid of tiles, as the ambient backgrounds ([0515f45](https://github.com/zirkelc/tin.so/commit/0515f452d50adc8659bd3e8378443e0ff1364186))
+
 ## [1.6.0](https://github.com/zirkelc/tin.so/compare/web-v1.5.0...web-v1.6.0) (2026-11-17)
 
 

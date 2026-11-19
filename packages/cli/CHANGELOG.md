@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/zirkelc/tin.so/compare/cli-v1.4.0...cli-v1.5.0) (2026-11-19)
+
+
+### Features
+
+* new backgrounds, ambient halos, Nord Light and popover padding ([349a45b](https://github.com/zirkelc/tin.so/commit/349a45bac3cc952b60bf6e6b6dbf62b29e35e840))
+
 ## [1.4.0](https://github.com/zirkelc/tin.so/compare/cli-v1.3.1...cli-v1.4.0) (2026-11-17)
 
 
