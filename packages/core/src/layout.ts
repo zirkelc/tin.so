@@ -202,9 +202,21 @@ export type LayoutOptions = {
   keepTrailingLines?: boolean;
 };
 
-/** Replaces tabs with spaces up to the next tab stop, and removes trailing empty lines unless kept */
+/**
+ * Characters that no code font has a glyph for, with a look-alike that the default font has.
+ * Test runners such as vitest draw their separator lines with the horizontal line extension.
+ */
+const GLYPH_SUBSTITUTES: Record<string, string> = { "\u23af": "\u2500" };
+const GLYPH_SUBSTITUTE_PATTERN = new RegExp(`[${Object.keys(GLYPH_SUBSTITUTES).join("")}]`, "g");
+
+/**
+ * Replaces tabs with spaces up to the next tab stop, replaces characters that the fonts cannot
+ * draw, and removes trailing empty lines unless kept
+ */
 export function normalizeCode(code: string, options: LayoutOptions = {}): string {
-  const lines = code.replace(/\r\n?/g, "\n");
+  const lines = code
+    .replace(/\r\n?/g, "\n")
+    .replace(GLYPH_SUBSTITUTE_PATTERN, (char) => GLYPH_SUBSTITUTES[char]!);
   return (options.keepTrailingLines ? lines : lines.replace(/\s+$/, ""))
     .split("\n")
     .map((line) => {

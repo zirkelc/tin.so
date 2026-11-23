@@ -38,6 +38,14 @@ describe("normalizeCode", () => {
     // Assert
     expect(code).toBe("a\nb");
   });
+
+  test("should draw the horizontal line extension of test runners as a box line", () => {
+    // Act
+    const code = normalizeCode(" ⎯⎯ Failed Tests 1 ⎯⎯");
+
+    // Assert
+    expect(code).toBe(" ── Failed Tests 1 ──");
+  });
 });
 
 describe("cellCount", () => {
