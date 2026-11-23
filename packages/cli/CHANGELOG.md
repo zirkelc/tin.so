@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/zirkelc/tin.so/compare/cli-v1.5.0...cli-v1.5.1) (2026-11-23)
+
+
+### Bug Fixes
+
+* **cli:** remove the empty lines at the start of code from stdin ([07d0d4d](https://github.com/zirkelc/tin.so/commit/07d0d4d01d8ad20b25eb65f8502492b924ff9aa2))
+
 ## [1.5.0](https://github.com/zirkelc/tin.so/compare/cli-v1.4.0...cli-v1.5.0) (2026-11-19)
 
 

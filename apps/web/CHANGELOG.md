@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/zirkelc/tin.so/compare/web-v1.7.0...web-v1.8.0) (2026-11-23)
+
+
+### Features
+
+* **web:** add Cloudflare Web Analytics ([93ecbd8](https://github.com/zirkelc/tin.so/commit/93ecbd8fb458a3a6c5ed11b9f0f6374080dd506b))
+
 ## [1.7.0](https://github.com/zirkelc/tin.so/compare/web-v1.6.0...web-v1.7.0) (2026-11-19)
 
 
