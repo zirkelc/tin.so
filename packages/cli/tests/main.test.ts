@@ -451,6 +451,19 @@ describe("render --code", () => {
     ]);
   });
 
+  test("should remove the empty lines at the start of code from stdin", async () => {
+    // Arrange
+    const io = createIo("\n  \n\r\n  const a = 1;\n");
+
+    // Act
+    const code = await main(["render", "--code", "-", "--json"], io);
+
+    // Assert
+    expect(code).toBe(0);
+    const spec = (await readLink(JSON.parse(io.output()).link)) as any;
+    expect(spec.windows[0].panes[0].code).toBe("  const a = 1;\n");
+  });
+
   test("should set the language of code without a title", async () => {
     // Arrange
     const io = createIo("print(1)");

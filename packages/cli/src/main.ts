@@ -371,7 +371,8 @@ function parseSpecText(text: string, source: string): unknown {
 async function readStdin(io: Io): Promise<string> {
   const text = await io.readStdin();
   if (text.trim() === "") throw new UsageError(`Stdin is empty. ${NO_INPUT}`);
-  return text;
+  // Command output often starts with empty lines, which give extra space below the title bar
+  return text.replace(/^(?:[ \t]*\r?\n)+/, "");
 }
 
 function windowFromOptions(values: SourceValues, panes: Array<unknown>): Record<string, unknown> {
