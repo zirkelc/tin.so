@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/zirkelc/tin.so/compare/core-v1.5.0...core-v1.5.1) (2026-11-23)
+
+
+### Bug Fixes
+
+* **core:** draw the separator lines of test runners as box lines ([77354c9](https://github.com/zirkelc/tin.so/commit/77354c92707384c755e6c2271872227016ab36fb))
+
 ## [1.5.0](https://github.com/zirkelc/tin.so/compare/core-v1.4.0...core-v1.5.0) (2026-11-19)
 
 
