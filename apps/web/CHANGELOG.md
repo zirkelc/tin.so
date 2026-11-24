@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/zirkelc/tin.so/compare/web-v1.8.0...web-v1.8.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* fit a window to the width of its code ([96b2a09](https://github.com/zirkelc/tin.so/commit/96b2a0911ade5c532664c5e37fa049ee31164427))
+
 ## [1.8.0](https://github.com/zirkelc/tin.so/compare/web-v1.7.0...web-v1.8.0) (2026-11-23)
 
 
