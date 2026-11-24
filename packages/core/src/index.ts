@@ -49,6 +49,7 @@ export {
   WINDOW_RADIUS,
   layout,
   type LayoutOptions,
+  minWindowWidth,
   normalizeCode,
   type PaneBox,
   type Rect,

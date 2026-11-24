@@ -504,6 +504,8 @@ export function WindowEditor(props: {
   /** The line numbers of the image, which a pane follows unless it has its own */
   lineNumbers: boolean;
   onChange: (window: WindowInput) => void;
+  /** Fits the window and its panes to the code, or undefined when that changes nothing */
+  fit: (() => void) | undefined;
   /** The selected popover of this window, by the index of its pane and its index in the pane */
   selectedPopover?: PopoverRef;
   onSelectPopover: (popover: PopoverRef | undefined) => void;
@@ -534,15 +536,12 @@ export function WindowEditor(props: {
               ? "Auto, pane sizes set"
               : "Auto"
         }
-        help="Auto: the window fits its code. Drag the corner of the window or a divider in the image to set a size."
+        help="Auto: the window fits its code, but is at least as wide as the smallest window. Fit gives the window the size of its code. Drag the corner of the window or a divider in the image to set a size."
         action={{
           label: "Fit",
           title: "Make the window and its panes fit the code again",
-          disabled: !sized && !paneSized,
-          onClick: () => {
-            const { width: _width, height: _height, ...rest } = window;
-            onChange({ ...rest, panes: window.panes.map(({ size: _size, ...pane }) => pane) });
-          },
+          disabled: props.fit === undefined,
+          onClick: () => props.fit?.(),
         }}
       />
       <div className="switches">

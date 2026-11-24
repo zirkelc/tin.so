@@ -1349,7 +1349,7 @@ describe("examples", () => {
 });
 
 describe("window toolbar", () => {
-  test("should fit the window and its panes to the code", async () => {
+  test("should fit the window and its panes to the width of the code", async () => {
     // Arrange
     await mountApp();
     await window.tin.setSpec({
@@ -1372,6 +1372,8 @@ describe("window toolbar", () => {
     await expect
       .poll(() => window.tin.getSpec().windows[0])
       .toEqual({
+        // The code is narrower than the smallest window of the layout
+        width: 269,
         panes: [
           { title: "a.ts", code: "const a = 1;" },
           { title: "b.ts", code: "const b = 2;" },

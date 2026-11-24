@@ -31,6 +31,8 @@ import { type HoveredPopover, Preview, type Selection } from "./Preview.tsx";
 import { type ImageFormat, type Rendered, renderImage, renderPreview } from "./renderer.ts";
 import {
   alignScene,
+  canFitWindow,
+  fitWindowToCode,
   growForLargerWindows,
   isPositioned,
   type SpecUpdate,
@@ -405,6 +407,12 @@ export function App() {
                     onChange={(window) =>
                       update((current) => updateWindow(current, selectedIndex, () => window))
                     }
+                    fit={(() => {
+                      const box = rendered?.scene.windows[selectedIndex];
+                      if (!box || !canFitWindow(spec, box, selectedIndex)) return undefined;
+                      return () =>
+                        update((current) => fitWindowToCode(current, box, selectedIndex));
+                    })()}
                     selectedPopover={selection?.popover}
                     onSelectPopover={(popover) =>
                       setSelected({ windows: [selectedIndex], ...(popover && { popover }) })

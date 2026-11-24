@@ -148,6 +148,8 @@ export type WindowBox = Rect & {
   background?: string;
   /** The size that fits the panes. The layout can make a window larger to fill the image. */
   natural: { width: number; height: number };
+  /** The size that fits the code, without the sizes that the spec sets for the window and its panes */
+  fit: { width: number; height: number };
   /** The title bar with the window controls, only in a window with a title bar */
   header?: Rect;
   /** The title bar has its own color and a line below it */
@@ -301,6 +303,7 @@ type WindowDraft = {
   headerHeight: number;
   panes: Array<PaneDraft>;
   natural: Size;
+  fit: Size;
 };
 
 /** Finds the start of a match in a line, as an index in the line text */
@@ -542,35 +545,42 @@ function draftWindow(
   const headerHeight = titleBar ? headerHeightOf(frame) : 0;
   const inset = window.frame ? frame.inset : 0;
   const dividers = (panes.length - 1) * DIVIDER;
-  const extents = panes.map((pane) => paneExtent(pane, window.split, panes.length));
+  // The size of the panes, with the pane sizes of the spec or with the size of their code only
+  const body = (extents: Array<number>): Size =>
+    window.split === "row"
+      ? {
+          width: extents.reduce((sum, extent) => sum + extent, 0) + dividers,
+          height: Math.max(...panes.map((pane) => pane.natural.height)),
+        }
+      : {
+          width: Math.max(...panes.map((pane) => pane.natural.width)),
+          height: extents.reduce((sum, extent) => sum + extent, 0) + dividers,
+        };
+  const along = (pane: PaneDraft) =>
+    window.split === "row" ? pane.natural.width : pane.natural.height;
 
-  let width: number;
-  let height: number;
-  if (window.split === "row") {
-    width = extents.reduce((sum, extent) => sum + extent, 0) + dividers;
-    height = Math.max(...panes.map((pane) => pane.natural.height));
-  } else {
-    width = Math.max(...panes.map((pane) => pane.natural.width));
-    height = extents.reduce((sum, extent) => sum + extent, 0) + dividers;
-  }
-
+  let titleWidth = 0;
   if (titleBar && title) {
     const bar = frame.titleBar;
     const controls = bar.controls ? CONTROLS_WIDTH : 0;
-    const titleWidth =
+    const text =
       bar.font === "code"
         ? measureCodeText(title, bar.fontSize, font) + bar.letterSpacing * title.length
         : measureUiText(title, bar.fontSize);
     const language = bar.language
       ? measureUiText(languageName(panes[0]!.language), bar.languageSize) + TITLE_GAP
       : 0;
-    width = Math.max(
-      width,
+    titleWidth =
       bar.align === "center"
-        ? bar.paddingX * 2 + controls * 2 + titleWidth + 24
-        : bar.paddingX * 2 + (controls ? controls + bar.titleGap : 0) + titleWidth + language,
-    );
+        ? bar.paddingX * 2 + controls * 2 + text + 24
+        : bar.paddingX * 2 + (controls ? controls + bar.titleGap : 0) + text + language;
   }
+  const outer = (size: Size): Size => ({
+    width: Math.max(size.width, titleWidth) + inset * 2,
+    height: size.height + headerHeight + inset * 2,
+  });
+  const sized = outer(body(panes.map((pane) => paneExtent(pane, window.split, panes.length))));
+  const fit = outer(body(panes.map(along)));
 
   return {
     spec: window,
@@ -578,10 +588,8 @@ function draftWindow(
     title,
     headerHeight,
     panes,
-    natural: {
-      width: window.width ?? width + inset * 2,
-      height: window.height ?? height + headerHeight + inset * 2,
-    },
+    natural: { width: window.width ?? sized.width, height: window.height ?? sized.height },
+    fit,
   };
 }
 
@@ -742,11 +750,20 @@ function placeWindow(draft: WindowDraft, rect: Rect, text: TextMetrics): WindowB
     controls: spec.controls,
     ...(spec.background && { background: spec.background }),
     natural: draft.natural,
+    fit: draft.fit,
     ...(header && { header, titleBar: placeTitleBar(header, frame, panes[0]!.language) }),
     ...(header && spec.titleBar === "solid" && { solidTitleBar: true }),
     panes: boxes,
     dividers,
   };
+}
+
+/**
+ * The smallest width of a window with a frame that follows direction and gap, so that a window
+ * with little code still gives an image of a usable size
+ */
+export function minWindowWidth(padding: number): number {
+  return Math.max(0, MIN_FRAME_WIDTH - padding * 2);
 }
 
 /** Places the windows that follow direction and gap, from the origin */
@@ -757,7 +774,7 @@ function placeFlow(
   text: TextMetrics,
 ): Array<WindowBox> {
   if (drafts.length === 0) return [];
-  const minWidth = Math.max(0, MIN_FRAME_WIDTH - spec.padding * 2);
+  const minWidth = minWindowWidth(spec.padding);
   const windows: Array<WindowBox> = [];
 
   if (spec.direction === "column") {

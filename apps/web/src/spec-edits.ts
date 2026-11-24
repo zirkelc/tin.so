@@ -3,6 +3,7 @@ import {
   highlightColors,
   MARK_STYLES,
   inferLanguage,
+  minWindowWidth,
   normalizeCode,
   parseSpec,
   resolveLanguage,
@@ -390,6 +391,45 @@ type SceneSize = { width: number; height: number; windows: Array<SceneWindow> };
  */
 export function keepImageSize(spec: SpecInput, scene: SceneSize): SpecInput {
   return withImageSize(spec, scene.width, scene.height);
+}
+
+/** The parts of the layout of a window that give the size of its code */
+type FitBox = { frame: boolean; fit: { width: number; height: number } };
+
+/**
+ * Makes a window and its panes fit the code: it removes the sizes of the window and its panes. A
+ * window with a frame that follows the padding is at least as wide as the smallest window of the
+ * layout, so a window with narrower code gets the width of its code.
+ */
+export function fitWindowToCode(spec: SpecInput, box: FitBox, windowIndex: number): SpecInput {
+  return updateWindow(spec, windowIndex, (window) => {
+    const { width: _width, height: _height, ...rest } = window;
+    const fitted = { ...rest, panes: rest.panes.map(({ size: _size, ...pane }) => pane) };
+    const flow = window.x === undefined && window.y === undefined;
+    const width = Math.ceil(box.fit.width);
+    const narrow = flow && box.frame && width < minWindowWidth(spec.padding ?? DEFAULT_PADDING);
+    return narrow ? { ...fitted, width } : fitted;
+  });
+}
+
+/**
+ * true when the window or a pane has a set size, and fitting the window to its code changes it. A
+ * window without a set size has the size of the layout, which already fits the code.
+ */
+export function canFitWindow(spec: SpecInput, box: FitBox, windowIndex: number): boolean {
+  const window = spec.windows[windowIndex];
+  if (!window) return false;
+  const sized =
+    window.width !== undefined ||
+    window.height !== undefined ||
+    window.panes.some((pane) => pane.size !== undefined);
+  if (!sized) return false;
+  const fitted = fitWindowToCode(spec, box, windowIndex).windows[windowIndex]!;
+  return (
+    fitted.width !== window.width ||
+    fitted.height !== window.height ||
+    window.panes.some((pane) => pane.size !== undefined)
+  );
 }
 
 /**

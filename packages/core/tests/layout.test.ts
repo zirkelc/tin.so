@@ -1,5 +1,5 @@
 import { describe, expect, onTestFinished, test } from "vite-plus/test";
-import { cellCount, layout, normalizeCode } from "../src/layout.ts";
+import { cellCount, layout, minWindowWidth, normalizeCode } from "../src/layout.ts";
 import { SpecError } from "../src/spec.ts";
 import { DEFAULT_THEME, getTheme } from "../src/themes/index.ts";
 
@@ -642,6 +642,29 @@ describe("sizes and positions", () => {
     const window = scene.windows[0]!;
     expect(window.panes.map((pane) => pane.width)).toEqual([400, 200]);
     expect(window.width).toBe(601);
+  });
+
+  test("should give the size of the code of a window with set sizes", async () => {
+    // Arrange
+    const code = "const answer = 42;";
+    const fitted = await layout({ padding: 0, windows: [{ panes: [{ code }, { code }] }] });
+
+    // Act
+    const scene = await layout({
+      padding: 0,
+      windows: [{ width: 900, height: 300, panes: [{ code, size: 100 }, { code }] }],
+    });
+
+    // Assert
+    expect(scene.windows[0]!.fit).toEqual(fitted.windows[0]!.natural);
+  });
+
+  test("should give the smallest width of a window in the flow, without the padding", () => {
+    // Act
+    const width = minWindowWidth(32);
+
+    // Assert
+    expect(width).toBe(456);
   });
 
   test("should cut off the code of a pane that is smaller than its code", async () => {

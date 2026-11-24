@@ -61,6 +61,8 @@ import {
   type Alignment,
   alignWindows,
   addPopover,
+  canFitWindow,
+  fitWindowToCode,
   attachToLine,
   annotationAt,
   type Axis,
@@ -854,11 +856,8 @@ function WindowEditors(
   const center = (axis: Axis) =>
     onChange((current) => centerWindow(current, rendered.scene, windowIndex, axis));
   const formattable = windowSpec.panes.some((pane) => canFormat(paneLanguage(pane)));
-  // The window or one of its panes has a size that the user set
-  const fitted =
-    windowSpec.width !== undefined ||
-    windowSpec.height !== undefined ||
-    windowSpec.panes.some((pane) => pane.size !== undefined);
+  // Fitting the window to its code changes its size or the size of a pane
+  const fitted = canFitWindow(spec, window, windowIndex);
 
   // A resize at the left or the top moves the window too, so the window gets its place in the image
   const resizeWindow = (event: PointerEvent<HTMLElement>, edges: Edges) => {
@@ -1188,7 +1187,7 @@ function WindowEditors(
             <Tool
               label="Fit the window to the code"
               disabled={!fitted}
-              onClick={() => change(fitWindow)}
+              onClick={() => onChange((current) => fitWindowToCode(current, window, windowIndex))}
             >
               <FitIcon />
             </Tool>
@@ -1294,11 +1293,6 @@ function outsideOf(window: Box, popovers: Array<Box>): string | undefined {
   return `path(evenodd, "${outer}${holes.join("")}")`;
 }
 
-/** The window and its panes without a set size, so that they fit the code */
-function fitWindow({ width: _width, height: _height, ...window }: WindowInput): WindowInput {
-  return { ...window, panes: window.panes.map(({ size: _size, ...pane }) => pane) };
-}
-
 /** The line width for formatted code: the columns that fit in the code area of the pane now */
 function formatWidthOf(
   spec: SpecInput,
@@ -1353,6 +1347,7 @@ type Actions = {
 function windowItems(actions: Actions, windowIndex: number): Array<MenuItem> {
   const { spec, scene, onChange, onSelect, onCopyImage } = actions;
   const window = spec.windows[windowIndex];
+  const box = scene.windows[windowIndex];
   const formattable = (window?.panes ?? []).some((pane) => canFormat(paneLanguage(pane)));
   const selectWindow = (index: number) => onSelect({ windows: [index] });
   const center = (axis: Axis) =>
@@ -1365,11 +1360,8 @@ function windowItems(actions: Actions, windowIndex: number): Array<MenuItem> {
     },
     {
       label: "Fit window to code",
-      disabled:
-        window?.width === undefined &&
-        window?.height === undefined &&
-        !window?.panes.some((pane) => pane.size !== undefined),
-      onSelect: () => onChange((current) => updateWindow(current, windowIndex, fitWindow)),
+      disabled: !box || !canFitWindow(spec, box, windowIndex),
+      onSelect: () => box && onChange((current) => fitWindowToCode(current, box, windowIndex)),
     },
     {
       label: "Reset position",

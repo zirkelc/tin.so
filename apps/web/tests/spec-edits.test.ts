@@ -1,7 +1,9 @@
 import { parseSpec, type SpecInput } from "@tin.so/core";
 import { describe, expect, test } from "vite-plus/test";
 import {
+  canFitWindow,
   centerWindow,
+  fitWindowToCode,
   fitToPadding,
   fitToRatio,
   fittedPadding,
@@ -516,6 +518,32 @@ describe("positionWindows", () => {
 
     // Assert
     expect(result).toEqual({ windows: [{ panes: [{ code: "a" }] }] });
+  });
+});
+
+describe("fitWindowToCode", () => {
+  test("should give a window the width of its code when the code is narrower than a window in the flow", () => {
+    // Arrange
+    const spec = { padding: 32, windows: [{ width: 404, panes: [{ code: "a" }] }] };
+    const box = { frame: true, fit: { width: 397.5, height: 423 } };
+
+    // Act
+    const result = fitWindowToCode(spec, box, 0);
+
+    // Assert
+    expect(result.windows[0]).toEqual({ width: 398, panes: [{ code: "a" }] });
+  });
+
+  test("should not fit a window that has the width of its code", () => {
+    // Arrange
+    const spec = { padding: 32, windows: [{ width: 398, panes: [{ code: "a" }] }] };
+    const box = { frame: true, fit: { width: 397.5, height: 423 } };
+
+    // Act
+    const result = canFitWindow(spec, box, 0);
+
+    // Assert
+    expect(result).toBe(false);
   });
 });
 
