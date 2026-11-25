@@ -33,7 +33,7 @@ import {
   alignScene,
   canFitWindow,
   fitWindowToCode,
-  growForLargerWindows,
+  followWindowSizes,
   isPositioned,
   type SpecUpdate,
   updateWindow,
@@ -144,11 +144,11 @@ export function App() {
     try {
       const result = await renderPreview(withoutMissingParts(next));
       if (id !== renderId.current) return;
-      // In the free layout, a window that gets larger grows the image, and a moved window does not
+      // In the free layout, the image grows and shrinks with a window near its edge, but not for a moved window
       const before = sceneRef.current;
       if (before && !grown && isPositioned(next)) {
         const aligned = alignScene(before.scene, before.spec, next);
-        const larger = growForLargerWindows(next, aligned, result.scene);
+        const larger = followWindowSizes(next, aligned, result.scene);
         if (larger !== next) return await showSpec(larger, true);
       }
       sceneRef.current = { spec: next, scene: result.scene };

@@ -8,7 +8,7 @@ import {
   fitToRatio,
   fittedPadding,
   alignScene,
-  growForLargerWindows,
+  followWindowSizes,
   moveLayer,
   clearMarks,
   type PaneInput,
@@ -749,7 +749,7 @@ describe("withAspectRatio", () => {
   });
 });
 
-describe("growForLargerWindows", () => {
+describe("followWindowSizes", () => {
   test("should grow the image when a window gets larger and reaches past the edge", () => {
     // Arrange
     const spec = { width: 600, height: 400, windows: [{ x: 100, y: 100, panes: [{ code: "a" }] }] };
@@ -757,7 +757,7 @@ describe("growForLargerWindows", () => {
     const after = { width: 600, height: 400, windows: [box(100, 100, 520, 260)] };
 
     // Act
-    const result = growForLargerWindows(spec, before, after);
+    const result = followWindowSizes(spec, before, after);
 
     // Assert
     expect({ width: result.width, height: result.height }).toEqual({ width: 720, height: 460 });
@@ -768,13 +768,64 @@ describe("growForLargerWindows", () => {
     const spec = { width: 600, height: 400, windows: [{ x: 100, y: 100, panes: [{ code: "a" }] }] };
     const before = { width: 600, height: 400, windows: [box(100, 100, 400, 200)] };
     const after = { width: 600, height: 400, windows: [box(100, 100, 492.4, 200)] };
-    const grown = growForLargerWindows(spec, before, after);
+    const grown = followWindowSizes(spec, before, after);
 
     // Act
-    const result = growForLargerWindows(grown, before, { ...after, width: grown.width! });
+    const result = followWindowSizes(grown, before, { ...after, width: grown.width! });
 
     // Assert
     expect(result).toBe(grown);
+  });
+
+  test("should not grow the image when a window far from the edge gets larger", () => {
+    // Arrange
+    const spec = { width: 960, height: 540, windows: [{ x: 104, y: 104, panes: [{ code: "a" }] }] };
+    const before = { width: 960, height: 540, windows: [box(104, 104, 220, 80)] };
+    const after = { width: 960, height: 540, windows: [box(104, 104, 360, 140)] };
+
+    // Act
+    const result = followWindowSizes(spec, before, after);
+
+    // Assert
+    expect(result).toBe(spec);
+  });
+
+  test("should shrink the image when a window near the edge gets smaller", () => {
+    // Arrange
+    const spec = { width: 720, height: 460, windows: [{ x: 100, y: 100, panes: [{ code: "a" }] }] };
+    const before = { width: 720, height: 460, windows: [box(100, 100, 520, 260)] };
+    const after = { width: 720, height: 460, windows: [box(100, 100, 400, 200)] };
+
+    // Act
+    const result = followWindowSizes(spec, before, after);
+
+    // Assert
+    expect({ width: result.width, height: result.height }).toEqual({ width: 600, height: 400 });
+  });
+
+  test("should keep the distance of the other windows to the edge when a window gets smaller", () => {
+    // Arrange
+    const windows = [
+      { x: 100, y: 100, panes: [{ code: "a" }] },
+      { x: 300, y: 10, panes: [{ code: "b" }] },
+    ];
+    const spec = { width: 720, height: 460, windows };
+    const before = {
+      width: 720,
+      height: 460,
+      windows: [box(100, 100, 520, 260), box(300, 10, 350, 40)],
+    };
+    const after = {
+      width: 720,
+      height: 460,
+      windows: [box(100, 100, 400, 200), box(300, 10, 350, 40)],
+    };
+
+    // Act
+    const result = followWindowSizes(spec, before, after);
+
+    // Assert
+    expect({ width: result.width, height: result.height }).toEqual({ width: 720, height: 400 });
   });
 
   test("should not grow the image for a window that only moved", () => {
@@ -784,7 +835,7 @@ describe("growForLargerWindows", () => {
     const after = { width: 600, height: 400, windows: [box(500, 100, 400, 200)] };
 
     // Act
-    const result = growForLargerWindows(spec, before, after);
+    const result = followWindowSizes(spec, before, after);
 
     // Assert
     expect(result).toBe(spec);

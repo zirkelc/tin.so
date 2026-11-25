@@ -741,31 +741,42 @@ export function alignScene(before: SceneSize, beforeSpec: SpecInput, spec: SpecI
   return { ...before, windows };
 }
 
+// The most distance to the edge that a larger window keeps, as the largest padding of the editor
+const MAX_KEPT_MARGIN = 128;
+
 /**
- * Grows the image of the free layout when a window gets larger and reaches past the right or
- * bottom edge, so that the window keeps its distance to that edge. A window that only moved
- * does not grow the image.
+ * Changes the image of the free layout with the size of its windows, so that a window near the
+ * right or bottom edge keeps its distance to that edge, at most MAX_KEPT_MARGIN. A window that gets
+ * larger grows the image. A window near the edge that gets smaller shrinks the image, but every
+ * other window keeps its distance to the edge too. A window far from the edge only uses the space
+ * in the image, and a window that only moved does not change the image.
  */
-export function growForLargerWindows(
-  spec: SpecInput,
-  before: SceneSize,
-  after: SceneSize,
-): SpecInput {
-  let width = after.width;
-  let height = after.height;
-  after.windows.forEach((box, index) => {
-    const old = before.windows[index];
-    if (!old) return;
-    if (box.width > old.width) {
-      const margin = Math.max(0, before.width - (old.x + old.width));
-      // Whole pixels, as the image has them, so that a second pass does not grow the image again
-      width = Math.max(width, Math.ceil(box.x + box.width + margin));
-    }
-    if (box.height > old.height) {
-      const margin = Math.max(0, before.height - (old.y + old.height));
-      height = Math.max(height, Math.ceil(box.y + box.height + margin));
-    }
-  });
+export function followWindowSizes(spec: SpecInput, before: SceneSize, after: SceneSize): SpecInput {
+  const follow = (axis: "x" | "y"): number => {
+    const size = axis === "x" ? "width" : "height";
+    let edge = after[size];
+    let shrinks = false;
+    let smallest = 0;
+    let largest = 0;
+    after.windows.forEach((box, index) => {
+      const old = before.windows[index];
+      const end = box[axis] + box[size];
+      if (!old) {
+        smallest = Math.max(smallest, end);
+        return;
+      }
+      const distance = Math.max(0, before[size] - (old[axis] + old[size]));
+      // Whole pixels, as the image has them, so that a second pass does not change the image again
+      const kept = Math.ceil(end + Math.min(MAX_KEPT_MARGIN, distance));
+      smallest = Math.max(smallest, kept);
+      if (box[size] > old[size]) largest = Math.max(largest, kept);
+      if (box[size] < old[size] && distance <= MAX_KEPT_MARGIN) shrinks = true;
+    });
+    if (shrinks) edge = Math.min(edge, smallest);
+    return Math.max(edge, largest);
+  };
+  let width = follow("x");
+  let height = follow("y");
   if (width === after.width && height === after.height) return spec;
   if (spec.aspectRatio) {
     const ratio = ratioOf(spec.aspectRatio);
