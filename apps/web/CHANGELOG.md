@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.2](https://github.com/zirkelc/tin.so/compare/web-v1.8.1...web-v1.8.2) (2026-11-25)
+
+
+### Bug Fixes
+
+* **web:** place a new window next to the last window in the free layout ([3f9dd27](https://github.com/zirkelc/tin.so/commit/3f9dd27460c6efdb5375abcec5f246fbe5788774))
+* **web:** shrink and grow the image of the free layout with a window near its edge ([9adb468](https://github.com/zirkelc/tin.so/commit/9adb468df31f0058ac0c6e752c8f6f79e3a348c7))
+
 ## [1.8.1](https://github.com/zirkelc/tin.so/compare/web-v1.8.0...web-v1.8.1) (2026-11-24)
 
 
