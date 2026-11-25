@@ -119,6 +119,8 @@ const SNAP_DISTANCE = 8;
 const DRAG_THRESHOLD = 3;
 const MIN_PANE_SIZE = 24;
 const MIN_WINDOW_SIZE = 48;
+// How far right and down a new free window is from the last window
+const NEW_WINDOW_OFFSET = 40;
 const MIN_POPOVER_WIDTH = 40;
 const MIN_POPOVER_HEIGHT = 32;
 const REMOVE_SIZE = 18;
@@ -1864,10 +1866,20 @@ export function Preview(props: {
   );
 
   const addWindow = () => {
-    onChange((current) => ({
-      ...current,
-      windows: [...current.windows, { panes: [{ title: "untitled.ts", code: "" }] }],
-    }));
+    onChange((current) => {
+      // Among windows with a position, a new window without one would take the width of the flow
+      // and then change to the width of its code at the first drag. It gets a position at once,
+      // a little below and right of the last window.
+      const last = current.windows.at(-1);
+      const place =
+        last && (last.x !== undefined || last.y !== undefined)
+          ? { x: (last.x ?? 0) + NEW_WINDOW_OFFSET, y: (last.y ?? 0) + NEW_WINDOW_OFFSET }
+          : {};
+      return {
+        ...current,
+        windows: [...current.windows, { ...place, panes: [{ title: "untitled.ts", code: "" }] }],
+      };
+    });
     selectWindow(spec.windows.length);
   };
 

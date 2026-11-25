@@ -848,6 +848,24 @@ describe("windows", () => {
     await expect.element(windowRow("b.ts")).toHaveAttribute("aria-expanded", "true");
   });
 
+  test("should place a new window next to the last one when the windows have positions", async () => {
+    // Arrange
+    await mountApp();
+    await window.tin.setSpec({
+      width: 960,
+      height: 540,
+      windows: [{ x: 64, y: 80, panes: [{ title: "a.ts", code: "a" }] }],
+    });
+
+    // Act
+    await page.getByRole("button", { name: "Add window" }).last().click();
+
+    // Assert
+    await expect
+      .poll(async () => (await specInUrl())?.windows[1])
+      .toEqual({ x: 104, y: 120, panes: [{ title: "untitled.ts", code: "" }] });
+  });
+
   test("should add a window to the selection with a shift-click", async () => {
     // Arrange
     await mountApp();
