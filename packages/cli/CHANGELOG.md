@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/zirkelc/tin.so/compare/cli-v1.5.2...cli-v1.6.0) (2026-11-27)
+
+
+### Features
+
+* add a Vercel theme with a grid frame ([00a821b](https://github.com/zirkelc/tin.so/commit/00a821b9f00f989ee0a2a3eb698f6133e05f0308))
+
 ## [1.5.2](https://github.com/zirkelc/tin.so/compare/cli-v1.5.1...cli-v1.5.2) (2026-11-24)
 
 
