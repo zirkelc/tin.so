@@ -23,7 +23,7 @@
   <img alt="Two files in one window, with a popover that shows the type of a variable and a highlighted line" src="docs/images/hero.png" width="860">
 </p>
 
-tin.so makes images of code that show more than one snippet: split panes, stacked windows and popovers that point to a word. Highlight lines, give any part of the code a style or a color, and pick one of 11 editor themes and a background. People use the [web editor](https://tin.so), and agents use the [CLI](#cli) and the [agent skill](#agent-skill). Both use the same renderer, so they make the same image without a server or a browser.
+tin.so makes images of code that show more than one snippet: split panes, stacked windows and popovers that point to a word. Highlight lines, give any part of the code a style or a color, and pick one of 12 themes and a background. People use the [web editor](https://tin.so), and agents use the [CLI](#cli) and the [agent skill](#agent-skill). Both use the same renderer, so they make the same image without a server or a browser.
 
 ## Web editor
 
@@ -41,26 +41,19 @@ Open [tin.so](https://tin.so), type or paste your code into the window, and save
   <img alt="Two windows that overlap: an editor with index.html above main.tsx, and a terminal" src="docs/images/layout.png" width="560">
 </p>
 
-An image can show more than one file. Split a window into panes, put several windows below each other or side by side, or place windows freely and let them overlap.
-
-- Split a window into panes, side by side or below each other. Panes side by side without tabs have a line below the title bar, where the lines between them end.
+- Split a window into panes, side by side or below each other.
 - Put several windows below each other or side by side.
 - Place windows anywhere in a free layout, where they can overlap.
-- Resize the image at its edges. With an aspect ratio, the image keeps the ratio.
+- Resize the image at its edges.
 
 ### Arrange windows
 
-- Move and resize windows, panes and popovers with the mouse. A window snaps to the center of the image and to the other windows.
-- Select several windows with a box, with Shift-click or with ⌘A, then align or distribute them.
-- Change the order of overlapping windows as in Figma, with ⌘] and ⌘[.
-- Duplicate windows with ⌘D, and copy and paste them with ⌘C and ⌘V, also from one browser tab to another.
-- A toolbar above the selected windows and the right-click menus give the actions for each window.
-- Zoom in and out, or fit the image to the screen. To move around a zoomed image, pick the hand tool at the bottom left (H) and drag. Space with a drag and a drag with the middle mouse button also move the image.
-- The zoom stays while you edit. When a window, a pane or a popover makes the image larger or smaller, the image really gets larger or smaller on the screen. The editor fits a new image to the screen, and Fit does it again.
-- A pane is as wide as its code. A popover can lie over the next pane, and a wider window gives it more room.
-- The Fit button in the window toolbar gives the window and its panes the size of the code again.
-- Point to the divider between two panes, or drag it, to see the size of each pane in pixels and in percent of the window.
-- A button in the window toolbar gives all panes of a window the same size, in the space that they share.
+- Move and resize windows, panes and popovers with the mouse, with snapping to the center and to other windows.
+- Select several windows, then align or distribute them.
+- Change the order of overlapping windows, as in Figma.
+- Duplicate, copy and paste windows, also between browser tabs.
+- Fit a window to its code, or give all panes of a window the same size.
+- Zoom in and out, and move around a zoomed image with the hand tool.
 
 ### Popovers
 
@@ -70,15 +63,10 @@ An image can show more than one file. Split a window into panes, put several win
 
 A popover points to a word in the code and looks like the hover card of an editor. Use it to show a type, a signature or a value next to the code that uses it.
 
-- Right-click a line and choose "Add popover". Select a word first to start the popover below it. A pane without code can have a popover too.
-- "Add popover" also underlines the word with a text style. Change it in the style panel like any other style, for example to a wavy line or to another color, or clear it.
-- Select code and right-click: the selection stays, so the menu acts on the selected text.
-- A popover has its own code and language, and its own padding between its edge and its code.
-- A popover belongs to its line, not to the text in it: it moves with its line when you edit the code, and it stays when the text below it changes.
-- Move and resize a popover. A popover that you move stays at its place in the pane. Double-click it, or choose "Attach to line" in its menu, to attach it to its line again.
-- A popover can reach into the padding of the image, up to its edge. The image grows only when a popover below its line goes past the edge. A popover that you moved never changes the image, which cuts off what is outside of it. The window keeps its place while you move its popover.
-- Settings that need more than a name have a dotted underline: point to it, or focus it with Tab, to read what the setting does. Format, Padding, Mode, Opacity, Frame, the title bar Style, Tab icon, the export Scale and the position of a popover have one.
-- The settings of a popover show its position ("Attached to line 2", or a free place) with a button to attach it to its line again. The X in its row removes it.
+- Right-click a word and choose "Add popover".
+- A popover has its own code and language.
+- A popover stays on its line when you edit the code.
+- Move a popover anywhere in the pane, or attach it to its line again.
 
 ### Highlights, styles and colors
 
@@ -86,15 +74,9 @@ A popover points to a word in the code and looks like the hover card of an edito
   <img alt="Code with line numbers, a highlighted line, a bold yellow number, a struck-through comment, a green fill and an underlined pink word" src="docs/images/marks.png" width="560">
 </p>
 
-Show the reader where to look. Highlight full lines, or give any part of a line a style, a text color or a fill.
-
-- Highlight lines. Option-click a line, or right-click the code.
-- Give a highlight a color, such as blue for a note or red for an error, in the Highlight submenu of the code. Point to a color to see it on the lines. The lines get a tint of the color and a bar at the left edge.
-- Bold, italic, underline and strikethrough on any part of a line, also in popovers.
-- A wavy line below a part of a line, as an editor marks an error, in the red of the theme.
-- Text colors and fills from a palette of 16 colors, or any hex color in a spec. The fill is translucent, as a highlighter. A color from the spec that is not in the palette shows as one more swatch in the style panel.
-- Select code in the image to open a panel with the colors and the styles. Point to a color or a style to see it in the image, and click to keep it.
-- Highlights, styles and popovers stay on their lines when you edit the code.
+- Highlight lines, in the default color or in a color such as blue for a note or red for an error.
+- Bold, italic, underline, strikethrough and a wavy error line on any part of a line.
+- Text colors and highlighter fills from a palette, or any hex color.
 - Line numbers for all panes or for one pane.
 
 ### Themes
@@ -103,10 +85,11 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
   <img alt="The same function in all 12 themes" src="docs/images/themes.png" width="860">
 </p>
 
-- 11 themes of code editors: Ayu, Catppuccin, Dracula, GitHub, Night Owl, Nord, One Dark, Solarized, Tokyo Night, Vitesse and VS Code. The code has the exact colors of the original theme. Each theme has a dark and a light variant, and the mode switch selects one. Nord's light variant is Nord Light by huytd.
-- A Vercel theme, inspired by the code blocks of Vercel and the Vercel theme of ray.so: pink, green and purple code on black or white, in Geist Mono. tin.so is not affiliated with Vercel. A window is flat with a thin border. Code without a window sits between grid lines that go through the whole image, with a bracket at two corners.
-- Point to a theme, a background or a font in its list to see it on the image at once.
+- 11 editor themes with the exact colors of the original: Ayu, Catppuccin, Dracula, GitHub, Night Owl, Nord, One Dark, Solarized, Tokyo Night, Vitesse and VS Code.
+- A Vercel theme, inspired by the code blocks of Vercel and the Vercel theme of ray.so, with grid lines around code without a window. tin.so is not affiliated with Vercel.
+- A dark and a light variant of each theme.
 - 9 code fonts: JetBrains Mono, Geist Mono, IBM Plex Mono, Fira Code, Roboto Mono, Commit Mono, Space Mono, Source Code Pro and Google Sans Code.
+- Point to a theme, a background or a font to preview it on the image.
 
 ### Backgrounds
 
@@ -114,10 +97,9 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
   <img alt="The background presets: gradients, meshes and solid colors" src="docs/images/backgrounds.png" width="860">
 </p>
 
-- 39 gradients, 12 meshes (soft color spots on a base color), 42 solid colors (six neutrals and twelve hues, each light, vivid and dark), a color picker, and your own CSS linear or radial gradients.
-- Ambient backgrounds in the colors of the image: soft glows of the theme colors or of the colors that the code uses most, a blurred copy of the code, or a glow of the main theme color: a round halo from the top, a spotlight behind the window, or a stage light from the top.
+- Gradients, meshes, solid colors, a color picker, and your own CSS gradients.
+- Ambient backgrounds in the colors of the theme or of the code.
 - An opacity slider, down to a transparent image.
-- Padding around the windows.
 
 ### Sizes for social media
 
@@ -125,8 +107,8 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
   <img alt="A Python window in the Catppuccin theme on a violet gradient, in the 16:9 format" src="docs/images/social.png" width="560">
 </p>
 
-- Aspect ratio presets in the editor: 16:9 (X post, YouTube), 1.91:1 (Open Graph, LinkedIn), 1:1, 4:5 (Instagram), 9:16 (Story, Reels, TikTok), 4:3 (slides), 3:2 and 2:1.
-- Any aspect ratio from 1:10 to 10:1 in a spec. The windows stay in the center.
+- Aspect ratio presets for X, YouTube, Open Graph, LinkedIn, Instagram, Stories, TikTok and slides.
+- Any aspect ratio from 1:10 to 10:1 in a spec.
 
 ### Windows
 
@@ -134,11 +116,10 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
   <img alt="Four windows side by side in the Dracula theme: a terminal with gray controls, a window with color controls and a tab, a window with only a tab, and a window without a title bar" src="docs/images/windows.png" width="860">
 </p>
 
-- A title bar with a title, or no title bar.
-- A solid title bar, with its own color and a line below it. The title, the controls and the style of the title bar are together in its own box in the window settings.
+- A title bar with a title, a solid title bar, or no title bar.
 - Gray window controls, or red, yellow and green as in macOS.
-- A tab for each pane, with the file name and the icon of the language or any icon from a list.
-- Edit the titles and the file names directly in the image.
+- A tab for each pane, with the file name and a language icon.
+- Edit titles and file names directly in the image.
 
 ### Code
 
@@ -146,28 +127,24 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
   <img alt="One window with Rust, Python and SQL side by side in the One Dark theme, each tab with the icon of its language" src="docs/images/code.png" width="860">
 </p>
 
-- Type the code directly in the image. Tab indents the selected lines by two spaces, and Shift+Tab removes the indent. Undo brings back each change.
-- Syntax highlighting with Shiki for all its languages. The language comes from the file name, or you select it: the popular languages are at the top, and the search also finds other names, such as "bash" for Shell.
-- Terminal output with its color codes, in the terminal colors of the theme. Code with color codes gets the language Terminal Output (`ansi`) by itself, for example from `FORCE_COLOR=1 npx oxlint | tin` or `git diff --color | tin`. Most tools turn their colors off in a pipe, so the variable or the flag turns them on again.
+- Type the code directly in the image.
+- Syntax highlighting with Shiki for all its languages, found from the file name.
+- Terminal output with its colors, for example from `git diff --color | tin`.
 - An example for each of the 242 languages.
-- Format the code with Prettier, for JavaScript, TypeScript, JSON, CSS, HTML, Markdown, YAML and more. The formatted lines stay within the width of the pane, so the pane and its window do not become larger.
-- Edit the full spec as JSON, with each problem shown while you type.
+- Format the code with Prettier.
+- Edit the full spec as JSON.
 
 ### Export
 
 - Save a PNG (1x, 2x or 4x) or an SVG, or copy the image to the clipboard.
-- Copy an image of only one window or of the selected windows.
-- A short message over the image confirms each copy and save, with the file name of a saved image, or tells you when it failed.
+- Copy an image of one window or of the selected windows.
 - The SVG contains the fonts, so it looks the same everywhere.
-- The image file holds its spec. Drop it into the editor to edit the image again, or render it again with the CLI and other options, such as `tin auth.png --theme dracula -o auth-dark.png`.
-- The image renders on your computer, with no server and no browser screenshot.
+- The image file holds its spec. Drop it into the editor to edit it again, or render it again with the CLI.
 
 ### Share
 
-- Copy a link that opens the same image in the editor.
-- The link holds the image in the URL fragment, so it never goes to a server.
-- The address bar always holds the current image, so a reload or a bookmark keeps it.
-- Undo and redo every change of the image with the buttons at the bottom right or with ⌘Z and ⇧⌘Z. A drag or a typed word is one step, and a theme preview is none.
+- Copy a link that opens the same image in the editor. The image is in the URL fragment, so it never goes to a server.
+- Undo and redo every change.
 
 ### Keyboard shortcuts
 
