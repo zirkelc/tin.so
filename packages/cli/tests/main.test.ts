@@ -1064,7 +1064,6 @@ describe("themes", () => {
       .split("\n")
       .map((line) => line.split(" ")[0]);
     expect(ids.includes("candy")).toBe(false);
-    expect(ids.includes("vercel")).toBe(false);
     expect(ids.includes("dracula")).toBe(true);
   });
 });

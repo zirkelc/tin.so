@@ -7,7 +7,7 @@ import {
   measureUiText,
 } from "./fonts/index.ts";
 import { type Icon, resolveIcon } from "./icons/index.ts";
-import { DEFAULT_FRAME, type Frame } from "./frames/index.ts";
+import { type Frame, getFrame } from "./frames/index.ts";
 import { MAC_HEADER, WINDOW_RADIUS } from "./sizes.ts";
 import {
   errorColor,
@@ -267,8 +267,8 @@ function textMetrics(font: CodeFont, fontSize: number, lineHeight: number): Text
   };
 }
 
-function resolveFont(spec: Spec): CodeFont {
-  return getCodeFont(spec.font ?? DEFAULT_CODE_FONT);
+function resolveFont({ spec, theme }: { spec: Spec; theme: Theme }): CodeFont {
+  return getCodeFont(spec.font ?? theme.font ?? DEFAULT_CODE_FONT);
 }
 
 type Size = { width: number; height: number };
@@ -940,8 +940,8 @@ export async function layout(input: unknown, options: LayoutOptions = {}): Promi
     }),
   };
   const mode = resolveMode(theme, spec.mode);
-  const font = resolveFont(spec);
-  const frame = DEFAULT_FRAME;
+  const font = resolveFont({ spec, theme });
+  const frame = getFrame(theme);
   // Without a background in the spec, the image gets the background preset of the theme for the mode
   const css = spec.background ?? themeBackground(theme, mode)?.css;
   const syntax = getSyntax(theme, mode);

@@ -151,7 +151,8 @@ const IMAGE_ARGS = defineArgs({
   font: {
     type: "string",
     valueHint: "id",
-    description: "Code font (default: JetBrains Mono). Run tin fonts for the list.",
+    description:
+      "Code font (default: the theme font, else JetBrains Mono). Run tin fonts for the list.",
   },
   padding: {
     type: "string",
@@ -195,7 +196,7 @@ const WINDOW_ARGS = defineArgs({
     type: "boolean",
     description: "Put the code in a window (default)",
     negativeDescription:
-      "No window: the code goes directly on the background, for a theme that allows it. The editor themes always show the window",
+      "No window: the code goes directly on the background, for a theme that allows it, such as vercel. The editor themes always show the window",
   },
   controls: {
     type: "enum",

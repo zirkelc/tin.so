@@ -1,7 +1,7 @@
 import { bytesToBase64 } from "./base64.ts";
 import { type Font, UI_FONT } from "./fonts/index.ts";
 import { attrs, blend, escapeXml, round, roundedRect, textAttrs } from "./frames/draw.ts";
-import { DEFAULT_FRAME, type FrameContext } from "./frames/index.ts";
+import { type FrameContext, getFrame } from "./frames/index.ts";
 import { backgroundSvg } from "./gradient.ts";
 import type { HighlightedLine } from "./highlight/index.ts";
 import type { Icon } from "./icons/index.ts";
@@ -242,6 +242,7 @@ const POPOVER_RAISE: Record<Mode, string> = {
 function renderWindow(parent: FrameContext, window: WindowBox, index: number, out: Array<string>) {
   const context = windowContext(parent, window);
   const { scene } = context;
+  const frame = getFrame(scene.theme);
 
   // A window-less group shows only the code
   if (!window.frame) {
@@ -249,11 +250,11 @@ function renderWindow(parent: FrameContext, window: WindowBox, index: number, ou
     return;
   }
 
-  out.push(DEFAULT_FRAME.body(context, window));
+  out.push(frame.body(context, window));
   out.push(`<g clip-path="url(#window-${index})">`);
   if (window.header && window.solidTitleBar)
     out.push(roundedRect(window.header, 0, { fill: TITLE_BAR_RAISE[scene.mode] }));
-  if (window.header) out.push(DEFAULT_FRAME.header(context, window));
+  if (window.header) out.push(frame.header(context, window));
 
   window.panes.forEach((pane, i) => renderPane(scene, pane, `pane-${index}-${i}`, out));
   // One line below the title bar, for the tabs that follow it, for a title bar of its own, or for
@@ -271,7 +272,7 @@ function renderWindow(parent: FrameContext, window: WindowBox, index: number, ou
   for (const divider of window.dividers)
     out.push(`<line ${attrs({ ...divider, stroke: scene.frame.divider })}/>`);
   out.push("</g>");
-  out.push(DEFAULT_FRAME.border(context, window));
+  out.push(frame.border(context, window));
 }
 
 function renderPopover(
@@ -290,7 +291,7 @@ function renderPopover(
       : "#ffffff"
     : scene.customBackground !== undefined
       ? scene.frame.backdrop.from
-      : DEFAULT_FRAME.base(context);
+      : getFrame(scene.theme).base(context);
 
   out.push(
     roundedRect({ ...box, y: box.y + 8 }, POPOVER.radius, {
@@ -360,7 +361,7 @@ export function toSvg(scene: Scene, options: SvgOptions = {}): string {
   const { width, height, windows } = scene;
   const defs: Array<string> = [];
   const body: Array<string> = [];
-  const frame = DEFAULT_FRAME;
+  const frame = getFrame(scene.theme);
   const used = new Set<string>();
   const context: FrameContext = {
     scene,

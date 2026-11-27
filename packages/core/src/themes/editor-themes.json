@@ -429,6 +429,53 @@
     }
   },
   {
+    "id": "vercel",
+    "name": "Vercel",
+    "background": {
+      "from": "#000000",
+      "to": "#000000"
+    },
+    "frame": "grid",
+    "frameless": true,
+    "font": "geist-mono",
+    "textmate": {
+      "dark": "vercel-dark",
+      "light": "vercel-light"
+    },
+    "window": {
+      "dark": {
+        "background": "#0a0a0a",
+        "title": "#a1a1a1",
+        "lineNumber": "#5e5e5e",
+        "divider": "#1f1f1f"
+      },
+      "light": {
+        "background": "#fafafa",
+        "title": "#666666",
+        "lineNumber": "#a8a8a8",
+        "divider": "#ebebeb"
+      }
+    },
+    "syntax": {
+      "dark": {
+        "foreground": "#ededed",
+        "keyword": "#ff4d8d",
+        "string": "#00ca50",
+        "function": "#c472fb",
+        "comment": "#a1a1a1",
+        "highlight": "#1f1f1f"
+      },
+      "light": {
+        "foreground": "#171717",
+        "keyword": "#c41562",
+        "string": "#107d32",
+        "function": "#7d00cc",
+        "comment": "#666666",
+        "highlight": "#ebebeb"
+      }
+    }
+  },
+  {
     "id": "vitesse",
     "name": "Vitesse",
     "background": {

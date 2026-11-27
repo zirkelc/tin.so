@@ -82,6 +82,20 @@ describe("layout", () => {
     expect(scene.width).toBe(Math.ceil(width + 64));
   });
 
+  test("should use the font of the theme when the spec has no font", async () => {
+    // Act
+    const themed = await layout({ theme: "vercel", windows: [{ panes: [{ code: "x" }] }] });
+    const chosen = await layout({
+      theme: "vercel",
+      font: "fira-code",
+      windows: [{ panes: [{ code: "x" }] }],
+    });
+
+    // Assert
+    expect(themed.font.id).toBe("geist-mono");
+    expect(chosen.font.id).toBe("fira-code");
+  });
+
   test("should apply the minimum frame width", async () => {
     // Act
     const scene = await layout({ padding: 64, windows: [{ panes: [{ code: "x" }] }] });

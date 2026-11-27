@@ -24,6 +24,12 @@ type Family = {
   light?: string;
   /** A gradient behind the window, when the colors of the theme do not give a good one */
   background?: { from: string; to: string };
+  /** The frame that draws the image around the code, when it is not the default frame */
+  frame?: "grid";
+  /** The theme can show the code without a window around it */
+  frameless?: boolean;
+  /** The code font of the theme, for a spec that does not set a font */
+  font?: string;
 };
 
 /**
@@ -77,6 +83,16 @@ const FAMILIES: Array<Family> = [
     dark: "tokyo-night",
     light: "tokyo-night-light",
     background: { from: "#7aa2f7", to: "#bb9af7" },
+  },
+  {
+    id: "vercel",
+    name: "Vercel",
+    dark: "vercel-dark",
+    light: "vercel-light",
+    background: { from: "#000000", to: "#000000" },
+    frame: "grid",
+    frameless: true,
+    font: "geist-mono",
   },
   { id: "vitesse", name: "Vitesse", dark: "vitesse-dark", light: "vitesse-light" },
 ];
@@ -144,6 +160,199 @@ const VENDORED: Record<string, Vendored> = {
     },
   },
 };
+
+const RAYSO_COMMIT = "1298a944166d53d59e6211609366cbfdd08da623";
+
+// The token colors of a theme that tin.so makes, by the kind of token
+type TokenKeys = {
+  foreground: string;
+  constant: string;
+  string: string;
+  comment: string;
+  keyword: string;
+  parameter: string;
+  function: string;
+  tag: string;
+  number: string;
+  diffDeleted: string;
+  diffInserted: string;
+};
+
+type Made = {
+  displayName: string;
+  /** The project that the colors come from: its repository on GitHub, the commit and the license */
+  source: { repo: string; commit: string; licenseFile: string; license: string; name: string };
+  type: "dark" | "light";
+  /** The colors of the editor: the window, the title, the line numbers and the line highlight */
+  colors: Record<string, string>;
+  tokens: TokenKeys;
+};
+
+/**
+ * The scopes of each kind of token. Adapted from the Vercel theme of ray.so (MIT,
+ * https://github.com/raycast/ray-so), which adapted them from the css-variables theme of Shiki.
+ */
+const TOKEN_SCOPES: Array<{ key: keyof TokenKeys; scope: Array<string>; fontStyle?: string }> = [
+  {
+    key: "foreground",
+    scope: [
+      "keyword.operator.accessor",
+      "meta.group.braces.round.function.arguments",
+      "meta.template.expression",
+      "markup.fenced_code meta.embedded.block",
+      "keyword.operator",
+      "variable.other.constant",
+      "variable.other.property",
+      "support.variable.property",
+      "meta.function-call entity.name.function",
+    ],
+  },
+  { key: "string", scope: ["string", "markup.fenced_code", "markup.inline"] },
+  {
+    key: "comment",
+    scope: ["comment", "string.quoted.docstring.multi", "punctuation.definition.comment"],
+  },
+  {
+    key: "constant",
+    scope: [
+      "constant.language",
+      "constant.other.placeholder",
+      "constant.character.format.placeholder",
+      "variable.language.this",
+      "variable.other.class",
+      "meta.property-name",
+      "support",
+      "entity.name.type",
+      "entity.other.inherited-class",
+    ],
+  },
+  {
+    key: "keyword",
+    scope: [
+      "keyword",
+      "keyword.operator.expression",
+      "keyword.operator.new",
+      "storage.modifier",
+      "storage.type",
+      "entity.name.tag.yaml",
+      "support.type.property-name.json",
+      "punctuation.definition.template-expression",
+      "punctuation.definition.string.begin.markdown",
+      "punctuation.definition.string.end.markdown",
+    ],
+  },
+  { key: "parameter", scope: ["variable.parameter"] },
+  {
+    key: "function",
+    scope: [
+      "entity.name.function",
+      "support.function",
+      "entity.other.attribute-name",
+      "meta.instance.constructor",
+    ],
+  },
+  { key: "tag", scope: ["entity.name.tag", "support.class.component"] },
+  { key: "number", scope: ["constant.numeric", "constant.language.boolean"] },
+  {
+    key: "diffDeleted",
+    scope: ["markup.deleted", "punctuation.definition.deleted.diff"],
+  },
+  {
+    key: "diffInserted",
+    scope: ["markup.inserted", "punctuation.definition.inserted.diff"],
+  },
+  { key: "string", scope: ["markup.underline.link"], fontStyle: "underline" },
+  { key: "keyword", scope: ["markup.heading", "markup.bold"], fontStyle: "bold" },
+  { key: "foreground", scope: ["markup.italic", "emphasis"], fontStyle: "italic" },
+];
+
+/**
+ * The themes that tin.so makes from the colors of a brand, as no official editor theme has them.
+ * The script writes each as a TextMate theme into the source folder.
+ */
+const MADE: Record<string, Made> = {
+  "vercel-dark": {
+    displayName: "Vercel Dark",
+    source: {
+      repo: "raycast/ray-so",
+      commit: RAYSO_COMMIT,
+      licenseFile: "LICENSE",
+      license: "MIT",
+      name: "the Vercel theme of ray.so",
+    },
+    type: "dark",
+    colors: {
+      "editor.background": "#0a0a0a",
+      "editor.foreground": "#ededed",
+      "titleBar.activeForeground": "#a1a1a1",
+      "editorLineNumber.foreground": "#5e5e5e",
+      "editor.lineHighlightBackground": "#1f1f1f",
+      "tab.border": "#1f1f1f",
+    },
+    tokens: {
+      foreground: "#ededed",
+      constant: "#47a8ff",
+      string: "#00ca50",
+      comment: "#a1a1a1",
+      keyword: "#ff4d8d",
+      parameter: "#ff9300",
+      function: "#c472fb",
+      tag: "#c472fb",
+      number: "#ffffff",
+      diffDeleted: "#f32e40",
+      diffInserted: "#00952d",
+    },
+  },
+  "vercel-light": {
+    displayName: "Vercel Light",
+    source: {
+      repo: "raycast/ray-so",
+      commit: RAYSO_COMMIT,
+      licenseFile: "LICENSE",
+      license: "MIT",
+      name: "the Vercel theme of ray.so",
+    },
+    type: "light",
+    colors: {
+      "editor.background": "#fafafa",
+      "editor.foreground": "#171717",
+      "titleBar.activeForeground": "#666666",
+      "editorLineNumber.foreground": "#a8a8a8",
+      "editor.lineHighlightBackground": "#ebebeb",
+      "tab.border": "#ebebeb",
+    },
+    tokens: {
+      foreground: "#171717",
+      constant: "#005ff2",
+      string: "#107d32",
+      comment: "#666666",
+      keyword: "#c41562",
+      parameter: "#aa4d00",
+      function: "#7d00cc",
+      tag: "#7d00cc",
+      number: "#111111",
+      diffDeleted: "#e2162a",
+      diffInserted: "#009432",
+    },
+  },
+};
+
+// Writes the made theme into the source folder and returns it
+async function makeTheme(id: string, made: Made): Promise<ThemeRegistrationRaw> {
+  const theme = {
+    name: id,
+    displayName: made.displayName,
+    type: made.type,
+    colors: made.colors,
+    tokenColors: TOKEN_SCOPES.map(({ key, scope, fontStyle }) => ({
+      scope,
+      settings: { foreground: made.tokens[key], ...(fontStyle && { fontStyle }) },
+    })),
+  } as ThemeRegistrationRaw;
+  await mkdir(VENDORED_DIR, { recursive: true });
+  await writeFile(new URL(`${id}.json`, VENDORED_DIR), `${JSON.stringify(theme, null, 2)}\n`);
+  return theme;
+}
 
 // Removes the comments and the trailing commas of a JSON with comments, outside of strings
 function stripJsonComments(text: string): string {
@@ -318,6 +527,11 @@ async function main() {
     const loaded: Partial<Record<"dark" | "light", ThemeRegistrationRaw>> = {};
     for (const [mode, id] of Object.entries(modes)) {
       if (!id) continue;
+      const made = MADE[id];
+      if (made) {
+        loaded[mode as "dark" | "light"] = await makeTheme(id, made);
+        continue;
+      }
       const vendored = VENDORED[id];
       if (vendored) {
         if (!LICENSES.has(vendored.license))
@@ -339,6 +553,9 @@ async function main() {
         from: accents.keyword ?? accents.foreground,
         to: accents.function ?? accents.string ?? accents.foreground,
       },
+      ...(family.frame && { frame: family.frame }),
+      ...(family.frameless && { frameless: true }),
+      ...(family.font && { font: family.font }),
       textmate: modes,
       window: Object.fromEntries(
         Object.entries(loaded).map(([mode, theme]) => [mode, windowColors(theme)]),
@@ -355,7 +572,7 @@ async function main() {
     ...new Set(FAMILIES.flatMap((family) => [family.dark, family.light]).filter(Boolean)),
   ] as Array<string>;
   const loaders = used.map((id) =>
-    VENDORED[id]
+    VENDORED[id] || MADE[id]
       ? `  "${id}": () => import("./textmate/${id}.json", { with: { type: "json" } }) as Promise<{ default: ThemeRegistrationAny }>,`
       : `  "${id}": () => import("@shikijs/themes/${id}"),`,
   );
@@ -382,6 +599,9 @@ async function main() {
       return file !== undefined && used.includes(file);
     });
   const sources = used.map((id) => {
+    const made = MADE[id];
+    if (made)
+      return `- \`${id}\`: made for tin.so from ${made.source.name}, https://github.com/${made.source.repo} (${made.source.license})`;
     const vendored = VENDORED[id];
     if (vendored) return `- \`${id}\`: https://github.com/${vendored.repo} (${vendored.license})`;
     const info = infos.find((info) => info.name === id)!;
@@ -395,6 +615,20 @@ async function main() {
         return `Files: ${id}.json\nSource: https://github.com/${vendored.repo}/blob/${vendored.commit}/${vendored.file}\n\n${license.trim()}`;
       }),
   );
+  // One license block for each project that made themes come from
+  const madeSources = new Map<string, Made["source"] & { ids: Array<string> }>();
+  for (const [id, made] of Object.entries(MADE)) {
+    if (!used.includes(id)) continue;
+    const source = madeSources.get(made.source.repo) ?? { ...made.source, ids: [] };
+    source.ids.push(id);
+    madeSources.set(made.source.repo, source);
+  }
+  const madeBlocks = await Promise.all(
+    [...madeSources.values()].map(async (source) => {
+      const license = await fetchGitHub(source.repo, source.commit, source.licenseFile);
+      return `Files: ${source.ids.map((id) => `${id}.json`).join(", ")}\nSource: https://github.com/${source.repo}/tree/${source.commit}\n\n${license.trim()}`;
+    }),
+  );
   await writeFile(
     NOTICE_FILE,
     [
@@ -404,14 +638,18 @@ async function main() {
         VENDORED,
       )
         .map((id) => `\`${id}\``)
+        .join(" and ")} come directly from the repository of their theme. The themes ${Object.keys(
+        MADE,
+      )
+        .map((id) => `\`${id}\``)
         .join(
           " and ",
-        )} come directly from the repository of their theme. The script \`scripts/port-editor-themes.ts\` writes this file. Their licenses follow.`,
+        )} are made for tin.so from the colors of another project. The script \`scripts/port-editor-themes.ts\` writes this file. Their licenses follow.`,
       "",
       ...sources,
       "",
       "```",
-      [...blocks.map((block) => block.trim()), ...vendoredBlocks].join(
+      [...blocks.map((block) => block.trim()), ...vendoredBlocks, ...madeBlocks].join(
         "\n\n----------------------------------------\n\n",
       ),
       "```",

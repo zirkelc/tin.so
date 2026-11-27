@@ -283,7 +283,6 @@ describe("theme", () => {
     );
     expect(names).toContain("Dracula");
     expect(names).not.toContain("Candy");
-    expect(names).not.toContain("Vercel");
   });
 
   test("should find a theme with the search field", async () => {

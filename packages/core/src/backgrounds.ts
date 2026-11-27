@@ -373,6 +373,7 @@ const THEME_BACKGROUNDS: Record<string, Partial<Record<Mode, string>>> = {
   "one-dark": { dark: "plum", light: "ocean" },
   solarized: { dark: "deep-sea", light: "lemon" },
   "tokyo-night": { dark: "twilight", light: "periwinkle" },
+  vercel: { dark: "black", light: "white" },
   vitesse: { dark: "jade", light: "sage" },
   vscode: { dark: "primer", light: "azure" },
 };

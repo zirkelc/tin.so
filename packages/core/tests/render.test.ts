@@ -361,6 +361,61 @@ describe("theme frames", () => {
     },
   );
 
+  test("should color the code of the Vercel theme with the Vercel colors", async () => {
+    // Arrange
+    const spec = {
+      theme: "vercel",
+      windows: [{ panes: [{ code: 'const a = "b";', language: "ts" }] }],
+    };
+
+    // Act
+    const dark = toSvg(await layout({ ...spec, mode: "dark" })).toLowerCase();
+    const light = toSvg(await layout({ ...spec, mode: "light" })).toLowerCase();
+
+    // Assert
+    expect(dark).toContain('fill="#ff4d8d"');
+    expect(dark).toContain('fill="#00ca50"');
+    expect(light).toContain('fill="#c41562"');
+    expect(light).toContain('fill="#107d32"');
+  });
+
+  test("should draw grid lines through the image along a window without a frame in the Vercel theme", async () => {
+    // Arrange
+    const scene = await layout({
+      theme: "vercel",
+      mode: "dark",
+      windows: [{ frame: false, panes: [{ code: "x" }] }],
+    });
+    const window = scene.windows[0]!;
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(scene.warnings).toEqual([]);
+    expect(window.frame).toBe(false);
+    const left = window.x + 0.5;
+    expect(svg).toContain(
+      `<line x1="${left}" y1="0" x2="${left}" y2="${scene.height}" stroke="#1a1a1a"/>`,
+    );
+  });
+
+  test("should draw a window with a frame in the Vercel theme without grid lines", async () => {
+    // Arrange
+    const scene = await layout({
+      theme: "vercel",
+      mode: "dark",
+      windows: [{ panes: [{ code: "x" }] }],
+    });
+
+    // Act
+    const svg = toSvg(scene);
+
+    // Assert
+    expect(svg.includes('stroke="#1a1a1a"')).toBe(false);
+    expect(svg).toContain('fill="#0a0a0a"');
+  });
+
   test("should draw the shadow of a window without a blur filter", async () => {
     // Arrange
     const scene = await layout({ windows: [{ panes: [{ title: "a.ts", code: "x" }] }] });
@@ -458,8 +513,8 @@ describe("background colors", () => {
     };
 
     // Act
-    const dark = toSvg(await layout({ ...spec, mode: "dark" }));
-    const light = toSvg(await layout({ ...spec, mode: "light" }));
+    const dark = toSvg(await layout({ ...spec, mode: "dark" })).toLowerCase();
+    const light = toSvg(await layout({ ...spec, mode: "light" })).toLowerCase();
 
     // Assert
     expect(dark).toContain('fill="rgb(20, 60, 70)" stroke=');

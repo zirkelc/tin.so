@@ -1,6 +1,6 @@
 # Editor themes
 
-The editor themes of `@tin.so/core` come from these projects, through [tm-themes](https://github.com/shikijs/textmate-grammars-themes) 1.12.12 and Shiki. The themes `tokyo-night-light` and `nord-light` and `dracula-alucard` come directly from the repository of their theme. The script `scripts/port-editor-themes.ts` writes this file. Their licenses follow.
+The editor themes of `@tin.so/core` come from these projects, through [tm-themes](https://github.com/shikijs/textmate-grammars-themes) 1.12.12 and Shiki. The themes `tokyo-night-light` and `nord-light` and `dracula-alucard` come directly from the repository of their theme. The themes `vercel-dark` and `vercel-light` are made for tin.so from the colors of another project. The script `scripts/port-editor-themes.ts` writes this file. Their licenses follow.
 
 - `ayu-dark`: https://github.com/ayu-theme/vscode-ayu/blob/97f28cd3c392cb12672a25229f33c4dd420f96ea/ayu-dark.json (MIT)
 - `ayu-light`: https://github.com/ayu-theme/vscode-ayu/blob/97f28cd3c392cb12672a25229f33c4dd420f96ea/ayu-light.json (MIT)
@@ -22,6 +22,8 @@ The editor themes of `@tin.so/core` come from these projects, through [tm-themes
 - `solarized-light`: https://github.com/microsoft/vscode/blob/0132168df99ab8830a1eb158b1a5e8242f3e94ff/extensions/theme-solarized-light/themes/solarized-light-color-theme.json (MIT)
 - `tokyo-night`: https://github.com/enkia/tokyo-night-vscode-theme/blob/da5546bc4163a02a30d6f3ced90d4ef7dfcb8460/themes/tokyo-night-color-theme.json (MIT)
 - `tokyo-night-light`: https://github.com/enkia/tokyo-night-vscode-theme (MIT)
+- `vercel-dark`: made for tin.so from the Vercel theme of ray.so, https://github.com/raycast/ray-so (MIT)
+- `vercel-light`: made for tin.so from the Vercel theme of ray.so, https://github.com/raycast/ray-so (MIT)
 - `vitesse-dark`: https://github.com/antfu/vscode-theme-vitesse/blob/625a5e6fffd15e440e574f353ae0ba777b41d47f/themes/vitesse-dark.json (MIT)
 - `vitesse-light`: https://github.com/antfu/vscode-theme-vitesse/blob/625a5e6fffd15e440e574f353ae0ba777b41d47f/themes/vitesse-light.json (MIT)
 
@@ -310,6 +312,33 @@ Source: https://github.com/dracula/cursor/blob/21e4edd687bdd5f38e1607c69f19f30cb
 MIT License
 
 Copyright (c) 2023 Dracula Theme
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+----------------------------------------
+
+Files: vercel-dark.json, vercel-light.json
+Source: https://github.com/raycast/ray-so/tree/1298a944166d53d59e6211609366cbfdd08da623
+
+MIT License
+
+Copyright (c) 2024 Raycast Technologies Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

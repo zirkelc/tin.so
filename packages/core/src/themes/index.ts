@@ -36,6 +36,13 @@ export type Theme = {
   syntax: { light?: Syntax; dark?: Syntax };
   /** true when the theme can show the code without a window around it (frame: false) */
   frameless?: boolean;
+  /**
+   * The frame around the code, when it is not the default frame. "grid" draws flat windows with a
+   * thin border, and grid lines along the code of a window without a frame.
+   */
+  frame?: "grid";
+  /** The code font of the theme, for a spec that does not set a font */
+  font?: string;
 };
 
 /** The colors of the window of an editor theme */

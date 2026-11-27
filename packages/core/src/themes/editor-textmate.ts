@@ -34,6 +34,14 @@ export const EDITOR_TEXTMATE_THEMES: Record<
     import("./textmate/tokyo-night-light.json", { with: { type: "json" } }) as Promise<{
       default: ThemeRegistrationAny;
     }>,
+  "vercel-dark": () =>
+    import("./textmate/vercel-dark.json", { with: { type: "json" } }) as Promise<{
+      default: ThemeRegistrationAny;
+    }>,
+  "vercel-light": () =>
+    import("./textmate/vercel-light.json", { with: { type: "json" } }) as Promise<{
+      default: ThemeRegistrationAny;
+    }>,
   "vitesse-dark": () => import("@shikijs/themes/vitesse-dark"),
   "vitesse-light": () => import("@shikijs/themes/vitesse-light"),
 };

@@ -100,10 +100,11 @@ Show the reader where to look. Highlight full lines, or give any part of a line 
 ### Themes
 
 <p align="center">
-  <img alt="The same function in all 11 themes" src="docs/images/themes.png" width="860">
+  <img alt="The same function in all 12 themes" src="docs/images/themes.png" width="860">
 </p>
 
 - 11 themes of code editors: Ayu, Catppuccin, Dracula, GitHub, Night Owl, Nord, One Dark, Solarized, Tokyo Night, Vitesse and VS Code. The code has the exact colors of the original theme. Each theme has a dark and a light variant, and the mode switch selects one. Nord's light variant is Nord Light by huytd.
+- A Vercel theme, inspired by the code blocks of Vercel and the Vercel theme of ray.so: pink, green and purple code on black or white, in Geist Mono. tin.so is not affiliated with Vercel. A window is flat with a thin border. Code without a window sits between grid lines that go through the whole image, with a bracket at two corners.
 - Point to a theme, a background or a font in its list to see it on the image at once.
 - 9 code fonts: JetBrains Mono, Geist Mono, IBM Plex Mono, Fira Code, Roboto Mono, Commit Mono, Space Mono, Source Code Pro and Google Sans Code.
 
